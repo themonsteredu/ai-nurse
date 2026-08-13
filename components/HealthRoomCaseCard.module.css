@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 780px;
+  max-width: 980px;
   margin: 0 auto;
   padding: var(--space-6);
   border: var(--border-thin) solid var(--color-border);
@@ -41,6 +41,172 @@
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
 }
+
+.healthScene {
+  position: relative;
+  min-height: 255px;
+  border: 5px solid #6d8076;
+  border-radius: var(--radius-large);
+  background: #e8f2e8;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.7), var(--shadow-card);
+  overflow: hidden;
+}
+
+.sceneFloor {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(71, 101, 82, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(71, 101, 82, 0.07) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.sceneBed,
+.sceneNurse,
+.sceneCabinet,
+.sceneSink,
+.sceneDesk,
+.sceneBed span,
+.sceneNurse span {
+  position: absolute;
+  display: block;
+}
+
+.sceneBed {
+  left: 7%;
+  top: 15%;
+  width: 42%;
+  height: 62%;
+  border: 5px solid #71847d;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 0 rgba(71, 99, 88, 0.18);
+}
+
+.scenePillow {
+  left: 7%;
+  top: 8%;
+  width: 26%;
+  height: 84%;
+  border-radius: 12px;
+  background: #d9efeb;
+}
+
+.sceneStudent {
+  left: 40%;
+  top: 14%;
+  width: 43%;
+  height: 72%;
+  border-radius: 42% 42% 27% 27%;
+  background: #e7a989;
+}
+
+.sceneStudent::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  width: 42%;
+  aspect-ratio: 1;
+  border: 4px solid #a87058;
+  border-radius: 50%;
+  background: #f0b89b;
+}
+
+.sceneNurse {
+  z-index: 2;
+  left: 69%;
+  top: 56%;
+  width: 72px;
+  height: 118px;
+  transform: translate(-50%, -50%);
+  transition: left var(--transition-normal), top var(--transition-normal);
+}
+
+.healthScene[data-phase="treat"] .sceneNurse,
+.healthScene[data-phase="follow-up"] .sceneNurse { left: 54%; top: 50%; }
+
+.nurseHead {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border: 4px solid #a87058;
+  border-radius: 50%;
+  background: #f0b89b;
+}
+
+.nurseBody {
+  left: 50%;
+  top: 42px;
+  transform: translateX(-50%);
+  display: grid !important;
+  place-items: center;
+  width: 67px;
+  height: 70px;
+  border-radius: 23px 23px 13px 13px;
+  background: #fff;
+  color: var(--color-mission-health-room);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-black);
+  box-shadow: inset 0 0 0 4px #b7dcca;
+}
+
+.sceneCabinet {
+  right: 4%;
+  top: 9%;
+  display: grid;
+  place-items: center;
+  width: 14%;
+  height: 30%;
+  border: 4px solid #71847d;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--color-mission-health-room);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-black);
+}
+
+.sceneSink {
+  right: 21%;
+  top: 10%;
+  width: 11%;
+  aspect-ratio: 1;
+  border: 4px solid #71847d;
+  border-radius: 50%;
+  background: #c6e4e6;
+}
+
+.sceneDesk {
+  right: 4%;
+  bottom: 8%;
+  width: 23%;
+  height: 28%;
+  border: 4px solid #71847d;
+  border-radius: 6px;
+  background: #d9b991;
+}
+
+.sceneStatus {
+  position: absolute;
+  z-index: 4;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 5px solid var(--color-mission-health-room);
+  border-radius: var(--radius-medium);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-card);
+}
+
+.sceneStatus span { color: var(--color-text-muted); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
+.sceneStatus strong { font-size: var(--font-size-body); font-weight: var(--font-weight-black); }
 
 .question { display: flex; flex-direction: column; gap: var(--space-3); }
 .questionLabel { margin: 0; font-size: var(--font-size-heading); font-weight: var(--font-weight-black); }
@@ -95,4 +261,18 @@
 .nextArea { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-4); border-top: var(--border-thin) solid var(--color-border); }
 .summary { margin: 0; font-size: var(--font-size-body-large); font-weight: var(--font-weight-bold); text-align: center; }
 
-@media (max-width: 620px) { .card { padding: var(--space-4); } .explanation { margin-left: 0; } }
+@media (min-width: 761px) {
+  .choiceList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .card { padding: var(--space-4); }
+  .explanation { margin-left: 0; }
+  .healthScene { min-height: 300px; }
+  .sceneBed { width: 58%; height: 50%; }
+  .sceneNurse { left: 76%; top: 51%; transform: translate(-50%, -50%) scale(0.82); }
+  .healthScene[data-phase="treat"] .sceneNurse,
+  .healthScene[data-phase="follow-up"] .sceneNurse { left: 62%; top: 46%; }
+  .sceneDesk { right: 5%; bottom: 8%; width: 29%; height: 19%; }
+  .sceneStatus { right: var(--space-3); }
+}

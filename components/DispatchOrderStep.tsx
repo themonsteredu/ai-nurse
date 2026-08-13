@@ -53,6 +53,7 @@ export function DispatchOrderStep({ steps, onFinish }: DispatchOrderStepProps) {
 
   const remaining = shuffled.filter((step) => !arranged.includes(step.id));
   const isComplete = arranged.length === steps.length;
+  const currentStage = Math.min(arranged.length, steps.length);
 
   function handlePick(stepId: string) {
     setArranged((current) =>
@@ -70,6 +71,40 @@ export function DispatchOrderStep({ steps, onFinish }: DispatchOrderStepProps) {
         길에서 사람이 쓰러졌어요. <strong>가장 먼저 할 일부터</strong> 차례로
         눌러주세요.
       </p>
+
+      <section
+        className={styles.scene}
+        data-stage={currentStage}
+        aria-label={`현장 대응 ${currentStage}단계까지 선택함`}
+      >
+        <div className={styles.sidewalk} aria-hidden="true" />
+        <div className={styles.road} aria-hidden="true">
+          <span /><span /><span /><span />
+        </div>
+        <div className={styles.victim} aria-hidden="true">
+          <span className={styles.victimHead} />
+          <span className={styles.victimBody} />
+        </div>
+        <div className={styles.responder} aria-hidden="true">
+          <span className={styles.responderHead} />
+          <span className={styles.responderBody} />
+        </div>
+        <div className={styles.phone} aria-hidden="true">119</div>
+        <div className={styles.sceneCallout}>
+          <span>현장 대응판</span>
+          <strong>{isComplete ? "출동 준비 완료" : `${currentStage + 1}번째 행동을 판단하세요`}</strong>
+          <div className={styles.sceneProgress} aria-hidden="true">
+            {steps.map((step, index) => (
+              <i
+                key={step.id}
+                data-state={index < currentStage ? "done" : index === currentStage ? "current" : "waiting"}
+              >
+                {index + 1}
+              </i>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 학생이 정한 순서 */}
       <ol className={styles.arrangedList}>

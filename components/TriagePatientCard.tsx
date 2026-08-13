@@ -74,7 +74,12 @@ export function TriagePatientCard({
       onPointerUp={draggable ? onPointerUp : undefined}
       onPointerCancel={draggable ? onPointerUp : undefined}
     >
-      <p className={styles.patientNumber}>{patient.order}번 환자</p>
+      <span className={styles.stretcher} aria-hidden="true">
+        <span className={styles.patientHead} />
+        <span className={styles.patientBody} />
+        <span className={styles.stretcherRail} />
+      </span>
+      <p className={styles.patientNumber}>{patient.order}번 환자 · 이동 침대</p>
       <p className={styles.name}>{patient.name}</p>
       <p className={styles.symptom}>{patient.symptom}</p>
 

@@ -62,15 +62,38 @@
   border-radius: var(--radius-extra-large);
   background:
     radial-gradient(circle, var(--color-mission-ambulance-soft) 0 30%, transparent 31%),
+    linear-gradient(rgba(70, 98, 94, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(70, 98, 94, 0.055) 1px, transparent 1px),
     var(--color-surface);
+  background-size: auto, 28px 28px, 28px 28px, auto;
   box-shadow: var(--shadow-raised);
   touch-action: none;
   overflow: hidden;
 }
 
+.tapArea::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(330px, 72%);
+  height: 82%;
+  transform: translate(-50%, -50%);
+  border: 5px solid #657875;
+  border-radius: 60px 60px 24px 24px;
+  background:
+    radial-gradient(circle at 50% 14%, #efb79e 0 29px, #aa725b 30px 33px, transparent 34px),
+    linear-gradient(90deg, transparent 24%, #d7e7ee 24% 76%, transparent 76%),
+    #f8fbfb;
+  box-shadow: 0 9px 0 rgba(55, 79, 75, 0.2);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
 .tapArea::after {
   content: "손바닥 전체로 힘차게";
   position: absolute;
+  z-index: 4;
   bottom: var(--space-5);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
@@ -85,6 +108,7 @@
 
 .guideCircle {
   position: absolute;
+  z-index: 2;
   width: min(280px, 65%);
   aspect-ratio: 1;
   border: var(--border-accent) solid var(--color-on-primary);
@@ -99,6 +123,7 @@
 .tapLabel,
 .tapCount {
   position: relative;
+  z-index: 3;
   color: var(--color-on-primary);
   text-shadow: 0 2px 8px rgba(23, 56, 61, 0.28);
 }

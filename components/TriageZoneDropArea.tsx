@@ -58,6 +58,12 @@ export function TriageZoneDropArea({
       onClick={() => onSelect(zone.level)}
       aria-label={`${zone.label} 구역에 놓기. ${zone.rule}`}
     >
+      <span className={styles.bayVisual} aria-hidden="true">
+        <span className={styles.bayBed}><i /></span>
+        <span className={styles.bayMonitor} />
+        <span className={styles.bayCurtain} />
+      </span>
+      <span className={styles.bayName}>처치 베드</span>
       <span className={styles.label}>{zone.label}</span>
       <span className={styles.rule}>{zone.rule}</span>
       <span className={styles.count}>

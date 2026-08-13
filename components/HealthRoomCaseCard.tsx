@@ -68,6 +68,41 @@ export function HealthRoomCaseCard({
       <h2 className={styles.title}>{healthCase.title}</h2>
       <p className={styles.situation}>{healthCase.situation}</p>
 
+      <section
+        className={styles.healthScene}
+        data-phase={!treatmentAnswered ? "observe" : !followUpAnswered ? "treat" : "follow-up"}
+        aria-label={
+          !treatmentAnswered
+            ? "보건실에서 친구 상태를 살피는 단계"
+            : !followUpAnswered
+              ? "첫 처치를 하고 다음 행동을 판단하는 단계"
+              : "처치와 후속 행동을 마친 단계"
+        }
+      >
+        <div className={styles.sceneFloor} aria-hidden="true" />
+        <div className={styles.sceneBed} aria-hidden="true">
+          <span className={styles.scenePillow} />
+          <span className={styles.sceneStudent} />
+        </div>
+        <div className={styles.sceneNurse} aria-hidden="true">
+          <span className={styles.nurseHead} />
+          <span className={styles.nurseBody}>+</span>
+        </div>
+        <div className={styles.sceneCabinet} aria-hidden="true">+</div>
+        <div className={styles.sceneSink} aria-hidden="true" />
+        <div className={styles.sceneDesk} aria-hidden="true" />
+        <p className={styles.sceneStatus}>
+          <span>보건실 현장</span>
+          <strong>
+            {!treatmentAnswered
+              ? "친구 상태 살피기"
+              : !followUpAnswered
+                ? "첫 처치 완료 · 다음 행동 판단"
+                : "관찰 기록 완료"}
+          </strong>
+        </p>
+      </section>
+
       {/* ① 바로 할 처치 */}
       <section className={styles.question}>
         <h3 className={styles.questionLabel}>① 지금 바로 무엇을 해줄까요?</h3>

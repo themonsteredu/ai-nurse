@@ -2,116 +2,108 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1000 / 640;
-  max-height: calc(100dvh - 290px);
-  min-height: 360px;
+  max-height: calc(100dvh - 270px);
+  min-height: 390px;
   margin: 0 auto;
-  border: var(--border-accent) solid var(--color-surface);
+  border: var(--border-accent) solid #d9e1df;
   border-radius: var(--radius-extra-large);
-  background: var(--color-background-deep);
+  background: #dfe9e5;
   box-shadow: 0 0 0 var(--border-thin) var(--color-border), var(--shadow-raised);
   overflow: hidden;
+  isolation: isolate;
 }
 
 .plan::before {
-  content: "HOSPITAL FLOOR · 1F";
+  content: "GOLDEN TIME MEDICAL CENTER · 1F";
   position: absolute;
-  z-index: 2;
-  left: var(--space-5);
-  bottom: var(--space-3);
-  color: var(--color-text-muted);
+  z-index: 6;
+  left: var(--space-4);
+  bottom: var(--space-2);
+  color: #50635f;
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-black);
-  letter-spacing: 0.16em;
-  opacity: 0.65;
+  letter-spacing: 0.13em;
+  opacity: 0.75;
 }
 
 .blueprint {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
 }
 
-.buildingFloor {
-  fill: var(--color-surface-muted);
-  stroke: var(--color-border-strong);
-  stroke-width: 2;
-}
-
-.corridor {
-  fill: var(--color-surface);
-  stroke: var(--color-border);
-  stroke-width: 2;
-}
-
-.tileLine {
-  stroke: var(--color-border);
-  stroke-width: 1;
-  opacity: 0.55;
-}
-
-.waitingArea rect {
-  fill: var(--color-primary-soft);
-  stroke: var(--color-primary);
-  stroke-width: 2;
-}
-
-.planter circle {
-  fill: var(--color-mission-health-room-soft);
-  stroke: var(--color-mission-health-room);
-  stroke-width: 3;
-}
-
-.wayfinding {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 4;
-  stroke-dasharray: 8 10;
-  opacity: 0.45;
-}
-
-.drivewayEdge {
-  stroke: var(--color-mission-ambulance);
-  stroke-width: 6;
-  opacity: 0.5;
-}
-
-.drivewayCenterLine {
-  stroke: var(--color-mission-ambulance);
-  stroke-width: 4;
-  opacity: 0.8;
-}
+.siteGround { fill: #d7e5df; stroke: #9cadab; stroke-width: 2; }
+.buildingFloor { fill: #f5f1e8; stroke: #667875; stroke-width: 9; }
+.corridor { fill: #e9ded0; stroke: #9c8e7d; stroke-width: 2; }
+.tileLine { stroke: #c9baa8; stroke-width: 1; opacity: 0.55; }
+.wallLine { fill: none; stroke: #667875; stroke-width: 8; }
+.corridorGuide { fill: none; stroke: #db8f3a; stroke-width: 7; stroke-dasharray: 10 10; opacity: 0.72; }
+.drivewayCenterLine { fill: none; stroke: #abb6b4; stroke-width: 2; }
+.laneDash { fill: none; stroke: #fff8cc; stroke-width: 5; stroke-dasharray: 25 20; }
+.waitingArea rect { fill: #d7ebe8; stroke: #57958d; stroke-width: 2; }
+.planter circle { fill: #80ba92; stroke: #3b7452; stroke-width: 3; }
 
 .receptionDesk {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   left: 50%;
-  top: 52%;
+  top: 60.3%;
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-5);
-  border: var(--border-medium) solid var(--color-primary);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-primary-strong);
-  font-size: clamp(0.8rem, 1.4vw, var(--font-size-body));
-  font-weight: var(--font-weight-black);
-  white-space: nowrap;
-  box-shadow: var(--shadow-card);
+  min-height: 38px;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-medium) solid #4b817a;
+  border-radius: 8px;
+  background: #fbfdfc;
+  color: #275c56;
+  font-size: clamp(0.72rem, 1.1vw, var(--font-size-caption));
+  box-shadow: 0 5px 0 rgba(64, 93, 88, 0.18);
   pointer-events: none;
 }
 
 .receptionDesk span {
   display: grid;
   place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #32776f;
+  color: #fff;
+  font-weight: var(--font-weight-black);
+}
+
+.studentMarker {
+  position: absolute;
+  z-index: 7;
+  left: 49.7%;
+  top: 58.2%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.studentMarker span {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  border: 4px solid #fff;
+  border-radius: 50% 50% 45% 45%;
+  background: #f4ad3c;
+  box-shadow: 0 3px 8px rgba(39, 62, 58, 0.32);
+}
+
+.studentMarker strong {
+  margin-top: 2px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: #203d39;
+  color: #fff;
+  font-size: 0.66rem;
 }
 
 .room {
@@ -119,155 +111,224 @@
   --room-soft: var(--color-primary-soft);
   position: absolute;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
-  padding: clamp(var(--space-3), 2.2vw, var(--space-5));
-  border: var(--border-bold) solid var(--room-color);
-  border-radius: var(--radius-large);
-  background: linear-gradient(145deg, var(--color-surface), var(--room-soft));
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  padding: 0;
+  border: 5px solid #687875;
+  border-radius: 5px;
+  background: var(--room-soft);
   color: var(--color-text);
   text-align: left;
-  box-shadow: var(--shadow-card), var(--shadow-soft-inset);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.74), 0 3px 0 rgba(50, 72, 68, 0.18);
   overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+  transition: border-color var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.room::after {
+.room::before {
   content: "";
   position: absolute;
-  right: -2rem;
-  bottom: -3rem;
-  width: 8rem;
-  height: 8rem;
-  border: var(--border-thin) solid var(--room-color);
-  border-radius: 50%;
-  opacity: 0.13;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(62, 83, 79, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(62, 83, 79, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
 }
 
-.room:hover {
+.room:hover,
+.room:focus-visible {
   z-index: 4;
-  transform: translateY(-5px) scale(1.01);
-  box-shadow: var(--shadow-raised);
-  filter: saturate(1.05);
+  border-color: var(--room-color);
+  box-shadow: inset 0 0 0 4px #fff, 0 0 0 5px var(--room-color), var(--shadow-raised);
+  filter: saturate(1.08);
 }
 
-.room:active {
-  transform: translateY(1px);
+.room:active { filter: brightness(0.96); }
+.room[data-mission="er"] { --room-color: var(--color-mission-er); --room-soft: #f7e5df; }
+.room[data-mission="ambulance"] { --room-color: var(--color-mission-ambulance); --room-soft: #e5edf3; }
+.room[data-mission="healthRoom"] { --room-color: var(--color-mission-health-room); --room-soft: #e2f2e5; }
+.room[data-visited="true"] { box-shadow: inset 0 0 0 4px var(--color-success-soft), 0 0 0 2px var(--color-success); }
+
+.roomHeader {
+  position: absolute;
+  z-index: 4;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
-.room[data-mission="er"] {
-  --room-color: var(--color-mission-er);
-  --room-soft: var(--color-mission-er-soft);
-}
-
-.room[data-mission="ambulance"] {
-  --room-color: var(--color-mission-ambulance);
-  --room-soft: var(--color-mission-ambulance-soft);
-}
-
-.room[data-mission="healthRoom"] {
-  --room-color: var(--color-mission-health-room);
-  --room-soft: var(--color-mission-health-room-soft);
-}
-
-.room[data-visited="true"] {
-  box-shadow: 0 0 0 var(--space-1) var(--color-success-soft), var(--shadow-card);
-}
-
-.roomWing {
+.roomWing,
+.roomStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--room-color);
-  font-size: clamp(0.72rem, 1.2vw, var(--font-size-caption));
+  background: rgba(255, 255, 255, 0.9);
+  font-size: clamp(0.68rem, 1.05vw, var(--font-size-caption));
   font-weight: var(--font-weight-black);
+  box-shadow: var(--shadow-card);
 }
 
-.roomIcon {
-  display: grid;
-  place-items: center;
-  width: clamp(44px, 6vw, 64px);
-  height: clamp(44px, 6vw, 64px);
-  border-radius: var(--radius-medium);
-  background: var(--color-surface);
-  font-size: clamp(1.6rem, 3.4vw, 2.5rem);
-  line-height: 1;
+.roomWing { color: var(--room-color); }
+.roomStatus { margin-left: auto; background: var(--room-color); color: var(--color-on-primary); }
+.roomStatus[data-earned="true"] { background: var(--color-success); }
+
+.roomCopy {
+  position: absolute;
+  z-index: 4;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  max-width: 58%;
+  padding: var(--space-2) var(--space-3);
+  border-left: 5px solid var(--room-color);
+  border-radius: 3px var(--radius-medium) var(--radius-medium) 3px;
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-card);
 }
 
 .roomTitle {
-  font-size: clamp(1.5rem, 3.2vw, 2.75rem);
+  color: var(--color-text);
+  font-size: clamp(1.15rem, 2.45vw, 2.1rem);
   font-weight: var(--font-weight-black);
   line-height: var(--line-height-tight);
-  letter-spacing: -0.055em;
+  letter-spacing: -0.045em;
 }
 
 .roomSubtitle {
-  max-width: 92%;
-  font-size: clamp(0.85rem, 1.55vw, var(--font-size-body-large));
+  margin-top: 2px;
   color: var(--color-text-muted);
+  font-size: clamp(0.7rem, 1.15vw, var(--font-size-body));
+  font-weight: var(--font-weight-medium);
 }
 
-.roomStatus {
-  position: relative;
-  z-index: 2;
-  margin-top: auto;
+.door {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: -5px;
+  width: 58px;
+  height: 17px;
+  transform: translateX(-50%);
+  border: 5px solid #687875;
+  border-bottom: 0;
+  background: #e9ded0;
+}
+
+.furniture,
+.furniture > span,
+.furniture i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.furniture { inset: 0; z-index: 2; }
+
+.erStation {
+  top: 27%; left: 42%; width: 16%; height: 23%;
+  border: 3px solid #6e817d; border-radius: 50%; background: #f7fbfa;
+  box-shadow: inset 0 0 0 8px #cee4df;
+}
+
+.erBed,
+.healthBed {
+  width: 26%; height: 18%;
+  border: 3px solid #81918e; border-radius: 7px; background: #fff;
+  box-shadow: 0 5px 0 rgba(75, 101, 96, 0.22);
+}
+
+.erBed::before,
+.healthBed::before {
+  content: ""; position: absolute; left: 5%; top: 12%; width: 27%; height: 74%;
+  border-radius: 5px; background: #dbe9f2;
+}
+
+.erBed i,
+.healthBed i {
+  left: 38%; top: 24%; width: 42%; height: 50%; border-radius: 50% 50% 35% 35%; background: #efb69a;
+}
+
+.erBed[data-bed="1"] { left: 5%; top: 24%; }
+.erBed[data-bed="2"] { right: 5%; top: 24%; }
+.erBed[data-bed="3"] { right: 5%; top: 55%; }
+
+.monitor {
+  width: 8%; height: 12%; border: 3px solid #536864; border-radius: 4px; background: #213e3b;
+}
+.monitor::after { content: ""; position: absolute; inset: 35% 12%; border-top: 2px solid #6fe4ba; transform: skewY(-18deg); }
+.monitor[data-monitor="1"] { left: 32%; top: 27%; }
+.monitor[data-monitor="2"] { right: 32%; top: 27%; }
+.monitor[data-monitor="3"] { right: 32%; top: 58%; }
+
+.healthBed { left: 8%; top: 27%; width: 42%; height: 21%; }
+.healthDesk { right: 8%; top: 29%; width: 26%; height: 25%; border: 3px solid #6d8175; border-radius: 6px; background: #d5b58a; }
+.healthChair { right: 17%; top: 58%; width: 10%; aspect-ratio: 1; border: 3px solid #6d8175; border-radius: 50%; background: #f9fbf8; }
+.healthCabinet { left: 8%; top: 61%; width: 25%; height: 12%; border: 3px solid #6d8175; background: #f8fcf8; }
+.healthSink { left: 38%; top: 61%; width: 13%; height: 13%; border: 3px solid #6d8175; border-radius: 50%; background: #cce8ea; }
+
+.ambulanceVehicle {
+  left: 31%; top: 20%; width: 35%; height: 58%;
+  border: 4px solid #61716f; border-radius: 13px 38px 38px 13px; background: #f9fbfb;
+  box-shadow: 0 7px 0 rgba(50, 70, 67, 0.2);
+}
+
+.ambulanceVehicle::before,
+.ambulanceVehicle::after {
+  content: ""; position: absolute; bottom: -8px; width: 19%; height: 15px; border-radius: 50%; background: #2e4542;
+}
+.ambulanceVehicle::before { left: 16%; }
+.ambulanceVehicle::after { right: 16%; }
+.vehicleCab { right: 4%; top: 12%; width: 25%; height: 76%; border-left: 4px solid #61716f; border-radius: 0 26px 26px 0; background: #b8d8df; }
+.vehicleCross { left: 39%; top: 27%; display: grid !important; place-items: center; width: 18%; aspect-ratio: 1; border-radius: 50%; background: var(--color-mission-ambulance); color: #fff; font-style: normal; font-size: clamp(1rem, 2.3vw, 2rem); font-weight: var(--font-weight-black); }
+.vehicleLight { left: 23%; top: -10px; width: 27%; height: 10px; border-radius: 8px 8px 2px 2px; background: linear-gradient(90deg, #e55454 0 45%, #eee 45% 55%, #4b83cd 55%); }
+.garageRail { top: 12%; bottom: 12%; width: 3px; background: repeating-linear-gradient(#869491 0 12px, transparent 12px 23px); }
+.garageRail[data-rail="1"] { left: 26%; }
+.garageRail[data-rail="2"] { right: 26%; }
+.dispatchDesk { right: 5%; top: 28%; width: 16%; height: 35%; border: 3px solid #697976; border-radius: 5px; background: #c8a67d; }
+
+.mapHint {
+  position: absolute;
+  z-index: 7;
+  right: var(--space-4);
+  bottom: var(--space-2);
+  margin: 0;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--room-color);
-  color: var(--color-on-primary);
-  font-size: clamp(0.8rem, 1.4vw, var(--font-size-body));
-  font-weight: var(--font-weight-black);
-}
-
-.roomStatus[data-earned="true"] {
-  background: var(--color-success);
-  color: var(--color-on-primary);
-}
-
-.room[data-mission="ambulance"] {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.room[data-mission="ambulance"] .roomWing {
-  display: none;
-}
-
-.room[data-mission="ambulance"] .roomStatus {
-  margin: 0 0 0 auto;
+  background: rgba(32, 61, 57, 0.88);
+  color: #fff;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
 }
 
 @media (max-width: 760px) and (orientation: portrait) {
-  .plan {
-    aspect-ratio: 4 / 5;
-    min-height: 680px;
-    max-height: none;
-  }
+  .plan { aspect-ratio: 4 / 5; min-height: 700px; max-height: none; }
+  .blueprint { opacity: 0.34; }
+  .receptionDesk { display: none; }
+  .studentMarker { left: 91%; top: 65.5%; }
 
-  .receptionDesk,
-  .blueprint {
-    opacity: 0.75;
-  }
+  .room { left: 3% !important; width: 94% !important; height: 29% !important; }
+  .room[data-mission="er"] { top: 2.5% !important; }
+  .room[data-mission="healthRoom"] { top: 35.5% !important; }
+  .room[data-mission="ambulance"] { top: 68.5% !important; }
 
-  .room {
-    left: var(--space-4) !important;
-    width: calc(100% - var(--space-6) - var(--space-2)) !important;
-    height: 29% !important;
-  }
+  .roomCopy { max-width: 48%; }
+  .roomTitle { font-size: clamp(1.3rem, 4vw, 2rem); }
+  .roomSubtitle { font-size: var(--font-size-caption); }
+  .door { left: 82%; }
+  .mapHint { display: none; }
+}
 
-  .room[data-mission="er"] {
-    top: 3% !important;
-  }
-
-  .room[data-mission="healthRoom"] {
-    top: 35.5% !important;
-  }
-
-  .room[data-mission="ambulance"] {
-    top: 68% !important;
-  }
+@media (max-width: 560px) {
+  .roomHeader { top: var(--space-2); left: var(--space-2); right: var(--space-2); }
+  .roomWing, .roomStatus { padding-inline: var(--space-2); }
+  .roomCopy { left: var(--space-2); bottom: var(--space-3); padding: var(--space-2); }
+  .roomSubtitle { display: none; }
+  .plan::before { font-size: 0.6rem; }
 }
