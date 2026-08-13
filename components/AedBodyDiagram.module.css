@@ -1,0 +1,98 @@
+/*
+ * AED 패드 붙이기 화면의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * ⚠️ 지켜야 할 것
+ *    - 몸 그림은 단순한 실루엣으로. 사실적인 사진·상처 표현 금지.
+ *    - 붙일 자리는 손가락으로 누를 수 있을 만큼 크게.
+ */
+
+.diagram {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  aspect-ratio: 200 / 260;
+}
+
+.body {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.bodyShape {
+  fill: var(--color-surface);
+  stroke: var(--color-border);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.centerLine {
+  stroke: var(--color-border);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+}
+
+/* 붙일 수 있는 자리 */
+.spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border: 3px dashed var(--color-text-muted);
+  border-radius: var(--radius-small);
+  background: rgba(255, 255, 255, 0.75);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.spot:not(:disabled):hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.spot[data-state="selected"] {
+  border-style: solid;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.spot[data-state="correct"] {
+  border-style: solid;
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.spot[data-state="wrong"] {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.spot:disabled {
+  cursor: default;
+}
+
+.spotMark {
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.spot[data-state="correct"] .spotMark {
+  color: var(--color-success);
+}
+
+.spot[data-state="wrong"] .spotMark {
+  color: var(--color-danger);
+}
+
+.spot[data-state="selected"] .spotMark {
+  color: var(--color-primary);
+}

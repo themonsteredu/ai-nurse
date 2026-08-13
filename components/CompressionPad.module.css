@@ -1,0 +1,154 @@
+/*
+ * 가슴압박 화면의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * ⚠️ 지켜야 할 것
+ *    - 탭 영역은 아주 크게. 리듬을 타면서 정확히 겨냥할 수 없습니다.
+ *    - touch-action: none 을 지우면 태블릿에서 연타할 때 화면이 스크롤됩니다.
+ *    - 느릴 때 어두워지는 효과는 기획서 요구사항입니다.
+ */
+
+/* ---------------- 준비 카운트다운 ---------------- */
+
+.ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 60dvh;
+  text-align: center;
+}
+
+.readyLabel {
+  margin: 0;
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.readyCount {
+  margin: 0;
+  font-size: 8rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-mission-ambulance);
+}
+
+.readyHint {
+  margin: 0;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
+}
+
+/* ---------------- 압박 진행 ---------------- */
+
+.pad {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-5);
+  align-items: stretch;
+  border-radius: var(--radius-large);
+  transition: background var(--transition-normal);
+}
+
+/* 기획서: 너무 느리면 화면이 어두워집니다 */
+.pad[data-zone="slow"] {
+  background: rgba(27, 36, 48, 0.14);
+}
+
+@media (max-width: 860px) {
+  .pad {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tapArea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 340px;
+  padding: var(--space-5);
+  border: 5px solid var(--color-mission-ambulance);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  /* 연타할 때 화면이 따라 움직이지 않게 합니다 */
+  touch-action: none;
+  overflow: hidden;
+}
+
+.tapArea:active {
+  background: var(--color-warning-soft);
+}
+
+/* 리듬 가이드 원 — JS 가 ref 로 크기를 직접 바꿉니다 */
+.guideCircle {
+  position: absolute;
+  width: min(260px, 60%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-mission-ambulance);
+  opacity: 1;
+  /* transform 은 JS 가 매 프레임 바꿉니다. 여기에 transition 을 걸면 리듬이 어긋납니다. */
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.tapLabel {
+  position: relative;
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.tapCount {
+  position: relative;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* ---------------- 오른쪽 정보 ---------------- */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.timeBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.timeLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.timeValue {
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.guideGoneNote {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-medium);
+  background: var(--color-primary-soft);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary-strong);
+  text-align: center;
+}

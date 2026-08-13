@@ -1,0 +1,142 @@
+/*
+ * 신고 순서 맞추기 화면의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.instruction {
+  margin: 0;
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-normal);
+}
+
+/* ---------------- 학생이 정한 순서 ---------------- */
+
+.arrangedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.arrangedCard,
+.emptySlot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-medium);
+  text-align: left;
+}
+
+.arrangedCard {
+  border: 3px solid var(--color-mission-ambulance);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.arrangedCard:hover .undoHint {
+  opacity: 1;
+}
+
+.emptySlot {
+  border: 3px dashed var(--color-border);
+  background: transparent;
+}
+
+.orderBadge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-mission-ambulance);
+  color: var(--color-on-primary);
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+}
+
+.orderBadge[data-empty="true"] {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.cardLabel {
+  flex: 1;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-medium);
+}
+
+.emptyText {
+  flex: 1;
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+}
+
+.undoHint {
+  flex-shrink: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+/* ---------------- 아직 안 고른 카드 ---------------- */
+
+.pool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.poolLabel {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+.poolList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poolCard {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-background);
+  font-size: var(--font-size-body-large);
+  text-align: left;
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.poolCard:hover {
+  border-color: var(--color-mission-ambulance);
+  transform: translateX(3px);
+}

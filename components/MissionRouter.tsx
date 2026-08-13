@@ -5,7 +5,7 @@
  *
  * 지금 상태:
  *   응급실  → 완성된 미션 화면 (TriageMissionScreen)
- *   119    → 임시 화면 (4단계에서 만듭니다)
+ *   119    → 완성된 미션 화면 (AmbulanceMissionScreen)
  *   보건실  → 임시 화면 (5단계에서 만듭니다)
  *
  * 미션을 새로 만들 때마다 아래 목록에 한 줄씩 연결하면 됩니다.
@@ -16,6 +16,7 @@
 
 import type { MissionId } from "@/data/types";
 
+import { AmbulanceMissionScreen } from "./AmbulanceMissionScreen";
 import { MissionPlaceholder } from "./MissionPlaceholder";
 import { TriageMissionScreen } from "./TriageMissionScreen";
 
@@ -24,8 +25,10 @@ export function MissionRouter({ missionId }: { missionId: MissionId }) {
     case "er":
       return <TriageMissionScreen />;
 
-    // 4단계, 5단계에서 각각 진짜 화면으로 바꿉니다.
     case "ambulance":
+      return <AmbulanceMissionScreen />;
+
+    // 5단계에서 진짜 화면으로 바꿉니다.
     case "healthRoom":
       return <MissionPlaceholder missionId={missionId} />;
   }
