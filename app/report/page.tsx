@@ -1,15 +1,14 @@
 /**
  * 최종 리포트 주소 ( /report ).
  *
- * 📌 지금은 임시 화면입니다. 진짜 리포트는 6단계에서 만듭니다.
- *    (배지 3개, 점수, 나의 간호 유형, 진로 정보, 수료증)
+ * 배지 3개를 다 모아야 열립니다.
+ * 아직 못 모았는데 주소로 들어오면 로비로 되돌립니다.
  *
- * 지금은 세 미션을 다 끝냈을 때 로비의 버튼이 여기로 오는지
- * 확인할 수 있을 정도만 만들어 두었습니다.
+ * 실제 내용은 components/FinalReport.tsx 에 있습니다.
  */
 
-import { ReportPlaceholder } from "@/components/ReportPlaceholder";
+import { FinalReport } from "@/components/FinalReport";
 
 export default function ReportPage() {
-  return <ReportPlaceholder />;
+  return <FinalReport />;
 }
