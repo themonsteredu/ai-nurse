@@ -1,0 +1,103 @@
+/*
+ * 보건일지 조립 화면의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ */
+
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.situation {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-medium);
+  background: var(--color-success-soft);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-normal);
+}
+
+/* 완성되어 가는 문장 */
+.preview {
+  padding: var(--space-5);
+  border: 3px dashed var(--color-mission-health-room);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+}
+
+.previewLabel {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+.previewSentence {
+  margin: 0;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+}
+
+/* 드롭다운 다섯 칸 */
+.slotList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.slotLabel {
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+}
+
+.select {
+  min-height: var(--touch-target-min);
+  padding: 0 var(--space-4);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-body-large);
+}
+
+.select[data-state="correct"] {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.select[data-state="wrong"] {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+.select:disabled {
+  opacity: 1;
+}
+
+.explanation {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-warning);
+  border-radius: var(--radius-small);
+  background: var(--color-background);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+}
+
+.explanation[data-correct="true"] {
+  border-left-color: var(--color-success);
+}

@@ -21,7 +21,11 @@ export type HealthLogSlot = {
   id: string;
   /** 이 칸이 무엇을 적는 칸인지 */
   question: string;
-  /** 문장에서 이 칸 뒤에 붙는 글자 (예: "이", "에", "로 내원,") */
+  /**
+   * 문장에서 이 칸 뒤에 붙는 글자.
+   * "이", "에", "로 내원," 처럼 조사는 앞말에 딱 붙이고,
+   * " 후" 처럼 따로 떨어지는 낱말은 앞에 공백을 하나 둡니다.
+   */
   suffix: string;
   /** 고를 수 있는 조각들 (정답은 하나) */
   options: HealthLogOption[];
@@ -78,7 +82,7 @@ export const HEALTH_LOG_SLOTS: HealthLogSlot[] = [
   {
     id: "slot-care",
     question: "어떤 처치를 했나요?",
-    suffix: "후",
+    suffix: " 후",
     order: 4,
     options: [
       { id: "care-a", label: "지혈 처치", isCorrect: true },
