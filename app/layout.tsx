@@ -2,13 +2,17 @@
  * 앱 전체를 감싸는 껍데기 파일.
  *
  * 모든 화면이 이 안에서 열립니다.
- * 태블릿 화면 설정(확대 금지 등)이 여기 들어 있습니다.
+ * 학생의 진행 상황(SessionProvider)도 여기서 감싸주기 때문에,
+ * 화면을 옮겨 다녀도 이름과 점수가 유지됩니다.
+ * (단, 새로고침하면 사라집니다 — 의도된 동작입니다)
  *
  * ✅ 코덱스(디자인 담당 AI)는 이 파일을 바꿔도 됩니다.
- *    다만 viewport 설정은 태블릿 수업에 필요하니 그대로 두세요.
+ *    다만 viewport 설정과 SessionProvider 는 그대로 두세요.
  */
 
 import type { Metadata, Viewport } from "next";
+
+import { SessionProvider } from "@/components/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,7 +36,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <SessionProvider>{children}</SessionProvider>
+      </body>
     </html>
   );
 }

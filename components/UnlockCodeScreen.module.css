@@ -1,0 +1,102 @@
+/*
+ * 통과 코드 화면의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.resultCard {
+  padding: var(--space-5);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.resultCard[data-passed="true"] {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.resultCard[data-passed="false"] {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+
+.resultScore {
+  margin: 0;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.resultDetail {
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+}
+
+.resultBadge {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-medium);
+}
+
+.codeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.label {
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.codeInput {
+  min-height: var(--touch-target-large);
+  padding: var(--space-3);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.4em;
+  text-align: center;
+  /* 글자 사이 간격 때문에 오른쪽으로 치우쳐 보이는 걸 보정합니다 */
+  text-indent: 0.4em;
+}
+
+.codeInput:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.codeInput[data-error="true"] {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-danger);
+  text-align: center;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  text-align: center;
+}

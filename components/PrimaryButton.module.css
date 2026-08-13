@@ -1,0 +1,63 @@
+/*
+ * 큰 버튼의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * ⚠️ 단, min-height 를 --touch-target-min 보다 작게 만들지 마세요.
+ *    초등학생이 태블릿에서 누르기 어려워집니다.
+ */
+
+.button {
+  min-height: var(--touch-target-large);
+  padding: var(--space-3) var(--space-6);
+  border: 2px solid transparent;
+  border-radius: var(--radius-medium);
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-primary-strong);
+}
+
+.secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  min-height: var(--touch-target-min);
+  font-weight: var(--font-weight-medium);
+}
+
+.ghost:hover:not(:disabled) {
+  color: var(--color-text);
+}
