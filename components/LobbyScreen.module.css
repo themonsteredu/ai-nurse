@@ -1,134 +1,20 @@
 /*
  * 로비 화면의 생김새.
  *
+ * 조감도 자체의 생김새는 HospitalFloorPlan.module.css 에 있습니다.
+ * 이 파일은 조감도 위쪽의 진행 상황 한 줄만 담당합니다.
+ *
  * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *    이 화면은 "병원 조감도"로 통째로 다시 만드는 걸 권장합니다.
  */
 
-.badgeShelf {
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-}
-
-.badgeTitle {
-  margin: 0 0 var(--space-3);
+.progress {
+  margin: 0 0 var(--space-4);
   font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-}
-
-.badgeList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-pill);
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
+  text-align: center;
 }
 
-/* 배지를 받으면 불이 들어옵니다 */
-.badge[data-earned="true"] {
-  border-color: var(--color-success);
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  font-weight: var(--font-weight-bold);
-}
-
-/* 해봤지만 통과 못 한 경우 */
-.badge[data-earned="false"][data-attempted="true"] {
-  border-color: var(--color-warning);
-  color: var(--color-warning);
-}
-
-.badgeIcon {
-  font-size: var(--font-size-heading);
-  line-height: 1;
-}
-
-.missionGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-5);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.missionCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 220px;
-  padding: var(--space-5);
-  border: 3px solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  text-align: left;
-  box-shadow: var(--shadow-card);
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.missionCard:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-raised);
-}
-
-.missionCard:active {
-  transform: translateY(0);
-}
-
-/* 미션마다 대표색 */
-.missionCard[data-tone="urgent"] {
-  border-color: var(--color-mission-er);
-}
-.missionCard[data-tone="focused"] {
-  border-color: var(--color-mission-ambulance);
-}
-.missionCard[data-tone="warm"] {
-  border-color: var(--color-mission-health-room);
-}
-
-.missionCard[data-done="true"] {
-  background: var(--color-success-soft);
-}
-
-.missionOrder {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-}
-
-.missionTitle {
-  font-size: var(--font-size-display);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
+.progress strong {
   color: var(--color-text);
-}
-
-.missionSubtitle {
-  font-size: var(--font-size-body-large);
-  color: var(--color-text-muted);
-}
-
-.missionStatus {
-  margin-top: auto;
-  font-size: var(--font-size-body);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary-strong);
 }
