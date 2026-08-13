@@ -77,3 +77,42 @@
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-black);
 }
+
+/*
+ * 768×1024 세로 태블릿에서도 4~5개 구역을 한 줄에 보여줍니다.
+ * 전체 버튼 높이는 180px을 유지하고, 긴 설명만 3줄로 정돈합니다.
+ * aria-label에는 전체 판단 기준이 그대로 남아 있습니다.
+ */
+@media (min-width: 641px) and (max-width: 860px) {
+  .zone {
+    min-height: var(--drop-zone-min-height);
+    padding: var(--space-3);
+    border-width: var(--border-bold);
+    border-top-width: 8px;
+  }
+
+  .zone::after {
+    right: var(--space-2);
+    bottom: var(--space-2);
+    width: 28px;
+    height: 28px;
+  }
+
+  .label {
+    font-size: 1.05rem;
+    line-height: var(--line-height-tight);
+  }
+
+  .rule {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--font-size-caption);
+    line-height: 1.4;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .count {
+    padding-right: var(--space-6);
+  }
+}
