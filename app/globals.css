@@ -29,6 +29,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+h1,
+h2,
+h3 {
+  font-family:
+    "S-Core Dream", "Pretendard", "SUIT", "Apple SD Gothic Neo",
+    "Malgun Gothic", system-ui, sans-serif;
+}
+
 button,
 input,
 select {

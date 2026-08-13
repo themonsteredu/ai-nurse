@@ -123,6 +123,8 @@ export function TriageMissionScreen() {
 
   /** 구역들의 화면 위치. 끌어다 놓기를 판정할 때 씁니다. */
   const zoneElements = useRef(new Map<TriageLevel, HTMLElement>());
+  /** 매우 빠른 포인터 이동도 놓치지 않도록 최신 드래그 위치를 즉시 보관합니다. */
+  const dragRef = useRef<DragState | null>(null);
 
   const registerZoneElement = useCallback(
     (level: TriageLevel, element: HTMLElement | null) => {
@@ -220,7 +222,7 @@ export function TriageMissionScreen() {
     const rect = element.getBoundingClientRect();
     element.setPointerCapture(event.pointerId);
 
-    setDrag({
+    const nextDrag = {
       pointerId: event.pointerId,
       left: rect.left,
       top: rect.top,
@@ -228,28 +230,31 @@ export function TriageMissionScreen() {
       height: rect.height,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
-    });
+    };
+    dragRef.current = nextDrag;
+    setDrag(nextDrag);
   }
 
   function handleDragMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (drag === null || event.pointerId !== drag.pointerId) return;
+    const current = dragRef.current;
+    if (current === null || event.pointerId !== current.pointerId) return;
 
-    setDrag((current) =>
-      current === null
-        ? null
-        : {
-            ...current,
-            left: event.clientX - current.offsetX,
-            top: event.clientY - current.offsetY,
-          },
-    );
+    const nextDrag = {
+      ...current,
+      left: event.clientX - current.offsetX,
+      top: event.clientY - current.offsetY,
+    };
+    dragRef.current = nextDrag;
+    setDrag(nextDrag);
     setHoveredZone(zoneAtPoint(event.clientX, event.clientY));
   }
 
   function handleDragEnd(event: ReactPointerEvent<HTMLDivElement>) {
-    if (drag === null || event.pointerId !== drag.pointerId) return;
+    const current = dragRef.current;
+    if (current === null || event.pointerId !== current.pointerId) return;
 
     const dropped = zoneAtPoint(event.clientX, event.clientY);
+    dragRef.current = null;
     setDrag(null);
     setHoveredZone(null);
     if (dropped) placeCurrentPatient(dropped);
@@ -353,7 +358,7 @@ export function TriageMissionScreen() {
             </p>
             <p className={styles.scoreBadge}>
               {missionResult.passed
-                ? `★ ${mission.badgeName} 획득!`
+                ? `${mission.badgeName} 획득`
                 : `${passThreshold(difficulty)}% 이상이면 배지를 받아요`}
             </p>
           </section>
@@ -389,7 +394,7 @@ export function TriageMissionScreen() {
             </section>
           ) : (
             <p className={styles.allCorrect}>
-              모든 환자를 맞게 분류했어요. 대단해요!
+              모든 환자의 우선순위를 정확히 판단했습니다.
             </p>
           )}
         </div>
@@ -400,12 +405,18 @@ export function TriageMissionScreen() {
   /* ---------------- ② 분류 진행 ---------------- */
 
   return (
-    <AppScreen title={mission.title} tone="urgent">
+    <AppScreen
+      title={mission.title}
+      subtitle="골든타임 안에 환자의 상태를 판단하세요."
+      tone="urgent"
+    >
       <div className={styles.play}>
         {/* 진행 상황과 시계 */}
         <div className={styles.statusBar}>
           <p className={styles.progress}>
-            환자 <strong>{currentIndex + 1}</strong> / {patients.length}
+            <span>PATIENT</span>
+            <strong>{String(currentIndex + 1).padStart(2, "0")}</strong>
+            <span>/ {String(patients.length).padStart(2, "0")}</span>
           </p>
           {remainingMs !== null && timeLimitMs !== null ? (
             <MissionTimer
@@ -444,23 +455,32 @@ export function TriageMissionScreen() {
           </div>
         ) : null}
 
-        {/* 색깔 구역들 */}
-        <div className={styles.zoneRow}>
-          {zones.map((zone) => (
-            <TriageZoneDropArea
-              key={zone.level}
-              zone={zone}
-              placedCount={
-                Object.values(placements).filter((value) => value === zone.level)
-                  .length
-              }
-              isDropTarget={hoveredZone === zone.level}
-              disabled={feedback !== null}
-              onSelect={placeCurrentPatient}
-              registerElement={registerZoneElement}
-            />
-          ))}
-        </div>
+        <section className={styles.actionSection} aria-labelledby="priority-action-title">
+          <div className={styles.actionHeader}>
+            <div>
+              <span>PRIORITY ACTION</span>
+              <h2 id="priority-action-title">가장 먼저 배정할 우선순위를 선택하세요.</h2>
+            </div>
+            <p>패널을 끌어 놓거나 타일을 직접 누를 수 있습니다.</p>
+          </div>
+
+          <div className={styles.zoneRow}>
+            {zones.map((zone) => (
+              <TriageZoneDropArea
+                key={zone.level}
+                zone={zone}
+                placedCount={
+                  Object.values(placements).filter((value) => value === zone.level)
+                    .length
+                }
+                isDropTarget={hoveredZone === zone.level}
+                disabled={feedback !== null}
+                onSelect={placeCurrentPatient}
+                registerElement={registerZoneElement}
+              />
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* 놓은 직후 바로 뜨는 해설 카드 */}

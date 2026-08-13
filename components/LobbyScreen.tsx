@@ -75,8 +75,8 @@ export function LobbyScreen() {
 
   return (
     <AppScreen
-      title={`${session.studentName} 간호사님, 어서 오세요`}
-      subtitle="가고 싶은 곳을 눌러보세요"
+      title="오늘의 간호 미션"
+      subtitle="병원 곳곳에서 세 가지 상황이 발생했습니다."
       tone="calm"
       footer={
         reportReady ? (
@@ -86,13 +86,17 @@ export function LobbyScreen() {
         ) : null
       }
     >
-      {/* 진행 상황 한 줄 요약 */}
-      <p className={styles.progress}>
-        세 곳 중 <strong>{completed}곳</strong>을 다녀왔어요 · 모은 배지{" "}
-        <strong>
-          {earnedBadgeCount(results)} / {TOTAL_BADGE_COUNT}
-        </strong>
-      </p>
+      <div className={styles.controlBar}>
+        <p className={styles.operator}>
+          <span>ACTIVE OPERATOR</span>
+          <strong>{session.studentName} 간호사</strong>
+        </p>
+        <p className={styles.progress}>
+          <strong>{completed} / {TOTAL_BADGE_COUNT}</strong>
+          <span>COMPLETE</span>
+          <small>배지 {earnedBadgeCount(results)}개 획득</small>
+        </p>
+      </div>
 
       {/* 배지를 못 받은 곳이 있으면 다시 도전하라고 알려줍니다 */}
       {retryList.length > 0 ? (
@@ -102,7 +106,7 @@ export function LobbyScreen() {
         </p>
       ) : null}
 
-      {/* 위에서 내려다본 병원 조감도 */}
+      {/* 세 현장을 연결한 미션 네트워크 */}
       <HospitalFloorPlan rooms={rooms} onEnterRoom={handleEnterRoom} />
     </AppScreen>
   );

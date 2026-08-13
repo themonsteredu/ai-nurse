@@ -1,33 +1,31 @@
 "use client";
 
-/**
- * 미션 1(응급실)에서 환자 카드를 놓는 색깔 구역.
- *
- * 무엇을 보여주나:
- *   구역 이름(지금 당장 / 몇 분 안에 / 빨리 / 기다려도 됨 / 가벼움)과
- *   그 구역의 판단 기준, 지금까지 이 구역에 놓인 환자 수.
- *
- * 어떤 데이터를 받나:
- *   - zone        : data/triage-zones.ts 의 구역 하나
- *   - placedCount : 이 구역에 지금까지 놓인 환자 수
- *   - isDropTarget: 지금 카드를 이 구역 위로 끌고 있는지
- *
- * 조작 방법:
- *   카드를 여기로 끌어다 놓거나, 이 구역을 그냥 눌러도 놓입니다.
- *   (진짜 button 이라 키보드 탭 + 엔터로도 됩니다)
- *
- * ⚠️ 어떤 환자가 어느 구역에 맞는지는 이 구역이 모릅니다.
- *    정답은 data/triage-patients.ts, 채점은 lib/triage.ts 가 합니다.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *    ⚠️ 다만 구역 색이 급한 순서를 뜻하므로 색 의미는 지켜주세요.
- *       (빨강 → 주황 → 노랑 → 초록 → 파랑)
- */
+/** 기존 중증도 분류 로직을 전문적인 PRIORITY ACTION 타일로 표현합니다. */
 
 import type { TriageZoneInfo } from "@/data/triage-zones";
 import type { TriageLevel } from "@/data/types";
 
 import styles from "./TriageZoneDropArea.module.css";
+
+const ACTION_META: Record<TriageLevel, { code: string; action: string }> = {
+  red: { code: "P1", action: "즉시 처치" },
+  orange: { code: "P2", action: "긴급 관찰" },
+  yellow: { code: "P3", action: "우선 진료" },
+  green: { code: "P4", action: "대기 관찰" },
+  blue: { code: "P5", action: "비응급 안내" },
+};
+
+function PriorityGlyph({ level }: { level: TriageLevel }) {
+  return (
+    <svg className={styles.glyph} viewBox="0 0 24 24" aria-hidden="true">
+      {level === "red" ? <path d="M12 3 3 20h18L12 3Zm0 5v6m0 3v.5" /> : null}
+      {level === "orange" ? <path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm0 4v5l3 2" /> : null}
+      {level === "yellow" ? <path d="M4 12h13m-5-5 5 5-5 5M4 5v14" /> : null}
+      {level === "green" ? <path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Zm9-2.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" /> : null}
+      {level === "blue" ? <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-10v6m0-10v.5" /> : null}
+    </svg>
+  );
+}
 
 type TriageZoneDropAreaProps = {
   zone: TriageZoneInfo;
@@ -35,7 +33,6 @@ type TriageZoneDropAreaProps = {
   isDropTarget: boolean;
   disabled: boolean;
   onSelect: (level: TriageLevel) => void;
-  /** 끌어다 놓기를 판정하려면 이 구역의 화면 위치를 알아야 합니다 */
   registerElement: (level: TriageLevel, element: HTMLElement | null) => void;
 };
 
@@ -47,6 +44,8 @@ export function TriageZoneDropArea({
   onSelect,
   registerElement,
 }: TriageZoneDropAreaProps) {
+  const meta = ACTION_META[zone.level];
+
   return (
     <button
       type="button"
@@ -58,16 +57,16 @@ export function TriageZoneDropArea({
       onClick={() => onSelect(zone.level)}
       aria-label={`${zone.label} 구역에 놓기. ${zone.rule}`}
     >
-      <span className={styles.bayVisual} aria-hidden="true">
-        <span className={styles.bayBed}><i /></span>
-        <span className={styles.bayMonitor} />
-        <span className={styles.bayCurtain} />
+      <span className={styles.zoneTopline}>
+        <span className={styles.code}>{meta.code}</span>
+        <PriorityGlyph level={zone.level} />
       </span>
-      <span className={styles.bayName}>처치 베드</span>
       <span className={styles.label}>{zone.label}</span>
+      <span className={styles.action}>{meta.action}</span>
       <span className={styles.rule}>{zone.rule}</span>
-      <span className={styles.count}>
-        {placedCount > 0 ? `${placedCount}명` : ""}
+      <span className={styles.zoneFooter}>
+        <span className={styles.count}>{placedCount > 0 ? `${placedCount}명 배정` : "미배정"}</span>
+        <span className={styles.select}>SELECT</span>
       </span>
     </button>
   );

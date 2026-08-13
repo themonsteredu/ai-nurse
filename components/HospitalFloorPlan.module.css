@@ -1,334 +1,299 @@
-.plan {
+.network {
   position: relative;
   width: 100%;
-  aspect-ratio: 1000 / 640;
-  max-height: calc(100dvh - 270px);
-  min-height: 390px;
-  margin: 0 auto;
-  border: var(--border-accent) solid #d9e1df;
-  border-radius: var(--radius-extra-large);
-  background: #dfe9e5;
-  box-shadow: 0 0 0 var(--border-thin) var(--color-border), var(--shadow-raised);
+  min-height: 560px;
+  background: #eef2f3;
   overflow: hidden;
   isolation: isolate;
 }
 
-.plan::before {
-  content: "GOLDEN TIME MEDICAL CENTER · 1F";
-  position: absolute;
-  z-index: 6;
-  left: var(--space-4);
-  bottom: var(--space-2);
-  color: #50635f;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-black);
-  letter-spacing: 0.13em;
-  opacity: 0.75;
-}
-
-.blueprint {
+.network::before {
+  content: "";
   position: absolute;
   inset: 0;
-  z-index: 0;
+  background: linear-gradient(112deg, rgba(255, 255, 255, 0.88), transparent 45%);
+  pointer-events: none;
+}
+
+.networkHeader {
+  position: absolute;
+  z-index: 3;
+  left: var(--space-4);
+  right: var(--space-4);
+  top: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: 0.67rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.15em;
+}
+
+.networkHeader p {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.networkHeader i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.routeLines {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
 }
 
-.siteGround { fill: #d7e5df; stroke: #9cadab; stroke-width: 2; }
-.buildingFloor { fill: #f5f1e8; stroke: #667875; stroke-width: 9; }
-.corridor { fill: #e9ded0; stroke: #9c8e7d; stroke-width: 2; }
-.tileLine { stroke: #c9baa8; stroke-width: 1; opacity: 0.55; }
-.wallLine { fill: none; stroke: #667875; stroke-width: 8; }
-.corridorGuide { fill: none; stroke: #db8f3a; stroke-width: 7; stroke-dasharray: 10 10; opacity: 0.72; }
-.drivewayCenterLine { fill: none; stroke: #abb6b4; stroke-width: 2; }
-.laneDash { fill: none; stroke: #fff8cc; stroke-width: 5; stroke-dasharray: 25 20; }
-.waitingArea rect { fill: #d7ebe8; stroke: #57958d; stroke-width: 2; }
-.planter circle { fill: #80ba92; stroke: #3b7452; stroke-width: 3; }
-
-.receptionDesk {
-  position: absolute;
-  z-index: 5;
-  left: 50%;
-  top: 60.3%;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 38px;
-  padding: var(--space-1) var(--space-3);
-  border: var(--border-medium) solid #4b817a;
-  border-radius: 8px;
-  background: #fbfdfc;
-  color: #275c56;
-  font-size: clamp(0.72rem, 1.1vw, var(--font-size-caption));
-  box-shadow: 0 5px 0 rgba(64, 93, 88, 0.18);
-  pointer-events: none;
+.routeLines path {
+  fill: none;
+  stroke: #aebbbc;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 6;
 }
 
-.receptionDesk span {
-  display: grid;
-  place-items: center;
-  width: 23px;
-  height: 23px;
-  border-radius: 50%;
-  background: #32776f;
-  color: #fff;
-  font-weight: var(--font-weight-black);
-}
-
-.studentMarker {
-  position: absolute;
-  z-index: 7;
-  left: 49.7%;
-  top: 58.2%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-
-.studentMarker span {
-  width: 24px;
-  height: 24px;
-  border: 4px solid #fff;
-  border-radius: 50% 50% 45% 45%;
-  background: #f4ad3c;
-  box-shadow: 0 3px 8px rgba(39, 62, 58, 0.32);
-}
-
-.studentMarker strong {
-  margin-top: 2px;
-  padding: 1px 6px;
-  border-radius: var(--radius-pill);
-  background: #203d39;
-  color: #fff;
-  font-size: 0.66rem;
-}
-
-.room {
-  --room-color: var(--color-primary);
-  --room-soft: var(--color-primary-soft);
-  position: absolute;
-  z-index: 1;
-  min-width: var(--touch-target-min);
-  min-height: var(--touch-target-min);
-  padding: 0;
-  border: 5px solid #687875;
-  border-radius: 5px;
-  background: var(--room-soft);
-  color: var(--color-text);
-  text-align: left;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.74), 0 3px 0 rgba(50, 72, 68, 0.18);
-  overflow: hidden;
-  transition: border-color var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.room::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(62, 83, 79, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(62, 83, 79, 0.045) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
-}
-
-.room:hover,
-.room:focus-visible {
-  z-index: 4;
-  border-color: var(--room-color);
-  box-shadow: inset 0 0 0 4px #fff, 0 0 0 5px var(--room-color), var(--shadow-raised);
-  filter: saturate(1.08);
-}
-
-.room:active { filter: brightness(0.96); }
-.room[data-mission="er"] { --room-color: var(--color-mission-er); --room-soft: #f7e5df; }
-.room[data-mission="ambulance"] { --room-color: var(--color-mission-ambulance); --room-soft: #e5edf3; }
-.room[data-mission="healthRoom"] { --room-color: var(--color-mission-health-room); --room-soft: #e2f2e5; }
-.room[data-visited="true"] { box-shadow: inset 0 0 0 4px var(--color-success-soft), 0 0 0 2px var(--color-success); }
-
-.roomHeader {
-  position: absolute;
-  z-index: 4;
-  top: var(--space-3);
-  left: var(--space-3);
-  right: var(--space-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.roomWing,
-.roomStatus {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.9);
-  font-size: clamp(0.68rem, 1.05vw, var(--font-size-caption));
-  font-weight: var(--font-weight-black);
-  box-shadow: var(--shadow-card);
-}
-
-.roomWing { color: var(--room-color); }
-.roomStatus { margin-left: auto; background: var(--room-color); color: var(--color-on-primary); }
-.roomStatus[data-earned="true"] { background: var(--color-success); }
-
-.roomCopy {
-  position: absolute;
-  z-index: 4;
-  left: var(--space-4);
-  bottom: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  max-width: 58%;
-  padding: var(--space-2) var(--space-3);
-  border-left: 5px solid var(--room-color);
-  border-radius: 3px var(--radius-medium) var(--radius-medium) 3px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow-card);
-}
-
-.roomTitle {
-  color: var(--color-text);
-  font-size: clamp(1.15rem, 2.45vw, 2.1rem);
-  font-weight: var(--font-weight-black);
-  line-height: var(--line-height-tight);
-  letter-spacing: -0.045em;
-}
-
-.roomSubtitle {
-  margin-top: 2px;
-  color: var(--color-text-muted);
-  font-size: clamp(0.7rem, 1.15vw, var(--font-size-body));
-  font-weight: var(--font-weight-medium);
-}
-
-.door {
+.positionMarker {
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: -5px;
-  width: 58px;
-  height: 17px;
-  transform: translateX(-50%);
-  border: 5px solid #687875;
-  border-bottom: 0;
-  background: #e9ded0;
-}
-
-.furniture,
-.furniture > span,
-.furniture i {
-  position: absolute;
-  display: block;
+  top: 28.2%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.6rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.08em;
   pointer-events: none;
 }
 
-.furniture { inset: 0; z-index: 2; }
-
-.erStation {
-  top: 27%; left: 42%; width: 16%; height: 23%;
-  border: 3px solid #6e817d; border-radius: 50%; background: #f7fbfa;
-  box-shadow: inset 0 0 0 8px #cee4df;
+.positionMarker span {
+  position: relative;
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
 }
 
-.erBed,
-.healthBed {
-  width: 26%; height: 18%;
-  border: 3px solid #81918e; border-radius: 7px; background: #fff;
-  box-shadow: 0 5px 0 rgba(75, 101, 96, 0.22);
-}
-
-.erBed::before,
-.healthBed::before {
-  content: ""; position: absolute; left: 5%; top: 12%; width: 27%; height: 74%;
-  border-radius: 5px; background: #dbe9f2;
-}
-
-.erBed i,
-.healthBed i {
-  left: 38%; top: 24%; width: 42%; height: 50%; border-radius: 50% 50% 35% 35%; background: #efb69a;
-}
-
-.erBed[data-bed="1"] { left: 5%; top: 24%; }
-.erBed[data-bed="2"] { right: 5%; top: 24%; }
-.erBed[data-bed="3"] { right: 5%; top: 55%; }
-
-.monitor {
-  width: 8%; height: 12%; border: 3px solid #536864; border-radius: 4px; background: #213e3b;
-}
-.monitor::after { content: ""; position: absolute; inset: 35% 12%; border-top: 2px solid #6fe4ba; transform: skewY(-18deg); }
-.monitor[data-monitor="1"] { left: 32%; top: 27%; }
-.monitor[data-monitor="2"] { right: 32%; top: 27%; }
-.monitor[data-monitor="3"] { right: 32%; top: 58%; }
-
-.healthBed { left: 8%; top: 27%; width: 42%; height: 21%; }
-.healthDesk { right: 8%; top: 29%; width: 26%; height: 25%; border: 3px solid #6d8175; border-radius: 6px; background: #d5b58a; }
-.healthChair { right: 17%; top: 58%; width: 10%; aspect-ratio: 1; border: 3px solid #6d8175; border-radius: 50%; background: #f9fbf8; }
-.healthCabinet { left: 8%; top: 61%; width: 25%; height: 12%; border: 3px solid #6d8175; background: #f8fcf8; }
-.healthSink { left: 38%; top: 61%; width: 13%; height: 13%; border: 3px solid #6d8175; border-radius: 50%; background: #cce8ea; }
-
-.ambulanceVehicle {
-  left: 31%; top: 20%; width: 35%; height: 58%;
-  border: 4px solid #61716f; border-radius: 13px 38px 38px 13px; background: #f9fbfb;
-  box-shadow: 0 7px 0 rgba(50, 70, 67, 0.2);
-}
-
-.ambulanceVehicle::before,
-.ambulanceVehicle::after {
-  content: ""; position: absolute; bottom: -8px; width: 19%; height: 15px; border-radius: 50%; background: #2e4542;
-}
-.ambulanceVehicle::before { left: 16%; }
-.ambulanceVehicle::after { right: 16%; }
-.vehicleCab { right: 4%; top: 12%; width: 25%; height: 76%; border-left: 4px solid #61716f; border-radius: 0 26px 26px 0; background: #b8d8df; }
-.vehicleCross { left: 39%; top: 27%; display: grid !important; place-items: center; width: 18%; aspect-ratio: 1; border-radius: 50%; background: var(--color-mission-ambulance); color: #fff; font-style: normal; font-size: clamp(1rem, 2.3vw, 2rem); font-weight: var(--font-weight-black); }
-.vehicleLight { left: 23%; top: -10px; width: 27%; height: 10px; border-radius: 8px 8px 2px 2px; background: linear-gradient(90deg, #e55454 0 45%, #eee 45% 55%, #4b83cd 55%); }
-.garageRail { top: 12%; bottom: 12%; width: 3px; background: repeating-linear-gradient(#869491 0 12px, transparent 12px 23px); }
-.garageRail[data-rail="1"] { left: 26%; }
-.garageRail[data-rail="2"] { right: 26%; }
-.dispatchDesk { right: 5%; top: 28%; width: 16%; height: 35%; border: 3px solid #697976; border-radius: 5px; background: #c8a67d; }
-
-.mapHint {
+.positionMarker span::after {
+  content: "";
   position: absolute;
-  z-index: 7;
+  inset: -8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 50%;
+  animation: pulse 1.8s ease-out infinite;
+}
+
+@keyframes pulse {
+  from { transform: scale(0.5); opacity: 0.8; }
+  to { transform: scale(1.45); opacity: 0; }
+}
+
+.missionNode {
+  --node-accent: var(--color-primary);
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  border-top: 3px solid var(--node-accent);
+  border-radius: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  overflow: hidden;
+  transition: transform var(--transition-normal), background var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+.missionNode[data-mission="er"] { --node-accent: var(--color-mission-er); }
+.missionNode[data-mission="ambulance"] { --node-accent: var(--color-mission-ambulance); }
+.missionNode[data-mission="healthRoom"] { --node-accent: var(--color-mission-health-room); }
+
+.missionNode:hover:not(:disabled),
+.missionNode:focus-visible {
+  transform: translateY(-4px);
+  background: #fff;
+  box-shadow: var(--shadow-raised);
+}
+
+.missionNode[data-entering="true"] {
+  z-index: 5;
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: var(--shadow-raised);
+}
+
+.missionNode:disabled { cursor: wait; }
+
+.nodeNumber {
+  position: absolute;
   right: var(--space-4);
-  bottom: var(--space-2);
-  margin: 0;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: rgba(32, 61, 57, 0.88);
-  color: #fff;
+  bottom: -0.28em;
+  color: #f0f3f3;
+  font-size: clamp(5rem, 11vw, 8.8rem);
+  font-weight: var(--font-weight-black);
+  line-height: 1;
+  letter-spacing: -0.08em;
+  pointer-events: none;
+}
+
+.nodeTopline {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  color: var(--color-text-muted);
+  font-size: 0.66rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+}
+
+.nodeStatus {
+  padding: 2px var(--space-2);
+  border-left: 2px solid var(--node-accent);
+  color: var(--node-accent);
+  letter-spacing: 0.08em;
+}
+
+.missionNode[data-status="complete"] .nodeStatus {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.nodeCategory {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  color: var(--node-accent);
+  font-size: clamp(0.75rem, 1.2vw, 0.92rem);
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+}
+
+.nodeTitle {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--space-1);
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+  font-weight: var(--font-weight-black);
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+}
+
+.nodeTask {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-medium);
 }
 
-@media (max-width: 760px) and (orientation: portrait) {
-  .plan { aspect-ratio: 4 / 5; min-height: 700px; max-height: none; }
-  .blueprint { opacity: 0.34; }
-  .receptionDesk { display: none; }
-  .studentMarker { left: 91%; top: 65.5%; }
-
-  .room { left: 3% !important; width: 94% !important; height: 29% !important; }
-  .room[data-mission="er"] { top: 2.5% !important; }
-  .room[data-mission="healthRoom"] { top: 35.5% !important; }
-  .room[data-mission="ambulance"] { top: 68.5% !important; }
-
-  .roomCopy { max-width: 48%; }
-  .roomTitle { font-size: clamp(1.3rem, 4vw, 2rem); }
-  .roomSubtitle { font-size: var(--font-size-caption); }
-  .door { left: 82%; }
-  .mapHint { display: none; }
+.nodeAction {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--color-text);
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.1em;
 }
 
-@media (max-width: 560px) {
-  .roomHeader { top: var(--space-2); left: var(--space-2); right: var(--space-2); }
-  .roomWing, .roomStatus { padding-inline: var(--space-2); }
-  .roomCopy { left: var(--space-2); bottom: var(--space-3); padding: var(--space-2); }
-  .roomSubtitle { display: none; }
-  .plan::before { font-size: 0.6rem; }
+.nodeAction i {
+  color: var(--node-accent);
+  font-size: 1rem;
+  font-style: normal;
+}
+
+.entryBrief {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 47, 51, 0.95);
+  color: #fff;
+  text-align: center;
+  animation: briefIn 180ms ease-out both;
+}
+
+.entryBrief > span {
+  color: #9ec5c2;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.18em;
+}
+
+.entryBrief strong {
+  margin-top: var(--space-2);
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.entryBrief p { margin: var(--space-3) 0 0; color: #d5e2e1; font-size: var(--font-size-body-large); }
+.entryBrief i { width: 140px; height: 2px; margin-top: var(--space-5); background: var(--color-primary); animation: loading 420ms linear both; }
+
+@keyframes briefIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes loading { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .positionMarker span::after { animation: none; }
+  .entryBrief, .entryBrief i { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .network { min-height: 690px; }
+  .networkHeader { position: relative; inset: auto; padding: var(--space-3) var(--space-4); }
+  .networkHeader p { display: none; }
+  .routeLines { display: none; }
+
+  .network::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 24px;
+    top: 72px;
+    bottom: 32px;
+    border-left: 1px dashed #aebbbc;
+  }
+
+  .positionMarker { left: 24px; top: 64px; transform: translateX(-50%); }
+  .positionMarker small { display: none; }
+
+  .missionNode {
+    left: 42px !important;
+    width: calc(100% - 58px) !important;
+    height: 184px !important;
+    padding: var(--space-4);
+  }
+
+  .missionNode[data-mission="er"] { top: 62px !important; }
+  .missionNode[data-mission="ambulance"] { top: 264px !important; }
+  .missionNode[data-mission="healthRoom"] { top: 466px !important; }
+  .nodeNumber { font-size: 6.2rem; }
+  .nodeTitle { font-size: 2rem; }
 }

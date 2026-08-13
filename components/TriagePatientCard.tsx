@@ -1,27 +1,8 @@
 "use client";
 
 /**
- * 미션 1(응급실)에서 학생이 옮기는 환자 카드.
- *
- * 무엇을 보여주나:
- *   환자 이름(40대 남성 등)과 증상.
- *   중등 모드에서는 활력징후(체온·맥박·호흡수·산소포화도)도 함께 보여줍니다.
- *
- * 어떤 데이터를 받나:
- *   - patient    : data/triage-patients.ts 의 환자 한 명
- *   - showVitals : 활력징후를 보여줄지 (중등 모드에서만 true)
- *   - draggable  : 지금 끌 수 있는 상태인지
- *
- * 조작 방법 (둘 다 됩니다):
- *   1) 카드를 구역으로 끌어다 놓기
- *   2) 구역을 그냥 누르기 — 드래그가 어려운 학생을 위한 방법
- *
- * ⚠️ 정답(어느 구역이 맞는지)은 이 카드가 모릅니다.
- *    채점은 lib/triage.ts 가 합니다.
- *
- * 감정 톤: 긴박함. 지금 이 사람을 어디로 보낼지 결정해야 하는 순간.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ * 미션 1의 TRIAGE PATIENT PANEL.
+ * 환자 정보와 활력징후를 보여줄 뿐, 분류 정답과 채점에는 관여하지 않습니다.
  */
 
 import type { PointerEvent as ReactPointerEvent } from "react";
@@ -34,14 +15,39 @@ type TriagePatientCardProps = {
   patient: TriagePatient;
   showVitals: boolean;
   draggable: boolean;
-  /** 지금 끌려가는 중인지 */
   dragging?: boolean;
-  /** 끌려가는 중일 때 화면에서의 위치 */
   dragStyle?: { left: number; top: number; width: number };
   onPointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onPointerMove?: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onPointerUp?: (event: ReactPointerEvent<HTMLDivElement>) => void;
 };
+
+type VitalKind = "temperature" | "pulse" | "respiration" | "oxygen";
+type VitalTone = "normal" | "warning" | "critical";
+
+/** 시각적 강조만 정합니다. 점수·정답 판정에는 사용되지 않습니다. */
+function vitalTone(kind: VitalKind, rawValue: string): VitalTone {
+  const value = Number.parseFloat(rawValue.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(value)) return "normal";
+
+  if (kind === "oxygen") {
+    if (value < 90) return "critical";
+    if (value < 95) return "warning";
+  }
+  if (kind === "pulse") {
+    if (value < 50 || value > 120) return "critical";
+    if (value < 60 || value > 100) return "warning";
+  }
+  if (kind === "respiration") {
+    if (value < 8 || value > 30) return "critical";
+    if (value < 12 || value > 24) return "warning";
+  }
+  if (kind === "temperature") {
+    if (value < 36 || value >= 39) return "critical";
+    if (value >= 38) return "warning";
+  }
+  return "normal";
+}
 
 export function TriagePatientCard({
   patient,
@@ -58,6 +64,7 @@ export function TriagePatientCard({
       className={styles.card}
       data-dragging={dragging}
       data-draggable={draggable}
+      data-vitals={showVitals}
       style={
         dragging && dragStyle
           ? {
@@ -74,40 +81,50 @@ export function TriagePatientCard({
       onPointerUp={draggable ? onPointerUp : undefined}
       onPointerCancel={draggable ? onPointerUp : undefined}
     >
-      <span className={styles.stretcher} aria-hidden="true">
-        <span className={styles.patientHead} />
-        <span className={styles.patientBody} />
-        <span className={styles.stretcherRail} />
-      </span>
-      <p className={styles.patientNumber}>{patient.order}번 환자 · 이동 침대</p>
-      <p className={styles.name}>{patient.name}</p>
-      <p className={styles.symptom}>{patient.symptom}</p>
+      <section className={styles.profile}>
+        <div
+          className={styles.patientVisual}
+          role="img"
+          aria-label={patient.illustrationHint}
+        >
+          <span>{String(patient.order).padStart(2, "0")}</span>
+          <small>CLINICAL<br />PROFILE</small>
+        </div>
+
+        <div className={styles.patientCopy}>
+          <p className={styles.patientNumber}>
+            PATIENT {String(patient.order).padStart(2, "0")}
+          </p>
+          <p className={styles.name}>{patient.name}</p>
+          <p className={styles.symptom}>{patient.symptom}</p>
+          {draggable ? (
+            <p className={styles.hint}>패널을 끌거나 아래 우선순위를 누르세요</p>
+          ) : null}
+        </div>
+      </section>
 
       {showVitals ? (
-        <dl className={styles.vitals}>
-          <div className={styles.vitalItem}>
-            <dt>체온</dt>
-            <dd>{patient.vitals.temperature}</dd>
-          </div>
-          <div className={styles.vitalItem}>
-            <dt>맥박</dt>
-            <dd>{patient.vitals.pulse}</dd>
-          </div>
-          <div className={styles.vitalItem}>
-            <dt>호흡</dt>
-            <dd>{patient.vitals.respiration}</dd>
-          </div>
-          <div className={styles.vitalItem}>
-            <dt>산소</dt>
-            <dd>{patient.vitals.oxygen}</dd>
-          </div>
-        </dl>
-      ) : null}
-
-      {draggable ? (
-        <p className={styles.hint}>
-          카드를 아래 구역으로 끌거나, 구역을 눌러주세요
-        </p>
+        <section className={styles.vitalsPanel} aria-label="활력징후">
+          <p className={styles.vitalsLabel}>VITALS <span>LIVE</span></p>
+          <dl className={styles.vitals}>
+            <div className={styles.vitalItem} data-tone={vitalTone("pulse", patient.vitals.pulse)}>
+              <dt><b aria-hidden="true">♡</b><span>HEART RATE<small>맥박</small></span></dt>
+              <dd>{patient.vitals.pulse}</dd>
+            </div>
+            <div className={styles.vitalItem} data-tone={vitalTone("oxygen", patient.vitals.oxygen)}>
+              <dt><b aria-hidden="true">◌</b><span>SpO₂<small>산소포화도</small></span></dt>
+              <dd>{patient.vitals.oxygen}</dd>
+            </div>
+            <div className={styles.vitalItem} data-tone={vitalTone("respiration", patient.vitals.respiration)}>
+              <dt><b aria-hidden="true">≈</b><span>RESP<small>호흡</small></span></dt>
+              <dd>{patient.vitals.respiration}</dd>
+            </div>
+            <div className={styles.vitalItem} data-tone={vitalTone("temperature", patient.vitals.temperature)}>
+              <dt><b aria-hidden="true">°</b><span>TEMP<small>체온</small></span></dt>
+              <dd>{patient.vitals.temperature}</dd>
+            </div>
+          </dl>
+        </section>
       ) : null}
     </div>
   );

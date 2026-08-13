@@ -2,59 +2,46 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  min-width: 190px;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-medium);
-  background: var(--color-surface-muted);
+  min-width: 210px;
 }
 
 .readout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
+  gap: 0 var(--space-3);
 }
 
-.label,
-.pausedNote {
+.label {
   color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
+  font-size: 0.66rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.13em;
 }
 
 .value {
-  color: var(--color-text);
+  color: var(--color-primary);
   font-size: var(--font-size-heading);
   font-weight: var(--font-weight-black);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.track {
-  height: 10px;
-  border-radius: var(--radius-pill);
-  background: var(--color-border);
-  overflow: hidden;
+.pausedNote {
+  grid-column: 1 / -1;
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+  text-align: right;
 }
 
-.fill {
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  transition: width var(--transition-fast);
-}
+.track { height: 3px; background: var(--color-border); overflow: hidden; }
+.fill { height: 100%; background: var(--color-primary); transition: width var(--transition-fast), background var(--transition-fast); }
+.timer[data-state="caution"] .value { color: var(--color-warning); }
+.timer[data-state="caution"] .fill { background: var(--color-warning); }
+.timer[data-state="urgent"] .value { color: var(--color-danger); }
+.timer[data-state="urgent"] .fill { background: var(--color-danger); }
+.timer[data-paused="true"] { opacity: 0.55; }
 
-.timer[data-urgent="true"] .value { color: var(--color-danger); }
-.timer[data-urgent="true"] .fill { background: var(--color-danger); }
-.timer[data-paused="true"] { opacity: 0.6; }
-
-/* 가로 태블릿의 짧은 화면에서는 정보량은 유지하고 세로 여백만 줄입니다. */
-@media (min-width: 861px) and (max-height: 820px) {
-  .timer {
-    gap: 0;
-    padding: var(--space-1) var(--space-3);
-  }
-
-  .track {
-    height: 7px;
-  }
-}
+@media (max-width: 560px) { .timer { min-width: 160px; } }

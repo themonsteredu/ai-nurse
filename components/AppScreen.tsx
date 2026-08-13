@@ -31,10 +31,10 @@ import styles from "./AppScreen.module.css";
 export type ScreenTone = "calm" | "urgent" | "focused" | "warm" | "celebrate";
 
 const TONE_LABEL: Record<ScreenTone, string> = {
-  calm: "GOLDEN TIME",
-  urgent: "MISSION 01 · 응급 판단",
-  focused: "MISSION 02 · 현장 출동",
-  warm: "MISSION 03 · 돌봄 실습",
+  calm: "GOLDEN TIME · NURSE MISSION",
+  urgent: "MISSION 01 · EMERGENCY",
+  focused: "MISSION 02 · AMBULANCE",
+  warm: "MISSION 03 · WARD",
   celebrate: "MISSION COMPLETE",
 };
 
@@ -59,9 +59,7 @@ export function AppScreen({
   return (
     <div className={styles.screen} data-tone={tone}>
       <header className={styles.header}>
-        <div className={styles.brandMark} aria-hidden="true">
-          <span className={styles.brandPulse}>+</span>
-        </div>
+        <div className={styles.brandMark} aria-hidden="true">GT</div>
 
         <div className={styles.headerText}>
           <span className={styles.eyebrow}>{TONE_LABEL[tone]}</span>
@@ -79,10 +77,13 @@ export function AppScreen({
           aria-pressed={soundEnabled}
           aria-label={soundEnabled ? "소리 끄기" : "소리 켜기"}
         >
-          <span className={styles.soundIcon} aria-hidden="true">
-            {soundEnabled ? "🔊" : "🔇"}
+          <span className={styles.soundSignal} data-active={soundEnabled} aria-hidden="true">
+            <i /><i /><i />
           </span>
-          <span>{soundEnabled ? "소리 켜짐" : "소리 꺼짐"}</span>
+          <span className={styles.soundCopy}>
+            <small>SOUND</small>
+            <strong>{soundEnabled ? "ON" : "OFF"}</strong>
+          </span>
         </button>
       </header>
 
