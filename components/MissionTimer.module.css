@@ -1,31 +1,32 @@
-/*
- * 제한시간 시계의 생김새.
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- */
-
 .timer {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  min-width: 180px;
+  min-width: 190px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface-muted);
 }
 
 .readout {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: var(--space-2);
 }
 
-.label {
-  font-size: var(--font-size-caption);
+.label,
+.pausedNote {
   color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
 }
 
 .value {
-  font-size: var(--font-size-heading);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
   color: var(--color-text);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-black);
+  font-variant-numeric: tabular-nums;
 }
 
 .track {
@@ -42,22 +43,6 @@
   transition: width var(--transition-fast);
 }
 
-/* 시간이 얼마 안 남았을 때 */
-.timer[data-urgent="true"] .value {
-  color: var(--color-danger);
-}
-
-.timer[data-urgent="true"] .fill {
-  background: var(--color-danger);
-}
-
-/* 해설 카드를 읽는 동안은 시계가 멈춥니다 */
-.timer[data-paused="true"] {
-  opacity: 0.6;
-}
-
-.pausedNote {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
-}
+.timer[data-urgent="true"] .value { color: var(--color-danger); }
+.timer[data-urgent="true"] .fill { background: var(--color-danger); }
+.timer[data-paused="true"] { opacity: 0.6; }

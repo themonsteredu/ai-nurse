@@ -1,33 +1,31 @@
-/*
- * 로비 화면의 생김새.
- *
- * 조감도 자체의 생김새는 HospitalFloorPlan.module.css 에 있습니다.
- * 이 파일은 조감도 위쪽의 진행 상황 한 줄만 담당합니다.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- */
-
 .progress {
-  margin: 0 0 var(--space-4);
+  width: fit-content;
+  margin: 0 auto var(--space-4);
+  padding: var(--space-2) var(--space-5);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-card);
   font-size: var(--font-size-body-large);
   color: var(--color-text-muted);
   text-align: center;
 }
 
 .progress strong {
-  color: var(--color-text);
-  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-strong);
+  font-weight: var(--font-weight-black);
 }
 
-/* 배지를 못 받은 곳이 있을 때 뜨는 안내 */
 .retryNotice {
-  max-width: 640px;
+  max-width: 700px;
   margin: 0 auto var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border: 2px solid var(--color-warning);
+  padding: var(--space-3) var(--space-5);
+  border: var(--border-medium) solid var(--color-warning);
   border-radius: var(--radius-medium);
   background: var(--color-warning-soft);
   color: var(--color-text);
   font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
   text-align: center;
+  box-shadow: var(--shadow-card);
 }

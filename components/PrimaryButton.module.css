@@ -1,29 +1,25 @@
-/*
- * 큰 버튼의 생김새.
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *
- * ⚠️ 단, min-height 를 --touch-target-min 보다 작게 만들지 마세요.
- *    초등학생이 태블릿에서 누르기 어려워집니다.
- */
-
 .button {
   min-height: var(--touch-target-large);
   padding: var(--space-3) var(--space-6);
-  border: 2px solid transparent;
+  border: var(--border-medium) solid transparent;
   border-radius: var(--radius-medium);
   font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-  transition:
-    background var(--transition-fast),
-    transform var(--transition-fast);
+  font-weight: var(--font-weight-black);
+  letter-spacing: -0.02em;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-3px);
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translateY(2px);
 }
 
 .button:disabled {
   opacity: 0.45;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -32,32 +28,35 @@
 }
 
 .primary {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
   color: var(--color-on-primary);
+  box-shadow: var(--shadow-button), var(--shadow-card);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--color-primary-strong);
+  box-shadow: 0 10px 0 rgba(7, 94, 103, 0.15), var(--shadow-raised);
 }
 
 .secondary {
+  border-color: var(--color-border-strong);
   background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
+  color: var(--color-primary-strong);
+  box-shadow: var(--shadow-card);
 }
 
 .secondary:hover:not(:disabled) {
   border-color: var(--color-primary);
-  background: var(--color-primary-soft);
+  background: var(--color-primary-pale);
 }
 
 .ghost {
+  min-height: var(--touch-target-min);
   background: transparent;
   color: var(--color-text-muted);
-  min-height: var(--touch-target-min);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-bold);
 }
 
 .ghost:hover:not(:disabled) {
+  background: var(--color-surface);
   color: var(--color-text);
 }

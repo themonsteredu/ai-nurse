@@ -107,6 +107,21 @@ export function HospitalFloorPlan({
           />
         ))}
 
+        {/* 대기 의자 — 복도 양쪽에 놓인 단순한 조감도 도형 */}
+        <g className={styles.waitingArea}>
+          <rect x="74" y="336" width="54" height="30" rx="8" />
+          <rect x="138" y="336" width="54" height="30" rx="8" />
+          <rect x="808" y="336" width="54" height="30" rx="8" />
+          <rect x="872" y="336" width="54" height="30" rx="8" />
+        </g>
+
+        {/* 실내 화단과 길 안내 점선 */}
+        <g className={styles.planter}>
+          <circle cx="230" cy="352" r="18" />
+          <circle cx="770" cy="352" r="18" />
+        </g>
+        <path d="M 500 350 L 500 430" className={styles.wayfinding} />
+
         {/* 구급차 진입로 — 출동구역에서 건물 밖으로 나가는 길 */}
         <path d="M 430 608 L 430 640" className={styles.drivewayEdge} />
         <path d="M 570 608 L 570 640" className={styles.drivewayEdge} />
@@ -119,7 +134,7 @@ export function HospitalFloorPlan({
 
       {/* 안내데스크 — 복도 한가운데. 글자가 있어야 해서 그림이 아닌 실제 요소입니다. */}
       <div className={styles.receptionDesk} aria-hidden="true">
-        🛎️ 안내데스크
+        <span>+</span> 안내데스크
       </div>
 
       {/* ---------- 앞쪽: 누를 수 있는 부서 버튼 ---------- */}

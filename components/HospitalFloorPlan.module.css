@@ -1,47 +1,42 @@
-/*
- * 병원 조감도의 생김새.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *    지금은 단순한 평면도 느낌입니다. 더 실감나게 만들어도 좋습니다.
- *
- * ⚠️ 지키면 좋은 것
- *    - 부서 구역은 손가락으로 누르기 쉽게 넉넉히 (초등학생 대상)
- *    - 다녀온 구역은 눈에 띄게 달라 보이게 (배지 점등 역할)
- */
-
 .plan {
   position: relative;
   width: 100%;
-  /* 위에서 내려다본 느낌이 나도록 가로로 넓은 비율을 유지합니다 */
   aspect-ratio: 1000 / 640;
-  /*
-   * 조감도는 스크롤 없이 한눈에 다 보여야 합니다.
-   * 화면 높이에서 위쪽 띠와 진행 상황 줄이 차지하는 만큼을 빼고 남는 높이에 맞춥니다.
-   * (병원 구역이 화면 밖으로 잘리는 걸 막아줍니다)
-   */
-  max-height: calc(100dvh - 300px);
-  min-height: 320px;
+  max-height: calc(100dvh - 290px);
+  min-height: 360px;
   margin: 0 auto;
-  border: 5px solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border: var(--border-accent) solid var(--color-surface);
+  border-radius: var(--radius-extra-large);
+  background: var(--color-background-deep);
+  box-shadow: 0 0 0 var(--border-thin) var(--color-border), var(--shadow-raised);
   overflow: hidden;
 }
 
-/* ---------- 건물 그림 (배경) ---------- */
+.plan::before {
+  content: "HOSPITAL FLOOR · 1F";
+  position: absolute;
+  z-index: 2;
+  left: var(--space-5);
+  bottom: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.16em;
+  opacity: 0.65;
+}
 
 .blueprint {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  /* 그림일 뿐이라 누를 수 없게 합니다. 버튼은 이 위에 따로 있습니다. */
   pointer-events: none;
 }
 
 .buildingFloor {
-  fill: var(--color-background);
+  fill: var(--color-surface-muted);
+  stroke: var(--color-border-strong);
+  stroke-width: 2;
 }
 
 .corridor {
@@ -53,119 +48,185 @@
 .tileLine {
   stroke: var(--color-border);
   stroke-width: 1;
-  opacity: 0.5;
+  opacity: 0.55;
+}
+
+.waitingArea rect {
+  fill: var(--color-primary-soft);
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.planter circle {
+  fill: var(--color-mission-health-room-soft);
+  stroke: var(--color-mission-health-room);
+  stroke-width: 3;
+}
+
+.wayfinding {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 4;
+  stroke-dasharray: 8 10;
+  opacity: 0.45;
 }
 
 .drivewayEdge {
   stroke: var(--color-mission-ambulance);
-  stroke-width: 4;
-  opacity: 0.45;
+  stroke-width: 6;
+  opacity: 0.5;
 }
 
 .drivewayCenterLine {
   stroke: var(--color-mission-ambulance);
-  stroke-width: 3;
-  opacity: 0.7;
+  stroke-width: 4;
+  opacity: 0.8;
 }
 
-/* 안내데스크 — 복도 한가운데 놓인 표지. 누를 수는 없습니다. */
 .receptionDesk {
   position: absolute;
+  z-index: 3;
   left: 50%;
   top: 52%;
   transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-5);
-  border: 2px solid var(--color-primary);
+  border: var(--border-medium) solid var(--color-primary);
   border-radius: var(--radius-pill);
-  background: var(--color-primary-soft);
+  background: var(--color-surface);
   color: var(--color-primary-strong);
   font-size: clamp(0.8rem, 1.4vw, var(--font-size-body));
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   white-space: nowrap;
+  box-shadow: var(--shadow-card);
   pointer-events: none;
 }
 
-/* ---------- 부서 구역 (누를 수 있는 버튼) ---------- */
+.receptionDesk span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
 
 .room {
+  --room-color: var(--color-primary);
+  --room-soft: var(--color-primary-soft);
   position: absolute;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
-  padding: var(--space-4);
-  border: 4px solid var(--color-border);
-  border-radius: var(--radius-medium);
-  background: var(--color-surface);
+  padding: clamp(var(--space-3), 2.2vw, var(--space-5));
+  border: var(--border-bold) solid var(--room-color);
+  border-radius: var(--radius-large);
+  background: linear-gradient(145deg, var(--color-surface), var(--room-soft));
+  color: var(--color-text);
   text-align: left;
-  box-shadow: var(--shadow-card);
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background var(--transition-fast);
+  box-shadow: var(--shadow-card), var(--shadow-soft-inset);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+}
+
+.room::after {
+  content: "";
+  position: absolute;
+  right: -2rem;
+  bottom: -3rem;
+  width: 8rem;
+  height: 8rem;
+  border: var(--border-thin) solid var(--room-color);
+  border-radius: 50%;
+  opacity: 0.13;
 }
 
 .room:hover {
-  transform: translateY(-4px);
+  z-index: 4;
+  transform: translateY(-5px) scale(1.01);
   box-shadow: var(--shadow-raised);
+  filter: saturate(1.05);
 }
 
 .room:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
-/* 부서마다 다른 대표색 */
 .room[data-mission="er"] {
-  border-color: var(--color-mission-er);
-}
-.room[data-mission="ambulance"] {
-  border-color: var(--color-mission-ambulance);
-}
-.room[data-mission="healthRoom"] {
-  border-color: var(--color-mission-health-room);
+  --room-color: var(--color-mission-er);
+  --room-soft: var(--color-mission-er-soft);
 }
 
-/* 다녀온 구역은 불이 켜집니다 */
+.room[data-mission="ambulance"] {
+  --room-color: var(--color-mission-ambulance);
+  --room-soft: var(--color-mission-ambulance-soft);
+}
+
+.room[data-mission="healthRoom"] {
+  --room-color: var(--color-mission-health-room);
+  --room-soft: var(--color-mission-health-room-soft);
+}
+
 .room[data-visited="true"] {
-  background: var(--color-success-soft);
+  box-shadow: 0 0 0 var(--space-1) var(--color-success-soft), var(--shadow-card);
 }
 
 .roomWing {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--room-color);
+  font-size: clamp(0.72rem, 1.2vw, var(--font-size-caption));
+  font-weight: var(--font-weight-black);
 }
 
 .roomIcon {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 6vw, 64px);
+  height: clamp(44px, 6vw, 64px);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  font-size: clamp(1.6rem, 3.4vw, 2.5rem);
   line-height: 1;
+  box-shadow: var(--shadow-card);
 }
 
 .roomTitle {
-  font-size: clamp(1.5rem, 3.4vw, var(--font-size-display));
-  font-weight: var(--font-weight-bold);
+  font-size: clamp(1.5rem, 3.2vw, 2.75rem);
+  font-weight: var(--font-weight-black);
   line-height: var(--line-height-tight);
-  color: var(--color-text);
+  letter-spacing: -0.055em;
 }
 
 .roomSubtitle {
-  font-size: clamp(0.9rem, 1.6vw, var(--font-size-body-large));
+  max-width: 92%;
+  font-size: clamp(0.85rem, 1.55vw, var(--font-size-body-large));
   color: var(--color-text-muted);
 }
 
 .roomStatus {
+  position: relative;
+  z-index: 2;
   margin-top: auto;
-  font-size: clamp(0.9rem, 1.5vw, var(--font-size-body));
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary-strong);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--room-color);
+  color: var(--color-on-primary);
+  font-size: clamp(0.8rem, 1.4vw, var(--font-size-body));
+  font-weight: var(--font-weight-black);
 }
 
-/* 배지까지 받은 구역 */
 .roomStatus[data-earned="true"] {
-  color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-on-primary);
 }
 
-/* 출동구역은 가로로 넓어서 내용을 옆으로 폅니다 */
 .room[data-mission="ambulance"] {
   flex-direction: row;
   align-items: center;
@@ -177,6 +238,36 @@
 }
 
 .room[data-mission="ambulance"] .roomStatus {
-  margin-top: 0;
-  margin-left: auto;
+  margin: 0 0 0 auto;
+}
+
+@media (max-width: 760px) and (orientation: portrait) {
+  .plan {
+    aspect-ratio: 4 / 5;
+    min-height: 680px;
+    max-height: none;
+  }
+
+  .receptionDesk,
+  .blueprint {
+    opacity: 0.75;
+  }
+
+  .room {
+    left: var(--space-4) !important;
+    width: calc(100% - var(--space-6) - var(--space-2)) !important;
+    height: 29% !important;
+  }
+
+  .room[data-mission="er"] {
+    top: 3% !important;
+  }
+
+  .room[data-mission="healthRoom"] {
+    top: 35.5% !important;
+  }
+
+  .room[data-mission="ambulance"] {
+    top: 68% !important;
+  }
 }

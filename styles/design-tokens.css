@@ -1,77 +1,75 @@
 /*
- * 색깔·글자 크기·간격을 한곳에 모아둔 파일.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *    오히려 여기부터 바꾸는 게 맞습니다.
- *
- * 규칙: 화면 코드 어디에도 색깔 코드(#ff0000)나 픽셀 값을 직접 쓰지 않습니다.
- *      전부 여기 있는 이름(var(--...))을 가져다 씁니다.
- *
- * 대상이 초등 3학년~중학생이고 태블릿 터치로 쓰기 때문에,
- * 버튼과 글자를 어른용 앱보다 크게 잡아두었습니다.
+ * 골든타임의 시각 언어.
+ * 어린 학생에게는 친근하고, 병원 현장에는 신뢰감 있게 보이도록 설계합니다.
  */
 
 :root {
   /* ---------- 바탕과 글자 ---------- */
-  --color-background: #f4f7fb;
+  --color-background: #eef6f5;
+  --color-background-deep: #dfeeed;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-text: #1b2430;
-  --color-text-muted: #5b6a7d;
-  --color-border: #d7dfea;
+  --color-surface-muted: #f7fbfa;
+  --color-text: #17383d;
+  --color-text-muted: #5c7376;
+  --color-border: #d4e3e1;
+  --color-border-strong: #aecac7;
+  --color-overlay: rgba(16, 48, 54, 0.58);
 
   /* ---------- 브랜드 ---------- */
-  --color-primary: #1f6feb;
-  --color-primary-strong: #1550b8;
-  --color-primary-soft: #e5efff;
+  --color-primary: #0b7f89;
+  --color-primary-strong: #075e67;
+  --color-primary-soft: #dcf2f1;
+  --color-primary-pale: #f0fbfa;
   --color-on-primary: #ffffff;
+  --color-accent: #ff8566;
+  --color-accent-soft: #fff0eb;
+  --color-sun: #f4bd4f;
+  --color-sun-soft: #fff7df;
 
-  /* ---------- 중증도 분류 구역 색 ----------
-     초등 모드는 빨강·노랑·초록·파랑 4색,
-     중등 모드는 여기에 주황이 더해져 5색입니다.
-
-     ⚠️ 이 색들은 "빨강이 가장 급하다"는 의미를 담고 있어서
-        완전히 다른 색으로 바꾸면 수업 내용과 어긋납니다.
-        명도나 채도를 다듬는 정도로만 조절해주세요.
-        (급한 순서: 빨강 → 주황 → 노랑 → 초록 → 파랑) */
-  --color-triage-red: #d93025;
-  --color-triage-red-soft: #fdecea;
-  --color-triage-orange: #e8730c;
-  --color-triage-orange-soft: #fff0e2;
-  --color-triage-yellow: #e8a317;
-  --color-triage-yellow-soft: #fff6e0;
-  --color-triage-green: #1e8e5a;
-  --color-triage-green-soft: #e6f5ee;
-  --color-triage-blue: #1f6feb;
-  --color-triage-blue-soft: #e5efff;
+  /* ---------- 중증도 분류 구역 색 ---------- */
+  --color-triage-red: #cf4051;
+  --color-triage-red-soft: #fff0f2;
+  --color-triage-orange: #dd732d;
+  --color-triage-orange-soft: #fff1e7;
+  --color-triage-yellow: #a77808;
+  --color-triage-yellow-soft: #fff7dc;
+  --color-triage-green: #267c57;
+  --color-triage-green-soft: #e7f6ed;
+  --color-triage-blue: #3475b8;
+  --color-triage-blue-soft: #ebf3fc;
 
   /* ---------- 상태 표시 ---------- */
-  --color-success: #1e8e5a;
-  --color-success-soft: #e6f5ee;
-  --color-danger: #d93025;
-  --color-danger-soft: #fdecea;
-  --color-warning: #e8a317;
-  --color-warning-soft: #fff6e0;
+  --color-success: #267c57;
+  --color-success-soft: #e7f6ed;
+  --color-danger: #cf4051;
+  --color-danger-soft: #fff0f2;
+  --color-warning: #a77808;
+  --color-warning-soft: #fff7dc;
 
-  /* ---------- 미션별 대표색 (로비 카드) ---------- */
-  --color-mission-er: #d93025;
-  --color-mission-ambulance: #e8730c;
-  --color-mission-health-room: #1e8e5a;
+  /* ---------- 미션별 대표색 ---------- */
+  --color-mission-er: #cf4051;
+  --color-mission-er-soft: #fff0f2;
+  --color-mission-ambulance: #dd732d;
+  --color-mission-ambulance-soft: #fff1e7;
+  --color-mission-health-room: #267c57;
+  --color-mission-health-room-soft: #e7f6ed;
 
-  /* ---------- 글자 크기 (태블릿 기준으로 크게) ---------- */
-  --font-size-display: 2.75rem; /* 화면 맨 위 큰 제목 */
-  --font-size-title: 2rem; /* 화면 제목 */
-  --font-size-heading: 1.5rem; /* 카드 제목 */
-  --font-size-body-large: 1.25rem; /* 학생이 읽는 본문 */
-  --font-size-body: 1.0625rem; /* 일반 본문 */
-  --font-size-caption: 0.9375rem; /* 작은 안내 문구 */
+  /* ---------- 글자 ---------- */
+  --font-size-display: clamp(2.6rem, 5.5vw, 4.25rem);
+  --font-size-title: clamp(1.75rem, 3.4vw, 2.5rem);
+  --font-size-heading: clamp(1.3rem, 2.2vw, 1.65rem);
+  --font-size-body-large: clamp(1.08rem, 1.7vw, 1.25rem);
+  --font-size-body: 1.0625rem;
+  --font-size-caption: 0.9375rem;
 
   --font-weight-regular: 400;
-  --font-weight-medium: 600;
+  --font-weight-medium: 650;
   --font-weight-bold: 800;
+  --font-weight-black: 900;
 
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.6;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.65;
 
   /* ---------- 간격 ---------- */
   --space-1: 0.25rem;
@@ -84,29 +82,37 @@
   --space-8: 4rem;
 
   /* ---------- 모서리와 그림자 ---------- */
-  --radius-small: 8px;
-  --radius-medium: 14px;
-  --radius-large: 22px;
+  --radius-small: 10px;
+  --radius-medium: 16px;
+  --radius-large: 26px;
+  --radius-extra-large: 36px;
   --radius-pill: 999px;
 
-  --shadow-card: 0 2px 8px rgba(27, 36, 48, 0.08);
-  --shadow-raised: 0 8px 24px rgba(27, 36, 48, 0.14);
+  --shadow-card: 0 8px 26px rgba(18, 70, 75, 0.09);
+  --shadow-raised: 0 18px 46px rgba(18, 70, 75, 0.16);
+  --shadow-button: 0 8px 0 rgba(7, 94, 103, 0.18);
+  --shadow-soft-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
 
-  /* ---------- 터치 영역 ----------
-     초등학생 손가락 기준입니다. 이보다 작게 만들지 마세요. */
+  /* ---------- 선 ---------- */
+  --border-thin: 1px;
+  --border-medium: 2px;
+  --border-bold: 3px;
+  --border-accent: 5px;
+
+  /* ---------- 터치 영역 ---------- */
   --touch-target-min: 56px;
   --touch-target-large: 76px;
   --drop-zone-min-height: 180px;
 
   /* ---------- 화면 폭 ---------- */
-  --content-max-width: 1100px;
+  --content-max-width: 1160px;
+  --reading-max-width: 720px;
 
   /* ---------- 움직임 ---------- */
-  --transition-fast: 120ms ease-out;
-  --transition-normal: 220ms ease-out;
+  --transition-fast: 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-normal: 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* 화면을 흔들리게 하는 효과를 꺼둔 학생을 위한 배려 */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --transition-fast: 0ms;

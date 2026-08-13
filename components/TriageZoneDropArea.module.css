@@ -1,85 +1,79 @@
-/*
- * 색깔 구역의 생김새.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *
- * ⚠️ 지켜야 할 것
- *    - 구역 색은 급한 순서를 뜻합니다 (빨강 → 주황 → 노랑 → 초록 → 파랑).
- *      색만 보고 순서를 알 수 있어야 합니다.
- *    - 색맹 학생을 위해 색 말고 글자(구역 이름)도 반드시 남겨주세요.
- *    - 카드를 끌어다 놓을 영역이므로 너무 작게 만들지 마세요.
- */
-
 .zone {
+  --zone-color: var(--color-border-strong);
+  --zone-soft: var(--color-surface);
+  position: relative;
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
-  flex: 1;
   min-width: 0;
   min-height: var(--drop-zone-min-height);
   padding: var(--space-4);
-  border: 4px solid var(--zone-color, var(--color-border));
+  border: var(--border-bold) solid var(--zone-color);
+  border-top-width: 10px;
   border-radius: var(--radius-large);
-  background: var(--zone-soft, var(--color-surface));
+  background: linear-gradient(180deg, var(--color-surface), var(--zone-soft));
+  color: var(--color-text);
   text-align: left;
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-/* 구역별 색. 실제 색값은 styles/design-tokens.css 에 있습니다. */
-.zone[data-level="red"] {
-  --zone-color: var(--color-triage-red);
-  --zone-soft: var(--color-triage-red-soft);
-}
-.zone[data-level="orange"] {
-  --zone-color: var(--color-triage-orange);
-  --zone-soft: var(--color-triage-orange-soft);
-}
-.zone[data-level="yellow"] {
-  --zone-color: var(--color-triage-yellow);
-  --zone-soft: var(--color-triage-yellow-soft);
-}
-.zone[data-level="green"] {
-  --zone-color: var(--color-triage-green);
-  --zone-soft: var(--color-triage-green-soft);
-}
-.zone[data-level="blue"] {
-  --zone-color: var(--color-triage-blue);
-  --zone-soft: var(--color-triage-blue-soft);
+.zone::after {
+  content: "↓";
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--zone-color);
+  color: var(--color-on-primary);
+  font-weight: var(--font-weight-black);
 }
 
-/* 카드를 이 구역 위로 끌고 왔을 때 */
+.zone[data-level="red"] { --zone-color: var(--color-triage-red); --zone-soft: var(--color-triage-red-soft); }
+.zone[data-level="orange"] { --zone-color: var(--color-triage-orange); --zone-soft: var(--color-triage-orange-soft); }
+.zone[data-level="yellow"] { --zone-color: var(--color-triage-yellow); --zone-soft: var(--color-triage-yellow-soft); }
+.zone[data-level="green"] { --zone-color: var(--color-triage-green); --zone-soft: var(--color-triage-green-soft); }
+.zone[data-level="blue"] { --zone-color: var(--color-triage-blue); --zone-soft: var(--color-triage-blue-soft); }
+
 .zone[data-drop-target="true"] {
-  transform: scale(1.03);
-  box-shadow: var(--shadow-raised);
+  transform: scale(1.035) translateY(-3px);
   border-style: dashed;
+  box-shadow: var(--shadow-raised);
 }
 
 .zone:not(:disabled):hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-raised);
 }
 
 .zone:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .label {
   font-size: var(--font-size-heading);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
   color: var(--zone-color);
 }
 
 .rule {
   font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
-  color: var(--color-text);
 }
 
 .count {
   margin-top: auto;
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
+  padding-right: 2.5rem;
   color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-black);
 }

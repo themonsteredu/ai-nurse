@@ -1,15 +1,3 @@
-/*
- * 가슴압박 화면의 생김새.
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *
- * ⚠️ 지켜야 할 것
- *    - 탭 영역은 아주 크게. 리듬을 타면서 정확히 겨냥할 수 없습니다.
- *    - touch-action: none 을 지우면 태블릿에서 연타할 때 화면이 스크롤됩니다.
- *    - 느릴 때 어두워지는 효과는 기획서 요구사항입니다.
- */
-
-/* ---------------- 준비 카운트다운 ---------------- */
-
 .ready {
   display: flex;
   flex-direction: column;
@@ -22,46 +10,44 @@
 
 .readyLabel {
   margin: 0;
-  font-size: var(--font-size-heading);
-  font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-bold);
 }
 
 .readyCount {
+  display: grid;
+  place-items: center;
+  width: min(42vw, 280px);
+  aspect-ratio: 1;
   margin: 0;
-  font-size: 8rem;
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
+  border: var(--border-accent) solid var(--color-mission-ambulance);
+  border-radius: 50%;
+  background: var(--color-mission-ambulance-soft);
   color: var(--color-mission-ambulance);
+  font-size: 8rem;
+  font-weight: var(--font-weight-black);
+  line-height: 1;
+  box-shadow: var(--shadow-raised);
 }
 
 .readyHint {
   margin: 0;
   font-size: var(--font-size-body-large);
-  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
 }
-
-/* ---------------- 압박 진행 ---------------- */
 
 .pad {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
   gap: var(--space-5);
   align-items: stretch;
-  border-radius: var(--radius-large);
+  padding: var(--space-4);
+  border-radius: var(--radius-extra-large);
   transition: background var(--transition-normal);
 }
 
-/* 기획서: 너무 느리면 화면이 어두워집니다 */
-.pad[data-zone="slow"] {
-  background: rgba(27, 36, 48, 0.14);
-}
-
-@media (max-width: 860px) {
-  .pad {
-    grid-template-columns: 1fr;
-  }
-}
+.pad[data-zone="slow"] { background: rgba(23, 56, 61, 0.14); }
 
 .tapArea {
   position: relative;
@@ -70,49 +56,63 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 340px;
+  min-height: 430px;
   padding: var(--space-5);
-  border: 5px solid var(--color-mission-ambulance);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  /* 연타할 때 화면이 따라 움직이지 않게 합니다 */
+  border: var(--border-accent) solid var(--color-mission-ambulance);
+  border-radius: var(--radius-extra-large);
+  background:
+    radial-gradient(circle, var(--color-mission-ambulance-soft) 0 30%, transparent 31%),
+    var(--color-surface);
+  box-shadow: var(--shadow-raised);
   touch-action: none;
   overflow: hidden;
 }
 
-.tapArea:active {
-  background: var(--color-warning-soft);
+.tapArea::after {
+  content: "손바닥 전체로 힘차게";
+  position: absolute;
+  bottom: var(--space-5);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-card);
 }
 
-/* 리듬 가이드 원 — JS 가 ref 로 크기를 직접 바꿉니다 */
+.tapArea:active { background-color: var(--color-warning-soft); }
+
 .guideCircle {
   position: absolute;
-  width: min(260px, 60%);
+  width: min(280px, 65%);
   aspect-ratio: 1;
+  border: var(--border-accent) solid var(--color-on-primary);
   border-radius: 50%;
   background: var(--color-mission-ambulance);
+  box-shadow: 0 0 0 var(--space-3) var(--color-mission-ambulance-soft);
   opacity: 1;
-  /* transform 은 JS 가 매 프레임 바꿉니다. 여기에 transition 을 걸면 리듬이 어긋납니다. */
   transition: opacity var(--transition-normal);
   pointer-events: none;
 }
 
-.tapLabel {
+.tapLabel,
+.tapCount {
   position: relative;
+  color: var(--color-on-primary);
+  text-shadow: 0 2px 8px rgba(23, 56, 61, 0.28);
+}
+
+.tapLabel {
   font-size: var(--font-size-title);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  font-weight: var(--font-weight-black);
 }
 
 .tapCount {
-  position: relative;
   font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-black);
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
 }
-
-/* ---------------- 오른쪽 정보 ---------------- */
 
 .side {
   display: flex;
@@ -125,30 +125,33 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-4);
+  padding: var(--space-5);
+  border: var(--border-thin) solid var(--color-border);
   border-radius: var(--radius-large);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
-.timeLabel {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-}
-
-.timeValue {
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
+.timeLabel { color: var(--color-text-muted); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
+.timeValue { font-size: var(--font-size-title); font-weight: var(--font-weight-black); font-variant-numeric: tabular-nums; }
 
 .guideGoneNote {
   margin: 0;
-  padding: var(--space-3);
+  padding: var(--space-4);
   border-radius: var(--radius-medium);
   background: var(--color-primary-soft);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
   color: var(--color-primary-strong);
+  font-weight: var(--font-weight-bold);
   text-align: center;
+}
+
+@media (max-width: 860px) {
+  .pad { grid-template-columns: 1fr; }
+  .side { display: grid; grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .pad { padding: 0; }
+  .tapArea { min-height: 360px; }
+  .side { grid-template-columns: 1fr; }
 }

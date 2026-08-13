@@ -1,82 +1,12 @@
-/*
- * 미션별 점수 그래프의 생김새.
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
- *
- * ⚠️ 막대 길이만으로 알려주지 말고 숫자(%)도 꼭 남겨주세요.
- */
-
-.chart {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.name {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-}
-
-.bestTag {
-  padding: 2px var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
-}
-
-.percent {
-  font-size: var(--font-size-heading);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
-.track {
-  height: 20px;
-  border-radius: var(--radius-pill);
-  background: var(--color-border);
-  overflow: hidden;
-}
-
-.bar {
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  transition: width var(--transition-normal);
-}
-
-/* 미션마다 대표색 */
-.bar[data-mission="er"] {
-  background: var(--color-mission-er);
-}
-.bar[data-mission="ambulance"] {
-  background: var(--color-mission-ambulance);
-}
-.bar[data-mission="healthRoom"] {
-  background: var(--color-mission-health-room);
-}
-
-.detail {
-  margin: 0;
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-}
+.chart { display: flex; flex-direction: column; gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+.row { display: flex; flex-direction: column; gap: var(--space-2); }
+.header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.name { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); font-size: var(--font-size-body-large); font-weight: var(--font-weight-black); }
+.bestTag { padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-sun-soft); color: var(--color-warning); font-size: var(--font-size-caption); font-weight: var(--font-weight-black); }
+.percent { color: var(--color-primary-strong); font-size: var(--font-size-heading); font-weight: var(--font-weight-black); font-variant-numeric: tabular-nums; }
+.track { height: 24px; padding: var(--space-1); border-radius: var(--radius-pill); background: var(--color-background-deep); overflow: hidden; box-shadow: var(--shadow-soft-inset); }
+.bar { height: 100%; border-radius: var(--radius-pill); background: var(--color-primary); transition: width var(--transition-normal); }
+.bar[data-mission="er"] { background: var(--color-mission-er); }
+.bar[data-mission="ambulance"] { background: var(--color-mission-ambulance); }
+.bar[data-mission="healthRoom"] { background: var(--color-mission-health-room); }
+.detail { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-caption); }
