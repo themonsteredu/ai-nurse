@@ -5,7 +5,11 @@
  *
  * 기획서 기준:
  *   초등 모드 = 구역 4개 (빨강·노랑·초록·파랑)
- *   중등 모드 = 구역 5개 (여기에 검정 추가)
+ *   중등 모드 = 구역 5개 (여기에 주황 "몇 분 안에" 추가)
+ *
+ * 주황은 "지금은 멀쩡해 보이지만 곧 나빠지는 환자"를 위한 구역입니다.
+ * 겉모습만 보고 판단하면 안 된다는 걸 가르치는 자리라
+ * 중등 모드에서만 나옵니다.
  *
  * ⛔ 코덱스(디자인 담당 AI)는 이 파일을 절대 수정하면 안 됩니다.
  *    구역의 생김새는 바꿔도 되지만, 어떤 환자가 어디로 가는지는
@@ -30,38 +34,38 @@ export const TRIAGE_ZONES: Record<TriageLevel, TriageZoneInfo> = {
   red: {
     level: "red",
     label: "지금 당장",
-    rule: "몇 분 안에 위험해져요. 다른 무엇보다 먼저 봐야 합니다.",
+    rule: "숨이나 심장이 지금 멈추려 해요. 다른 무엇보다 먼저 봐야 합니다.",
     order: 1,
     levels: ["elementary", "middle"],
+  },
+  orange: {
+    level: "orange",
+    label: "몇 분 안에",
+    rule: "지금은 말도 하고 멀쩡해 보이지만, 몇 분 안에 갑자기 나빠질 수 있어요.",
+    order: 2,
+    // 겉모습과 실제 위험이 다르다는 걸 다루는 구역이라 중등 모드에서만 나옵니다.
+    levels: ["middle"],
   },
   yellow: {
     level: "yellow",
     label: "빨리",
     rule: "지금 당장은 아니지만, 기다리면 나빠져요.",
-    order: 2,
+    order: 3,
     levels: ["elementary", "middle"],
   },
   green: {
     level: "green",
     label: "기다려도 됨",
     rule: "치료는 필요하지만 한참 기다려도 괜찮아요.",
-    order: 3,
+    order: 4,
     levels: ["elementary", "middle"],
   },
   blue: {
     level: "blue",
     label: "가벼움",
     rule: "급하지 않아요. 오늘 꼭 치료하지 않아도 괜찮은 정도예요.",
-    order: 4,
-    levels: ["elementary", "middle"],
-  },
-  black: {
-    level: "black",
-    label: "이미 늦음",
-    rule: "안타깝지만 도울 수 없는 상태예요. 살릴 수 있는 사람에게 힘을 써야 합니다.",
     order: 5,
-    // 무거운 개념이라 중등 모드에서만 나옵니다.
-    levels: ["middle"],
+    levels: ["elementary", "middle"],
   },
 };
 

@@ -17,9 +17,11 @@ export type MissionId = "er" | "ambulance" | "healthRoom";
  * 중증도 분류 구역 색깔. 미션 1에서 사용합니다.
  *
  * 초등 모드는 빨강·노랑·초록·파랑 4개 구역만 씁니다.
- * 중등 모드는 여기에 검정 구역이 하나 더 붙어 5개가 됩니다.
+ * 중등 모드는 여기에 주황("몇 분 안에")이 하나 더 붙어 5개가 됩니다.
+ *
+ * 진로체험 수업이라 사망(검정) 구역은 두지 않습니다.
  */
-export type TriageLevel = "red" | "yellow" | "green" | "blue" | "black";
+export type TriageLevel = "red" | "orange" | "yellow" | "green" | "blue";
 
 /**
  * 채점 결과의 기본 단위.

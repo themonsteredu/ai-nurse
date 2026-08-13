@@ -6,7 +6,8 @@
  *   중등 모드 = 환자 10명, 활력징후 수치까지 함께 제시
  *
  * ★ 선생님이 수업 내용을 바꾸고 싶으면 여기를 고치면 됩니다.
- *   - 정답을 바꾸려면 correctZone 을 red / yellow / green / blue / black 중 하나로.
+ *   - 정답을 바꾸려면 correctZone 을 red / orange / yellow / green / blue 중 하나로.
+ *     (orange 는 중등 모드에만 있는 구역이라, orange 정답 환자는 중등 전용이어야 합니다)
  *   - 오답 해설을 바꾸려면 explanation 문장을 고치세요.
  *
  * ⛔ 코덱스(디자인 담당 AI)는 이 파일을 절대 수정하면 안 됩니다.
@@ -169,9 +170,9 @@ export const TRIAGE_PATIENTS: TriagePatient[] = [
       respiration: "26회",
       oxygen: "93%",
     },
-    correctZone: "red",
+    correctZone: "orange",
     explanation:
-      "겉으로 피가 안 보여도 몸 안에서 피가 새고 있을 수 있어요. 창백한 얼굴 + 식은땀 + 빠른 맥박은 그 신호입니다. 보이지 않는 출혈이 더 위험할 때가 있어요.",
+      "겉으로 피가 안 보여도 몸 안에서 피가 새고 있을 수 있어요. 창백한 얼굴 + 식은땀 + 빠른 맥박이 그 신호입니다. 지금은 말도 하지만 몇 분 안에 갑자기 나빠질 수 있어서 '몇 분 안에' 구역이에요.",
     illustrationHint: "다리를 붙잡고 앉은 어른 일러스트, 창백한 톤",
     levels: ["middle"],
     order: 7,
@@ -212,19 +213,19 @@ export const TRIAGE_PATIENTS: TriagePatient[] = [
   },
   {
     id: "er-10",
-    name: "80대 남성",
+    name: "중학생",
     symptom:
-      "쓰러진 지 오래되어 발견되었다. 숨과 맥박이 없고 몸이 이미 차갑게 식었다.",
+      "축구를 하다 머리를 세게 부딪혔다. 처음에는 멀쩡히 걸어 들어왔는데, 점점 말이 느려지고 자꾸 졸려 한다.",
     vitals: {
-      temperature: "측정 안 됨",
-      pulse: "없음",
-      respiration: "없음",
-      oxygen: "측정 안 됨",
+      temperature: "36.5℃",
+      pulse: "58회",
+      respiration: "14회",
+      oxygen: "97%",
     },
-    correctZone: "black",
+    correctZone: "orange",
     explanation:
-      "간호사가 가장 마음 아파하는 판단이에요. 안타깝지만 이미 도울 수 없는 상태입니다. 이럴 때는 살릴 수 있는 다른 환자에게 힘을 써야 해요. 이것도 간호사가 해야 하는 어려운 결정입니다.",
-    illustrationHint: "흰 천이 덮인 침대 실루엣, 어둡지 않고 차분하고 존중하는 톤",
+      "머리를 부딪힌 뒤 멀쩡하다가 점점 졸려하는 건 머릿속에서 피가 고이고 있다는 신호예요. 걸어 들어왔다고 안심하면 안 됩니다. 겉모습이 멀쩡한 게 오히려 더 위험할 때가 있어요.",
+    illustrationHint: "머리에 손을 얹고 눈을 비비는 학생 일러스트, 피 표현 없이",
     levels: ["middle"],
     order: 10,
   },

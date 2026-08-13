@@ -26,16 +26,24 @@
   --color-primary-soft: #e5efff;
   --color-on-primary: #ffffff;
 
-  /* ---------- 중증도 분류 구역 3색 ----------
-     이 색은 "빨강/노랑/초록"이라는 의미가 있어서
-     완전히 다른 색으로 바꾸면 수업 내용과 어긋납니다.
-     명도나 채도를 다듬는 정도로만 조절해주세요. */
+  /* ---------- 중증도 분류 구역 색 ----------
+     초등 모드는 빨강·노랑·초록·파랑 4색,
+     중등 모드는 여기에 주황이 더해져 5색입니다.
+
+     ⚠️ 이 색들은 "빨강이 가장 급하다"는 의미를 담고 있어서
+        완전히 다른 색으로 바꾸면 수업 내용과 어긋납니다.
+        명도나 채도를 다듬는 정도로만 조절해주세요.
+        (급한 순서: 빨강 → 주황 → 노랑 → 초록 → 파랑) */
   --color-triage-red: #d93025;
   --color-triage-red-soft: #fdecea;
+  --color-triage-orange: #e8730c;
+  --color-triage-orange-soft: #fff0e2;
   --color-triage-yellow: #e8a317;
   --color-triage-yellow-soft: #fff6e0;
   --color-triage-green: #1e8e5a;
   --color-triage-green-soft: #e6f5ee;
+  --color-triage-blue: #1f6feb;
+  --color-triage-blue-soft: #e5efff;
 
   /* ---------- 상태 표시 ---------- */
   --color-success: #1e8e5a;
