@@ -1,0 +1,117 @@
+/*
+ * 해설 카드의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * ⚠️ 틀렸을 때 학생이 주눅 들지 않게 해주세요.
+ *    이 수업은 "틀리면서 배우는 것"이 목적이라,
+ *    오답 카드도 혼내는 느낌이 아니라 알려주는 느낌이어야 합니다.
+ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(27, 36, 48, 0.55);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: var(--space-6);
+  border-top: 10px solid var(--color-success);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.card[data-correct="false"] {
+  border-top-color: var(--color-warning);
+}
+
+.verdict {
+  margin: 0;
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-success);
+}
+
+.card[data-correct="false"] .verdict {
+  color: var(--color-warning);
+}
+
+.patient {
+  margin: 0;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.zoneCompare {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.chosen,
+.answer {
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--zone-color, var(--color-border));
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--zone-color, var(--color-text));
+}
+
+.chosen {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.arrow {
+  font-size: var(--font-size-heading);
+  color: var(--color-text-muted);
+}
+
+/* 구역별 색. 실제 색값은 styles/design-tokens.css 에 있습니다. */
+.chosen[data-level="red"],
+.answer[data-level="red"] {
+  --zone-color: var(--color-triage-red);
+}
+.chosen[data-level="orange"],
+.answer[data-level="orange"] {
+  --zone-color: var(--color-triage-orange);
+}
+.chosen[data-level="yellow"],
+.answer[data-level="yellow"] {
+  --zone-color: var(--color-triage-yellow);
+}
+.chosen[data-level="green"],
+.answer[data-level="green"] {
+  --zone-color: var(--color-triage-green);
+}
+.chosen[data-level="blue"],
+.answer[data-level="blue"] {
+  --zone-color: var(--color-triage-blue);
+}
+
+.explanation {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-medium);
+  background: var(--color-background);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}

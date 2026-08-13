@@ -1,0 +1,96 @@
+/*
+ * 환자 카드의 생김새.
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * ⚠️ touch-action: none 은 지우지 마세요.
+ *    이게 없으면 태블릿에서 카드를 끌 때 화면이 같이 스크롤됩니다.
+ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.card[data-draggable="true"] {
+  cursor: grab;
+  touch-action: none;
+}
+
+.card[data-dragging="true"] {
+  cursor: grabbing;
+  z-index: 50;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-raised);
+  transform: rotate(-1.5deg);
+  /* 끌고 있는 카드 아래의 구역을 눌러야 하므로 통과시킵니다 */
+  pointer-events: none;
+}
+
+.patientNumber {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.symptom {
+  margin: 0;
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}
+
+/* 활력징후 — 중등 모드에서만 보입니다 */
+.vitals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-medium);
+  background: var(--color-background);
+}
+
+.vitalItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.vitalItem dt {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.vitalItem dd {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.card[data-dragging="true"] .hint {
+  visibility: hidden;
+}
