@@ -3,10 +3,12 @@
  *
  * 학생은 섞여 있는 카드를 올바른 순서로 배열합니다.
  *
- * ★ 선생님이 순서를 바꾸고 싶으면 correctOrder 숫자를 고치세요. (1번이 가장 먼저)
- * ⛔ 코덱스(디자인 담당 AI)는 이 파일을 절대 수정하면 안 됩니다.
+ * 기획서에 적힌 순서 그대로입니다:
+ *   주변 안전 확인 → 어깨 두드리며 반응 확인 → 119 신고 + AED 요청
+ *   → 호흡 확인 → 가슴압박 시작
  *
- * 📌 기획서가 도착하면 이 순서를 기획서 내용으로 교체합니다.
+ * ★ 순서를 바꾸고 싶으면 correctOrder 숫자를 고치세요. (1번이 가장 먼저)
+ * ⛔ 코덱스(디자인 담당 AI)는 이 파일을 절대 수정하면 안 됩니다.
  */
 
 import type { Difficulty } from "./types";
@@ -28,9 +30,9 @@ export type DispatchStep = {
 export const DISPATCH_STEPS: DispatchStep[] = [
   {
     id: "step-safety",
-    label: "주변이 안전한지 먼저 확인한다",
+    label: "주변이 안전한지 확인한다",
     explanation:
-      "돕는 사람이 다치면 환자도 못 구해요. 차가 오는지, 위험한 게 없는지 먼저 봅니다.",
+      "돕는 사람이 다치면 환자도 못 구해요. 차가 오는지, 위험한 게 없는지 가장 먼저 봅니다.",
     correctOrder: 1,
     illustrationHint: "주변을 둘러보는 사람 아이콘",
     levels: ["elementary", "middle"],
@@ -46,28 +48,19 @@ export const DISPATCH_STEPS: DispatchStep[] = [
   },
   {
     id: "step-call",
-    label: "한 사람을 콕 집어 119에 신고해 달라고 부탁한다",
+    label: "119에 신고하고 자동심장충격기를 요청한다",
     explanation:
-      "\"거기 파란 옷 입으신 분, 119에 신고해 주세요!\"처럼 한 사람을 정확히 지목해야 해요. 그냥 \"누가 신고 좀\"이라고 하면 아무도 안 합니다.",
+      "\"거기 파란 옷 입으신 분, 119에 신고해 주세요! 그리고 저기 계신 분은 자동심장충격기 가져다주세요!\"처럼 한 사람씩 콕 집어 부탁해야 해요. 그냥 \"누가 신고 좀\"이라고 하면 아무도 안 합니다.",
     correctOrder: 3,
-    illustrationHint: "손가락으로 사람을 가리키는 아이콘 + 전화 아이콘",
+    illustrationHint: "손가락으로 사람을 가리키는 아이콘 + 전화 + AED 아이콘",
     levels: ["elementary", "middle"],
-  },
-  {
-    id: "step-aed-request",
-    label: "다른 사람에게 자동심장충격기를 가져와 달라고 부탁한다",
-    explanation:
-      "가슴압박과 자동심장충격기를 같이 쓰면 살아날 확률이 훨씬 높아져요. 신고와 동시에 부탁합니다.",
-    correctOrder: 4,
-    illustrationHint: "AED 기계 아이콘 + 달려가는 사람",
-    levels: ["middle"],
   },
   {
     id: "step-breathing",
     label: "숨을 쉬는지 확인한다",
     explanation:
       "가슴이 오르내리는지 10초 안에 봅니다. 숨을 안 쉬거나 이상하게 쉬면 바로 가슴압박을 시작해요.",
-    correctOrder: 5,
+    correctOrder: 4,
     illustrationHint: "가슴을 바라보는 눈 아이콘",
     levels: ["elementary", "middle"],
   },
@@ -76,7 +69,7 @@ export const DISPATCH_STEPS: DispatchStep[] = [
     label: "가슴 압박을 시작한다",
     explanation:
       "가슴 한가운데를 분당 100~120회 속도로 깊고 빠르게 누릅니다. 구급대원이 올 때까지 멈추지 않아요.",
-    correctOrder: 6,
+    correctOrder: 5,
     illustrationHint: "두 손을 포갠 가슴압박 자세 아이콘",
     levels: ["elementary", "middle"],
   },

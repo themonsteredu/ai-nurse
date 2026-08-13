@@ -29,9 +29,10 @@ import { MISSION_LIST } from "@/data/missions";
 import type { MissionId } from "@/data/types";
 import { hasBadge, earnedBadgeCount, TOTAL_BADGE_COUNT } from "@/lib/badges";
 import {
+  canOpenReport,
   completedMissionCount,
-  isAllMissionsComplete,
   isMissionComplete,
+  missionsToRetry,
   resultList,
 } from "@/lib/session";
 
@@ -65,7 +66,12 @@ export function LobbyScreen() {
   }
 
   const completed = completedMissionCount(session);
-  const allDone = isAllMissionsComplete(session);
+
+  // 기획서 기준: 배지 3개를 다 모아야 리포트가 열립니다.
+  const reportReady = canOpenReport(session);
+
+  // 다녀왔지만 통과 못 해서 다시 도전해야 하는 미션들
+  const retryList = missionsToRetry(session);
 
   return (
     <AppScreen
@@ -73,7 +79,7 @@ export function LobbyScreen() {
       subtitle="가고 싶은 곳을 눌러보세요"
       tone="calm"
       footer={
-        allDone ? (
+        reportReady ? (
           <PrimaryButton fullWidth onClick={() => router.push("/report")}>
             최종 리포트 보러 가기
           </PrimaryButton>
@@ -87,6 +93,14 @@ export function LobbyScreen() {
           {earnedBadgeCount(results)} / {TOTAL_BADGE_COUNT}
         </strong>
       </p>
+
+      {/* 배지를 못 받은 곳이 있으면 다시 도전하라고 알려줍니다 */}
+      {retryList.length > 0 ? (
+        <p className={styles.retryNotice}>
+          배지 3개를 다 모아야 최종 리포트가 열려요. 아직 배지를 못 받은 곳에
+          다시 도전해보세요.
+        </p>
+      ) : null}
 
       {/* 위에서 내려다본 병원 조감도 */}
       <HospitalFloorPlan rooms={rooms} onEnterRoom={handleEnterRoom} />

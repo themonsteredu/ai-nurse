@@ -13,8 +13,13 @@ export type Difficulty = "elementary" | "middle";
 /** 미션(부서) 종류. 로비의 카드 3장과 1:1로 대응합니다. */
 export type MissionId = "er" | "ambulance" | "healthRoom";
 
-/** 중증도 분류 구역 색깔. 미션 1에서 사용합니다. */
-export type TriageLevel = "red" | "yellow" | "green";
+/**
+ * 중증도 분류 구역 색깔. 미션 1에서 사용합니다.
+ *
+ * 초등 모드는 빨강·노랑·초록·파랑 4개 구역만 씁니다.
+ * 중등 모드는 여기에 검정 구역이 하나 더 붙어 5개가 됩니다.
+ */
+export type TriageLevel = "red" | "yellow" | "green" | "blue" | "black";
 
 /**
  * 채점 결과의 기본 단위.

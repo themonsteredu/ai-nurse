@@ -13,11 +13,13 @@
 import {
   CPR_BPM_MAX,
   CPR_BPM_MIN,
+  CPR_DURATION_SECONDS,
+  CPR_GUIDE_VISIBLE_SECONDS,
   CPR_MIN_COMPRESSIONS,
   CPR_SMOOTHING_WINDOW,
   CPR_TARGET_COMPRESSIONS,
 } from "@/data/rules";
-import type { ScoreTally } from "@/data/types";
+import type { Difficulty, ScoreTally } from "@/data/types";
 
 /** 리듬이 느린지, 알맞은지, 빠른지. 화면에서 안내 문구를 고를 때 씁니다. */
 export type RhythmZone = "slow" | "good" | "fast";
@@ -46,6 +48,56 @@ export function rhythmZone(bpm: number): RhythmZone {
 /** 권장 속도 범위. 화면에 "100~120회"라고 안내할 때 씁니다. */
 export function targetBpmRange(): { min: number; max: number } {
   return { min: CPR_BPM_MIN, max: CPR_BPM_MAX };
+}
+
+/* ------------------------------------------------------------------ */
+/* 리듬 가이드 원 (커졌다 작아지는 동그라미)                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 가이드 원이 한 번 커졌다 작아지는 데 걸리는 시간(밀리초).
+ * 권장 속도 한가운데(분당 110회)에 맞춥니다.
+ */
+export function guideBeatIntervalMs(): number {
+  const middleBpm = (CPR_BPM_MIN + CPR_BPM_MAX) / 2;
+  return 60000 / middleBpm;
+}
+
+/**
+ * 지금 이 순간 가이드 원의 크기(0~1).
+ * 1에 가까울수록 크고, 0에 가까울수록 작습니다.
+ * 학생은 이 값이 0이 되는 순간(가장 작아질 때) 탭해야 합니다.
+ */
+export function guideCircleScale(elapsedMs: number): number {
+  const beat = guideBeatIntervalMs();
+  const phase = (elapsedMs % beat) / beat;
+  // 0 → 1 → 0 으로 부드럽게 오갑니다.
+  return (Math.cos(phase * Math.PI * 2 - Math.PI) + 1) / 2;
+}
+
+/**
+ * 지금 가이드 원을 보여줘야 하는지.
+ *
+ * 기획서 기준:
+ *   초등 모드 — 끝까지 계속 보임
+ *   중등 모드 — 20초가 지나면 사라짐 (스스로 리듬 유지)
+ */
+export function isGuideVisible(
+  difficulty: Difficulty,
+  elapsedMs: number,
+): boolean {
+  const visibleSeconds = CPR_GUIDE_VISIBLE_SECONDS[difficulty];
+  if (visibleSeconds === null) return true;
+  return elapsedMs < visibleSeconds * 1000;
+}
+
+/* ------------------------------------------------------------------ */
+/* 가슴압박 시간                                                       */
+/* ------------------------------------------------------------------ */
+
+/** 이 난이도의 가슴압박 시간(밀리초). 초등 60초 / 중등 120초. */
+export function compressionDurationMs(difficulty: Difficulty): number {
+  return CPR_DURATION_SECONDS[difficulty] * 1000;
 }
 
 /** 탭한 시각들 사이의 간격 목록을 만듭니다. */

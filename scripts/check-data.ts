@@ -11,25 +11,35 @@
 import { AED_PAD_SPOTS, CORRECT_AED_PAD_SPOTS } from "../data/aed-pads";
 import { DISPATCH_STEPS, getDispatchSteps } from "../data/dispatch-steps";
 import { HEALTH_LOG_SLOT_LIST } from "../data/health-log";
-import { getHealthRoomCases, HEALTH_ROOM_CASES } from "../data/health-room-cases";
+import {
+  getHealthRoomCases,
+  HEALTH_ROOM_CASES,
+} from "../data/health-room-cases";
 import { MISSION_LIST } from "../data/missions";
-import { NURSE_TYPES } from "../data/nurse-types";
+import { MISSION_TO_NURSE_TYPE, NURSE_TYPES } from "../data/nurse-types";
 import {
   CPR_BPM_MAX,
   CPR_BPM_MIN,
+  CPR_DURATION_SECONDS,
   PASS_THRESHOLD_PERCENT,
+  TRIAGE_TIME_LIMIT_SECONDS,
   UNLOCK_CODES,
 } from "../data/rules";
 import { getTriagePatients, TRIAGE_PATIENTS } from "../data/triage-patients";
-import { TRIAGE_ZONE_LIST } from "../data/triage-zones";
+import { getTriageZones } from "../data/triage-zones";
 import type { Difficulty } from "../data/types";
 import {
   bpmFromIntervalMs,
+  compressionDurationMs,
+  guideCircleScale,
   isGoodRhythm,
+  isGuideVisible,
   scoreCompressions,
 } from "../lib/cpr";
+import { scoreHealthRoomCases, scoreHealthLog } from "../lib/health-room";
 import { decideNurseTypeId } from "../lib/nurse-type";
 import { accuracyPercent, buildMissionResult, isPassing } from "../lib/scoring";
+import { canOpenReport, createSession, markMissionUnlocked, recordMissionResult } from "../lib/session";
 import { isValidUnlockCode, normalizeUnlockCode } from "../lib/unlock";
 
 const problems: string[] = [];
@@ -41,14 +51,18 @@ function check(condition: boolean, message: string) {
 
 const DIFFICULTIES: Difficulty[] = ["elementary", "middle"];
 
-/* ------------------------- 1. 환자 카드 점검 ------------------------ */
+/* ------------------- 1. 환자 카드 / 구역 (미션 1) ------------------- */
+
+// 기획서: 초등 구역 4개·환자 6명 / 중등 구역 5개·환자 10명
+const EXPECTED_ZONES: Record<Difficulty, number> = { elementary: 4, middle: 5 };
+const EXPECTED_PATIENTS: Record<Difficulty, number> = {
+  elementary: 6,
+  middle: 10,
+};
 
 const patientIds = new Set<string>();
 for (const patient of TRIAGE_PATIENTS) {
-  check(
-    !patientIds.has(patient.id),
-    `환자 카드 id가 중복됩니다: ${patient.id}`,
-  );
+  check(!patientIds.has(patient.id), `환자 카드 id가 중복됩니다: ${patient.id}`);
   patientIds.add(patient.id);
   check(
     patient.explanation.trim().length > 0,
@@ -61,45 +75,62 @@ for (const patient of TRIAGE_PATIENTS) {
 }
 
 for (const difficulty of DIFFICULTIES) {
+  const zones = getTriageZones(difficulty);
   const patients = getTriagePatients(difficulty);
+
   check(
-    patients.length > 0,
-    `${difficulty} 모드에 환자 카드가 하나도 없습니다.`,
+    zones.length === EXPECTED_ZONES[difficulty],
+    `${difficulty} 모드 구역이 ${zones.length}개입니다. 기획서 기준은 ${EXPECTED_ZONES[difficulty]}개입니다.`,
   );
-  const zonesUsed = new Set(patients.map((p) => p.correctZone));
   check(
-    zonesUsed.size === TRIAGE_ZONE_LIST.length,
-    `${difficulty} 모드에서 안 쓰이는 색깔 구역이 있습니다. 빈 구역: ${TRIAGE_ZONE_LIST.filter(
-      (z) => !zonesUsed.has(z.level),
-    )
-      .map((z) => z.label)
-      .join(", ")}`,
+    patients.length === EXPECTED_PATIENTS[difficulty],
+    `${difficulty} 모드 환자가 ${patients.length}명입니다. 기획서 기준은 ${EXPECTED_PATIENTS[difficulty]}명입니다.`,
   );
+
+  // 그 난이도에 없는 구역이 정답인 환자가 있으면 학생이 절대 못 맞힙니다
+  const zoneLevels = new Set(zones.map((zone) => zone.level));
+  for (const patient of patients) {
+    check(
+      zoneLevels.has(patient.correctZone),
+      `${difficulty} 모드에 "${patient.correctZone}" 구역이 없는데 환자 "${patient.name}"의 정답이 그 구역입니다.`,
+    );
+  }
+
+  // 안 쓰이는 빈 구역이 있으면 알려줍니다
+  const usedZones = new Set(patients.map((p) => p.correctZone));
+  const emptyZones = zones.filter((z) => !usedZones.has(z.level));
+  check(
+    emptyZones.length === 0,
+    `${difficulty} 모드에서 정답 환자가 하나도 없는 구역: ${emptyZones.map((z) => z.label).join(", ")}`,
+  );
+
+  const limit = TRIAGE_TIME_LIMIT_SECONDS[difficulty];
   notes.push(
-    `${difficulty} 모드 환자 카드 ${patients.length}장 (통과 기준 ${PASS_THRESHOLD_PERCENT[difficulty]}%)`,
+    `미션1 ${difficulty}: 구역 ${zones.length}개 · 환자 ${patients.length}명 · 제한시간 ${limit === null ? "없음" : `${limit}초`} · 통과 ${PASS_THRESHOLD_PERCENT[difficulty]}%`,
   );
 }
 
-/* ------------------------ 2. 신고 순서 점검 ------------------------- */
+/* ------------------------ 2. 신고 순서 (미션 2) ---------------------- */
 
 for (const difficulty of DIFFICULTIES) {
   const steps = getDispatchSteps(difficulty);
-  check(steps.length > 0, `${difficulty} 모드에 신고 순서 카드가 없습니다.`);
+  check(steps.length === 5, `${difficulty} 모드 신고 순서 카드가 ${steps.length}장입니다. 기획서 기준은 5장입니다.`);
   const orders = steps.map((s) => s.correctOrder);
   check(
     new Set(orders).size === orders.length,
     `${difficulty} 모드 신고 순서에 같은 번호가 두 번 나옵니다: ${orders.join(", ")}`,
   );
-  notes.push(`${difficulty} 모드 신고 순서 카드 ${steps.length}장`);
+  check(
+    orders.join(",") === [1, 2, 3, 4, 5].join(","),
+    `${difficulty} 모드 신고 순서 번호가 1~5로 이어지지 않습니다: ${orders.join(", ")}`,
+  );
 }
-
-const stepIds = new Set(DISPATCH_STEPS.map((s) => s.id));
 check(
-  stepIds.size === DISPATCH_STEPS.length,
+  new Set(DISPATCH_STEPS.map((s) => s.id)).size === DISPATCH_STEPS.length,
   "신고 순서 카드 id가 중복됩니다.",
 );
 
-/* -------------------------- 3. AED 점검 ---------------------------- */
+/* ---------------------------- 3. AED ------------------------------- */
 
 check(
   CORRECT_AED_PAD_SPOTS.length === 2,
@@ -116,32 +147,70 @@ for (const spot of AED_PAD_SPOTS) {
   );
 }
 
-/* ------------------------- 4. 보건실 점검 --------------------------- */
+/* ------------------------- 4. 보건실 (미션 3) ----------------------- */
+
+check(
+  HEALTH_ROOM_CASES.length === 5,
+  `보건실 상황이 ${HEALTH_ROOM_CASES.length}개입니다. 기획서 기준은 5개입니다.`,
+);
 
 for (const item of HEALTH_ROOM_CASES) {
-  const correct = item.choices.filter((c) => c.isCorrect);
+  const correctTreatments = item.treatmentChoices.filter((c) => c.isCorrect);
   check(
-    correct.length === 1,
-    `보건실 상황 "${item.title}"의 정답이 ${correct.length}개입니다. 정답은 정확히 1개여야 합니다.`,
+    correctTreatments.length === 1,
+    `보건실 "${item.title}"의 처치 정답이 ${correctTreatments.length}개입니다. 정확히 1개여야 합니다.`,
   );
   check(
-    item.choices.length >= 2,
-    `보건실 상황 "${item.title}"의 선택지가 너무 적습니다.`,
+    item.treatmentChoices.length === 4,
+    `보건실 "${item.title}"의 처치 선택지가 ${item.treatmentChoices.length}개입니다. 기획서 기준은 4개입니다.`,
   );
-  for (const choice of item.choices) {
+
+  const correctFollowUps = item.followUpChoices.filter((c) => c.isCorrect);
+  check(
+    correctFollowUps.length === 1,
+    `보건실 "${item.title}"의 다음 조치 정답이 ${correctFollowUps.length}개입니다. 정확히 1개여야 합니다.`,
+  );
+  check(
+    item.followUpChoices.length === 4,
+    `보건실 "${item.title}"의 다음 조치 선택지가 ${item.followUpChoices.length}개입니다. 4개여야 합니다.`,
+  );
+
+  for (const choice of [...item.treatmentChoices, ...item.followUpChoices]) {
     check(
       choice.explanation.trim().length > 0,
-      `보건실 상황 "${item.title}"의 선택지 "${choice.label}"에 설명이 없습니다.`,
+      `보건실 "${item.title}"의 선택지 "${choice.label}"에 설명이 없습니다.`,
     );
   }
 }
 
-for (const difficulty of DIFFICULTIES) {
-  notes.push(
-    `${difficulty} 모드 보건실 상황 ${getHealthRoomCases(difficulty).length}개`,
-  );
+// 보건실 만점이 실제로 100%가 나오는지
+const perfectTreatments: Record<string, string> = {};
+const perfectFollowUps: Record<string, string> = {};
+for (const item of HEALTH_ROOM_CASES) {
+  perfectTreatments[item.id] = item.treatmentChoices.find((c) => c.isCorrect)!.id;
+  perfectFollowUps[item.id] = item.followUpChoices.find((c) => c.isCorrect)!.id;
 }
+const healthPerfect = scoreHealthRoomCases(
+  perfectTreatments,
+  perfectFollowUps,
+  getHealthRoomCases("elementary"),
+);
+check(
+  accuracyPercent(healthPerfect) === 100,
+  `보건실을 다 맞혔는데 만점이 아닙니다: ${healthPerfect.correct}/${healthPerfect.total}`,
+);
+check(
+  healthPerfect.total === 10,
+  `보건실 만점이 ${healthPerfect.total}점입니다. 상황 5개 × 2단계 = 10점이어야 합니다.`,
+);
+notes.push(`미션3: 상황 ${HEALTH_ROOM_CASES.length}개 × 2단계 = ${healthPerfect.total}점`);
 
+/* --------------------- 5. 보건일지 (중등 전용) ---------------------- */
+
+check(
+  HEALTH_LOG_SLOT_LIST.length === 5,
+  `보건일지 칸이 ${HEALTH_LOG_SLOT_LIST.length}개입니다. 기획서 문장 틀은 5칸입니다.`,
+);
 for (const slot of HEALTH_LOG_SLOT_LIST) {
   const correct = slot.options.filter((o) => o.isCorrect);
   check(
@@ -149,19 +218,21 @@ for (const slot of HEALTH_LOG_SLOT_LIST) {
     `보건일지 칸 "${slot.question}"의 정답이 ${correct.length}개입니다.`,
   );
 }
+const perfectLog: Record<string, string> = {};
+for (const slot of HEALTH_LOG_SLOT_LIST) {
+  perfectLog[slot.id] = slot.options.find((o) => o.isCorrect)!.id;
+}
+check(
+  accuracyPercent(scoreHealthLog(perfectLog)) === 100,
+  "보건일지를 다 맞혔는데 만점이 아닙니다.",
+);
 
-/* ------------------------ 5. 통과 코드 점검 ------------------------- */
+/* -------------------------- 6. 통과 코드 --------------------------- */
 
 for (const mission of MISSION_LIST) {
   const code = UNLOCK_CODES[mission.id];
-  check(
-    /^\d{4}$/.test(code),
-    `${mission.title}의 통과 코드가 네 자리 숫자가 아닙니다: ${code}`,
-  );
-  check(
-    isValidUnlockCode(mission.id, code),
-    `${mission.title}의 통과 코드 확인이 실패했습니다.`,
-  );
+  check(/^\d{4}$/.test(code), `${mission.title}의 통과 코드가 네 자리 숫자가 아닙니다: ${code}`);
+  check(isValidUnlockCode(mission.id, code), `${mission.title}의 통과 코드 확인이 실패했습니다.`);
   check(
     !isValidUnlockCode(mission.id, "0000") || code === "0000",
     `${mission.title}에서 아무 코드나 통과됩니다.`,
@@ -176,7 +247,7 @@ check(
   "통과 코드 중에 겹치는 게 있습니다. 미션마다 달라야 합니다.",
 );
 
-/* -------------------------- 6. CPR 점검 ---------------------------- */
+/* ---------------------------- 7. CPR ------------------------------- */
 
 check(
   isGoodRhythm(CPR_BPM_MIN) && isGoodRhythm(CPR_BPM_MAX),
@@ -191,86 +262,112 @@ check(
   "탭 간격에서 BPM을 계산하는 식이 틀렸습니다.",
 );
 
-// 분당 110회(간격 545ms)로 40번 정확히 누른 경우 → 만점이어야 함
 const perfectTaps = Array.from({ length: 40 }, (_, i) => i * 545);
-const perfectScore = scoreCompressions(perfectTaps);
 check(
-  accuracyPercent(perfectScore) === 100,
-  `정확한 리듬으로 40번 눌렀는데 만점이 아닙니다: ${perfectScore.correct}/${perfectScore.total}`,
+  accuracyPercent(scoreCompressions(perfectTaps)) === 100,
+  "정확한 리듬으로 40번 눌렀는데 만점이 아닙니다.",
 );
-
-// 너무 느리게(분당 60회) 누른 경우 → 0점이어야 함
-const slowTaps = Array.from({ length: 40 }, (_, i) => i * 1000);
 check(
-  accuracyPercent(scoreCompressions(slowTaps)) === 0,
-  "너무 느린 리듬인데 점수가 나옵니다.",
+  accuracyPercent(scoreCompressions(Array.from({ length: 40 }, (_, i) => i * 1000))) === 0,
+  "너무 느린 리듬(분당 60회)인데 점수가 나옵니다.",
 );
-
-// 정확하지만 몇 번 안 누른 경우 → 통과하면 안 됨
-const tooFewTaps = Array.from({ length: 5 }, (_, i) => i * 545);
 check(
-  !isPassing(scoreCompressions(tooFewTaps), "elementary"),
+  !isPassing(scoreCompressions(Array.from({ length: 5 }, (_, i) => i * 545)), "elementary"),
   "몇 번만 누르고 멈췄는데 통과됩니다.",
 );
 
-/* ----------------------- 7. 유형 판정 점검 ------------------------- */
+// 가이드 원: 초등은 끝까지, 중등은 20초 뒤 사라짐
+check(isGuideVisible("elementary", 59_000), "초등 모드에서 가이드 원이 도중에 사라집니다.");
+check(isGuideVisible("middle", 19_000), "중등 모드에서 가이드 원이 20초 전에 사라집니다.");
+check(!isGuideVisible("middle", 21_000), "중등 모드에서 20초가 지나도 가이드 원이 남아 있습니다.");
 
-const allHigh = [
-  buildMissionResult("er", { correct: 9, total: 10 }, "middle"),
-  buildMissionResult("ambulance", { correct: 9, total: 10 }, "middle"),
-  buildMissionResult("healthRoom", { correct: 9, total: 10 }, "middle"),
-];
+// 가이드 원 크기는 0~1 사이를 오가야 합니다
+let guideMin = 1;
+let guideMax = 0;
+for (let t = 0; t < 2000; t += 10) {
+  const scale = guideCircleScale(t);
+  guideMin = Math.min(guideMin, scale);
+  guideMax = Math.max(guideMax, scale);
+}
 check(
-  decideNurseTypeId(allHigh) === "allRounder",
-  "세 미션을 모두 잘했는데 올라운드형이 안 나옵니다.",
+  guideMin < 0.05 && guideMax > 0.95,
+  `가이드 원이 제대로 커졌다 작아지지 않습니다 (${guideMin.toFixed(2)}~${guideMax.toFixed(2)}).`,
 );
 
-const erBest = [
-  buildMissionResult("er", { correct: 10, total: 10 }, "middle"),
-  buildMissionResult("ambulance", { correct: 5, total: 10 }, "middle"),
-  buildMissionResult("healthRoom", { correct: 4, total: 10 }, "middle"),
-];
-check(
-  decideNurseTypeId(erBest) === "emergency",
-  "응급실을 제일 잘했는데 응급실형이 안 나옵니다.",
-);
-
-const healthBest = [
-  buildMissionResult("er", { correct: 3, total: 10 }, "middle"),
-  buildMissionResult("ambulance", { correct: 4, total: 10 }, "middle"),
-  buildMissionResult("healthRoom", { correct: 9, total: 10 }, "middle"),
-];
-check(
-  decideNurseTypeId(healthBest) === "schoolCare",
-  "보건실을 제일 잘했는데 돌봄교육형이 안 나옵니다.",
-);
-
-for (const type of Object.values(NURSE_TYPES)) {
+for (const difficulty of DIFFICULTIES) {
   check(
-    type.careers.length > 0 && type.pathway.trim().length > 0,
+    compressionDurationMs(difficulty) === CPR_DURATION_SECONDS[difficulty] * 1000,
+    `${difficulty} 모드 가슴압박 시간이 맞지 않습니다.`,
+  );
+  notes.push(
+    `미션2 ${difficulty}: 압박 ${CPR_DURATION_SECONDS[difficulty]}초 · 통과 ${PASS_THRESHOLD_PERCENT[difficulty]}%`,
+  );
+}
+
+/* -------------------------- 8. 간호 유형 --------------------------- */
+
+check(
+  Object.keys(NURSE_TYPES).length === 3,
+  `간호 유형이 ${Object.keys(NURSE_TYPES).length}개입니다. 기획서 기준은 3개입니다.`,
+);
+
+const typeCases: { label: string; scores: [number, number, number]; expect: string }[] = [
+  { label: "응급실 최고점", scores: [10, 5, 4], expect: "fastJudgment" },
+  { label: "CPR 최고점", scores: [4, 10, 5], expect: "calmAction" },
+  { label: "보건실 최고점", scores: [3, 4, 9], expect: "carefulCare" },
+];
+for (const testCase of typeCases) {
+  const results = [
+    buildMissionResult("er", { correct: testCase.scores[0], total: 10 }, "middle"),
+    buildMissionResult("ambulance", { correct: testCase.scores[1], total: 10 }, "middle"),
+    buildMissionResult("healthRoom", { correct: testCase.scores[2], total: 10 }, "middle"),
+  ];
+  check(
+    decideNurseTypeId(results) === testCase.expect,
+    `${testCase.label}인데 기대한 유형(${testCase.expect})이 안 나옵니다.`,
+  );
+}
+
+for (const mission of MISSION_LIST) {
+  const typeId = MISSION_TO_NURSE_TYPE[mission.id];
+  const type = NURSE_TYPES[typeId];
+  check(!!type, `${mission.title}에 연결된 간호 유형이 없습니다.`);
+  check(
+    type.careers.length > 0,
     `간호 유형 "${type.title}"에 진로 정보가 비어 있습니다.`,
   );
 }
 
-/* ------------------------ 8. 통과 기준 점검 ------------------------- */
+/* ------------------- 9. 통과 기준 / 리포트 열림 --------------------- */
 
-// 초등 6문제 중 4개 = 67% → 통과, 3개 = 50% → 탈락
+check(isPassing({ correct: 4, total: 6 }, "elementary"), "초등 6문제 중 4개(67%)인데 탈락합니다.");
+check(!isPassing({ correct: 3, total: 6 }, "elementary"), "초등 6문제 중 3개(50%)인데 통과됩니다.");
+check(isPassing({ correct: 6, total: 8 }, "middle"), "중등에서 정확히 75%인데 탈락합니다.");
+check(!isPassing({ correct: 5, total: 8 }, "middle"), "중등 8문제 중 5개(63%)인데 통과됩니다.");
+
+// 기획서: 배지 3개를 다 모아야 리포트가 열린다
+let session = createSession("점검", "elementary");
+for (const mission of MISSION_LIST) {
+  session = recordMissionResult(
+    session,
+    buildMissionResult(mission.id, { correct: 10, total: 10 }, "elementary"),
+  );
+  session = markMissionUnlocked(session, mission.id);
+}
+check(canOpenReport(session), "세 미션을 모두 통과했는데 리포트가 안 열립니다.");
+
+let failedSession = createSession("점검", "elementary");
+for (const mission of MISSION_LIST) {
+  const passed = mission.id !== "ambulance";
+  failedSession = recordMissionResult(
+    failedSession,
+    buildMissionResult(mission.id, { correct: passed ? 10 : 1, total: 10 }, "elementary"),
+  );
+  failedSession = markMissionUnlocked(failedSession, mission.id);
+}
 check(
-  isPassing({ correct: 4, total: 6 }, "elementary"),
-  "초등 모드에서 6문제 중 4개를 맞았는데 탈락합니다.",
-);
-check(
-  !isPassing({ correct: 3, total: 6 }, "elementary"),
-  "초등 모드에서 6문제 중 3개를 맞았는데 통과됩니다.",
-);
-// 중등 8문제 중 6개 = 75% → 통과 (기준값과 같으면 통과)
-check(
-  isPassing({ correct: 6, total: 8 }, "middle"),
-  "중등 모드에서 정확히 75%인데 탈락합니다.",
-);
-check(
-  !isPassing({ correct: 5, total: 8 }, "middle"),
-  "중등 모드에서 8문제 중 5개를 맞았는데 통과됩니다.",
+  !canOpenReport(failedSession),
+  "한 미션을 통과 못 했는데 리포트가 열립니다. 기획서는 배지 3개를 다 모아야 열립니다.",
 );
 
 /* ---------------------------- 결과 출력 ---------------------------- */
@@ -279,7 +376,7 @@ console.log("\n📋 데이터 점검 결과\n");
 for (const note of notes) console.log(`   · ${note}`);
 
 if (problems.length === 0) {
-  console.log("\n✅ 문제 없습니다. 데이터와 계산이 서로 잘 맞습니다.\n");
+  console.log("\n✅ 문제 없습니다. 데이터와 계산이 기획서대로 잘 맞습니다.\n");
   process.exit(0);
 } else {
   console.log(`\n❌ 문제 ${problems.length}건을 찾았습니다:\n`);

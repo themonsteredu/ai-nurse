@@ -29,6 +29,33 @@ export const CPR_MIN_COMPRESSIONS = 15;
 export const CPR_TARGET_COMPRESSIONS = 30;
 
 /**
+ * 가슴압박 시간 (기획서 기준: 초등 60초 / 중등 120초).
+ * 이 시간 동안 누른 것만 점수에 들어갑니다.
+ */
+export const CPR_DURATION_SECONDS: Record<Difficulty, number> = {
+  elementary: 60,
+  middle: 120,
+};
+
+/**
+ * 리듬 가이드 원(커졌다 작아지는 동그라미)이 언제까지 보일지.
+ *
+ * 초등 모드: 끝까지 계속 보입니다 (null = 안 사라짐).
+ * 중등 모드: 20초가 지나면 사라져서 스스로 리듬을 유지해야 합니다.
+ */
+export const CPR_GUIDE_VISIBLE_SECONDS: Record<Difficulty, number | null> = {
+  elementary: null,
+  middle: 20,
+};
+
+/**
+ * 중등 모드에서 알려주는 "가슴압박 30번 : 인공호흡 2번" 개념.
+ * 실제 채점에는 쓰이지 않고 안내 문구에만 씁니다.
+ */
+export const CPR_CYCLE_COMPRESSIONS = 30;
+export const CPR_CYCLE_BREATHS = 2;
+
+/**
  * 화면의 BPM 숫자가 너무 덜덜 떨리지 않게 최근 몇 번의 간격을 평균낼지.
  * 순수하게 보기 편하라고 있는 값이라 조절해도 채점에는 영향이 없습니다.
  */
@@ -45,6 +72,23 @@ export const CPR_SMOOTHING_WINDOW = 4;
 export const PASS_THRESHOLD_PERCENT: Record<Difficulty, number> = {
   elementary: 60,
   middle: 75,
+};
+
+/* ------------------------------------------------------------------ */
+/* 2-2. 미션 1(응급실) 제한시간                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 미션 1 제한시간 (기획서 기준).
+ *
+ * 초등 모드: 제한 없음 (null)
+ * 중등 모드: 3분
+ *
+ * 시간이 다 되면 그때까지 놓은 것만 채점합니다.
+ */
+export const TRIAGE_TIME_LIMIT_SECONDS: Record<Difficulty, number | null> = {
+  elementary: null,
+  middle: 180,
 };
 
 /* ------------------------------------------------------------------ */

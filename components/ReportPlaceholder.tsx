@@ -54,15 +54,17 @@ export function ReportPlaceholder() {
           </p>
         </section>
 
-        <section className={styles.typeCard}>
-          <p className={styles.typeLabel}>나의 간호 유형</p>
-          <p className={styles.typeTitle}>{nurseType.title}</p>
-          <p className={styles.typeTagline}>{nurseType.tagline}</p>
-          <p className={styles.typeDescription}>{nurseType.description}</p>
-          <p className={styles.typeCareers}>
-            어울리는 직업: {nurseType.careers.join(" · ")}
-          </p>
-        </section>
+        {nurseType ? (
+          <section className={styles.typeCard}>
+            <p className={styles.typeLabel}>나의 간호 유형</p>
+            <p className={styles.typeTitle}>{nurseType.title}</p>
+            <p className={styles.typeTagline}>{nurseType.tagline}</p>
+            <p className={styles.typeDescription}>{nurseType.description}</p>
+            <p className={styles.typeCareers}>
+              어울리는 직업: {nurseType.careers.join(" · ")}
+            </p>
+          </section>
+        ) : null}
 
         <section className={styles.missionScores}>
           <p className={styles.sectionLabel}>미션별 점수</p>

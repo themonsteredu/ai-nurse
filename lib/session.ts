@@ -105,11 +105,33 @@ export function nextMission(state: SessionState): MissionId | null {
   return remaining?.id ?? null;
 }
 
-/** 세 미션을 모두 끝냈는지. 최종 리포트로 갈 수 있는지 판단합니다. */
+/** 세 미션을 모두 끝냈는지 (통과 여부와 관계없이 다녀왔는지). */
 export function isAllMissionsComplete(state: SessionState): boolean {
   return MISSION_LIST.every((mission) =>
     isMissionComplete(state, mission.id),
   );
+}
+
+/**
+ * 최종 리포트를 열 수 있는지.
+ *
+ * 기획서 기준: "배지 3개를 다 모아야 리포트가 열린다."
+ * 즉 세 미션을 다녀오기만 해서는 안 되고, 세 곳 모두 통과해야 합니다.
+ * 통과하지 못한 미션은 로비에서 다시 도전할 수 있습니다.
+ */
+export function canOpenReport(state: SessionState): boolean {
+  return MISSION_LIST.every(
+    (mission) => state.results[mission.id]?.passed === true,
+  );
+}
+
+/** 아직 통과하지 못해 다시 도전해야 하는 미션 목록. */
+export function missionsToRetry(state: SessionState): MissionId[] {
+  return MISSION_LIST.filter(
+    (mission) =>
+      isMissionComplete(state, mission.id) &&
+      state.results[mission.id]?.passed !== true,
+  ).map((mission) => mission.id);
 }
 
 /** 끝낸 미션 개수. 로비의 진행 표시에 씁니다. */

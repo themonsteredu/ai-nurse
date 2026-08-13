@@ -7,7 +7,8 @@
  */
 
 import { TRIAGE_PATIENTS, type TriagePatient } from "@/data/triage-patients";
-import type { ScoreTally, TriageLevel } from "@/data/types";
+import { TRIAGE_TIME_LIMIT_SECONDS } from "@/data/rules";
+import type { Difficulty, ScoreTally, TriageLevel } from "@/data/types";
 
 /**
  * 학생이 카드를 어디에 놓았는지 기록하는 형태.
@@ -72,6 +73,20 @@ export function scoreTriage(
     }
   }
   return { correct, total: patients.length };
+}
+
+/**
+ * 이 난이도의 제한시간(밀리초). 제한이 없으면 null.
+ * 기획서 기준: 초등 제한 없음 / 중등 3분.
+ */
+export function triageTimeLimitMs(difficulty: Difficulty): number | null {
+  const seconds = TRIAGE_TIME_LIMIT_SECONDS[difficulty];
+  return seconds === null ? null : seconds * 1000;
+}
+
+/** 이 난이도에 제한시간이 있는지. */
+export function hasTimeLimit(difficulty: Difficulty): boolean {
+  return TRIAGE_TIME_LIMIT_SECONDS[difficulty] !== null;
 }
 
 /** 틀린 카드 목록. 미션이 끝난 뒤 해설 카드를 보여줄 때 씁니다. */
