@@ -1,0 +1,37 @@
+/**
+ * 앱 전체가 공유하는 "용어 사전" 파일.
+ *
+ * 여기 있는 건 값이 아니라 "이름의 정의"입니다.
+ * 예: 난이도는 초등/중등 둘 뿐이고, 미션은 세 개 뿐이라는 약속.
+ *
+ * ⚠️ 코덱스(디자인 담당 AI)는 이 파일을 수정하지 않습니다.
+ */
+
+/** 난이도. 시작 화면에서 학생이 고릅니다. */
+export type Difficulty = "elementary" | "middle";
+
+/** 미션(부서) 종류. 로비의 카드 3장과 1:1로 대응합니다. */
+export type MissionId = "er" | "ambulance" | "healthRoom";
+
+/** 중증도 분류 구역 색깔. 미션 1에서 사용합니다. */
+export type TriageLevel = "red" | "yellow" | "green";
+
+/**
+ * 채점 결과의 기본 단위.
+ * correct = 맞은 개수, total = 전체 개수.
+ * 정확도(%)는 lib/scoring.ts 에서 이 둘로 계산합니다.
+ */
+export type ScoreTally = {
+  correct: number;
+  total: number;
+};
+
+/** 한 미션을 끝냈을 때 남는 성적표. */
+export type MissionResult = {
+  missionId: MissionId;
+  tally: ScoreTally;
+  /** 0~100 정수. lib/scoring.ts 가 계산해서 채웁니다. */
+  accuracyPercent: number;
+  /** 난이도별 통과 기준을 넘었는지. */
+  passed: boolean;
+};

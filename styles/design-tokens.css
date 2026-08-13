@@ -1,0 +1,107 @@
+/*
+ * 색깔·글자 크기·간격을 한곳에 모아둔 파일.
+ *
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *    오히려 여기부터 바꾸는 게 맞습니다.
+ *
+ * 규칙: 화면 코드 어디에도 색깔 코드(#ff0000)나 픽셀 값을 직접 쓰지 않습니다.
+ *      전부 여기 있는 이름(var(--...))을 가져다 씁니다.
+ *
+ * 대상이 초등 3학년~중학생이고 태블릿 터치로 쓰기 때문에,
+ * 버튼과 글자를 어른용 앱보다 크게 잡아두었습니다.
+ */
+
+:root {
+  /* ---------- 바탕과 글자 ---------- */
+  --color-background: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-text: #1b2430;
+  --color-text-muted: #5b6a7d;
+  --color-border: #d7dfea;
+
+  /* ---------- 브랜드 ---------- */
+  --color-primary: #1f6feb;
+  --color-primary-strong: #1550b8;
+  --color-primary-soft: #e5efff;
+  --color-on-primary: #ffffff;
+
+  /* ---------- 중증도 분류 구역 3색 ----------
+     이 색은 "빨강/노랑/초록"이라는 의미가 있어서
+     완전히 다른 색으로 바꾸면 수업 내용과 어긋납니다.
+     명도나 채도를 다듬는 정도로만 조절해주세요. */
+  --color-triage-red: #d93025;
+  --color-triage-red-soft: #fdecea;
+  --color-triage-yellow: #e8a317;
+  --color-triage-yellow-soft: #fff6e0;
+  --color-triage-green: #1e8e5a;
+  --color-triage-green-soft: #e6f5ee;
+
+  /* ---------- 상태 표시 ---------- */
+  --color-success: #1e8e5a;
+  --color-success-soft: #e6f5ee;
+  --color-danger: #d93025;
+  --color-danger-soft: #fdecea;
+  --color-warning: #e8a317;
+  --color-warning-soft: #fff6e0;
+
+  /* ---------- 미션별 대표색 (로비 카드) ---------- */
+  --color-mission-er: #d93025;
+  --color-mission-ambulance: #e8730c;
+  --color-mission-health-room: #1e8e5a;
+
+  /* ---------- 글자 크기 (태블릿 기준으로 크게) ---------- */
+  --font-size-display: 2.75rem; /* 화면 맨 위 큰 제목 */
+  --font-size-title: 2rem; /* 화면 제목 */
+  --font-size-heading: 1.5rem; /* 카드 제목 */
+  --font-size-body-large: 1.25rem; /* 학생이 읽는 본문 */
+  --font-size-body: 1.0625rem; /* 일반 본문 */
+  --font-size-caption: 0.9375rem; /* 작은 안내 문구 */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 800;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.6;
+
+  /* ---------- 간격 ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ---------- 모서리와 그림자 ---------- */
+  --radius-small: 8px;
+  --radius-medium: 14px;
+  --radius-large: 22px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 2px 8px rgba(27, 36, 48, 0.08);
+  --shadow-raised: 0 8px 24px rgba(27, 36, 48, 0.14);
+
+  /* ---------- 터치 영역 ----------
+     초등학생 손가락 기준입니다. 이보다 작게 만들지 마세요. */
+  --touch-target-min: 56px;
+  --touch-target-large: 76px;
+  --drop-zone-min-height: 180px;
+
+  /* ---------- 화면 폭 ---------- */
+  --content-max-width: 1100px;
+
+  /* ---------- 움직임 ---------- */
+  --transition-fast: 120ms ease-out;
+  --transition-normal: 220ms ease-out;
+}
+
+/* 화면을 흔들리게 하는 효과를 꺼둔 학생을 위한 배려 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+  }
+}

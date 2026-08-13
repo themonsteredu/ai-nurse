@@ -1,0 +1,53 @@
+/*
+ * 앱 전체에 공통으로 적용되는 기본 스타일.
+ *
+ * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
+ *
+ * 색깔·크기 값은 여기에 직접 쓰지 말고,
+ * styles/design-tokens.css 에 이름을 만들어두고 가져다 쓰세요.
+ */
+
+@import "../styles/design-tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family:
+    "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui,
+    -apple-system, sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+
+  /* 태블릿에서 두 번 탭했을 때 화면이 확대되는 걸 막습니다. */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 드래그할 때 글자가 파랗게 선택되는 걸 막습니다. */
+button,
+[draggable="true"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+/* 키보드로 조작하는 학생을 위해 초점 표시를 남겨둡니다. 지우지 마세요. */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,74 @@
+/**
+ * "나의 간호 유형" 판정 파일.
+ *
+ * 규칙은 두 가지뿐입니다.
+ *   1. 세 미션을 모두 고르게 잘했으면 → 올라운드형
+ *   2. 그 외에는 가장 잘한 미션에 해당하는 유형
+ *
+ * 기준 숫자는 data/rules.ts 에 있습니다. 여기서는 규칙만 다룹니다.
+ *
+ * ⛔ 코덱스(디자인 담당 AI)는 이 파일을 절대 수정하면 안 됩니다.
+ */
+
+import { MISSION_LIST } from "@/data/missions";
+import {
+  MISSION_TO_NURSE_TYPE,
+  NURSE_TYPES,
+  type NurseType,
+  type NurseTypeId,
+} from "@/data/nurse-types";
+import {
+  ALLROUNDER_MAX_SPREAD_PERCENT,
+  ALLROUNDER_MIN_PERCENT,
+} from "@/data/rules";
+import type { MissionId, MissionResult } from "@/data/types";
+
+/** 세 미션을 고르게 다 잘했는지 판단합니다. */
+export function isAllRounder(results: MissionResult[]): boolean {
+  if (results.length < MISSION_LIST.length) return false;
+
+  const scores = results.map((item) => item.accuracyPercent);
+  const lowest = Math.min(...scores);
+  const highest = Math.max(...scores);
+
+  return (
+    lowest >= ALLROUNDER_MIN_PERCENT &&
+    highest - lowest <= ALLROUNDER_MAX_SPREAD_PERCENT
+  );
+}
+
+/**
+ * 가장 잘한 미션을 찾습니다.
+ * 점수가 같으면 로비에 놓인 순서(응급실 → 구급차 → 보건실)가 빠른 쪽이 이깁니다.
+ */
+export function bestMission(results: MissionResult[]): MissionId | null {
+  if (results.length === 0) return null;
+
+  const missionOrder = new Map(
+    MISSION_LIST.map((mission, index) => [mission.id, index] as const),
+  );
+
+  return results.reduce((best, candidate) => {
+    if (candidate.accuracyPercent > best.accuracyPercent) return candidate;
+    if (candidate.accuracyPercent < best.accuracyPercent) return best;
+
+    const bestOrder = missionOrder.get(best.missionId) ?? 0;
+    const candidateOrder = missionOrder.get(candidate.missionId) ?? 0;
+    return candidateOrder < bestOrder ? candidate : best;
+  }).missionId;
+}
+
+/** 최종 유형을 결정합니다. */
+export function decideNurseTypeId(results: MissionResult[]): NurseTypeId {
+  if (isAllRounder(results)) return "allRounder";
+
+  const best = bestMission(results);
+  if (best === null) return "allRounder";
+
+  return MISSION_TO_NURSE_TYPE[best];
+}
+
+/** 최종 유형의 전체 설명을 가져옵니다. 리포트 화면에서 씁니다. */
+export function decideNurseType(results: MissionResult[]): NurseType {
+  return NURSE_TYPES[decideNurseTypeId(results)];
+}
