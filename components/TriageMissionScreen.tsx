@@ -81,6 +81,13 @@ type DragState = {
   left: number;
   top: number;
   width: number;
+  /**
+   * 끌기 시작한 순간의 카드 높이.
+   * 카드가 화면에서 떠오르면 그 자리가 비는데, 딱 이 높이만큼 빈 자리를 채워서
+   * 아래 구역들이 위로 뛰어오르지 않게 합니다.
+   * (높이를 고정값으로 두면 디자인이 바뀔 때 구역이 움직여 드래그가 빗나갑니다)
+   */
+  height: number;
   offsetX: number;
   offsetY: number;
 };
@@ -218,6 +225,7 @@ export function TriageMissionScreen() {
       left: rect.left,
       top: rect.top,
       width: rect.width,
+      height: rect.height,
       offsetX: event.clientX - rect.left,
       offsetY: event.clientY - rect.top,
     });
@@ -411,8 +419,14 @@ export function TriageMissionScreen() {
         {/* 지금 분류할 환자 */}
         {currentPatient ? (
           <div className={styles.cardArea}>
-            {/* 카드를 끌고 있는 동안 자리가 무너지지 않게 자리를 잡아둡니다 */}
-            {drag !== null ? <div className={styles.cardSpacer} /> : null}
+            {/*
+              카드를 끌고 있는 동안 그 자리를 똑같은 높이로 채워둡니다.
+              이게 없으면 아래 구역들이 위로 뛰어올라, 학생이 겨냥한 구역이
+              손가락 밑에서 도망갑니다.
+            */}
+            {drag !== null ? (
+              <div className={styles.cardSpacer} style={{ height: drag.height }} />
+            ) : null}
             <TriagePatientCard
               patient={currentPatient}
               showVitals={showVitals}
