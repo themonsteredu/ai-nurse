@@ -170,6 +170,24 @@
 .feedback { margin: var(--space-3) 0 0; padding: var(--space-3) var(--space-4); border-left: 4px solid var(--color-danger); background: var(--color-danger-soft); color: var(--color-text); }
 .feedback[data-correct="true"] { border-color: var(--color-success); background: var(--color-success-soft); }
 
+.assemblyPanel { margin-top:var(--space-4); padding:var(--space-4); background:#fff; }
+.assemblyHeader { display:flex; flex-direction:column; padding-left:var(--space-3); border-left:4px solid var(--color-primary); }
+.assemblyHeader span { color:var(--color-primary); font-size:.64rem; font-weight:800; letter-spacing:.12em; }
+.assemblyHeader strong { margin-top:4px; font-family:"S-Core Dream","Pretendard",sans-serif; font-size:var(--font-size-body-large); }
+.assemblyHeader small { margin-top:4px; color:var(--color-text-muted); }
+.sterileRack { display:flex; flex-wrap:wrap; gap:var(--space-3); margin-top:var(--space-4); }
+.sterileRack button { display:grid; grid-template-columns:82px minmax(90px,1fr); align-items:center; min-height:var(--touch-target-large); padding:var(--space-2) var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-small); background:#f8fafa; color:var(--color-text); text-align:left; }
+.sterileRack button[data-selected="true"] { border-color:var(--color-primary); background:var(--color-primary-soft); box-shadow:inset 0 0 0 2px var(--color-primary); }
+.sterileRack .toolVisual { width:78px; height:54px; }
+.sterileRack strong { font-size:.82rem; }
+.roleSlots { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-3); margin-top:var(--space-4); }
+.roleSlots button { display:flex; flex-direction:column; align-items:flex-start; min-height:112px; padding:var(--space-3); border:2px dashed var(--color-border-strong); border-radius:var(--radius-small); background:#f7f9f9; color:var(--color-text); text-align:left; }
+.roleSlots button[data-active="true"] { border-color:var(--color-primary); background:var(--color-primary-soft); }
+.roleSlots button[data-filled="true"] { border-style:solid; border-color:var(--color-success); background:var(--color-success-soft); }
+.roleSlots span { color:var(--color-primary); font-size:.62rem; font-weight:800; letter-spacing:.1em; }
+.roleSlots strong { margin-top:var(--space-2); font-size:.9rem; }
+.roleSlots small { margin-top:auto; color:var(--color-text-muted); font-size:.7rem; line-height:1.4; }
+
 .completePanel { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-4); padding: var(--space-4); background: #102f33; color: #fff; }
 .completePanel p { display: flex; flex-direction: column; margin: 0; }
 .completePanel strong { margin-top: 4px; font-size: var(--font-size-body-large); }
@@ -194,5 +212,9 @@
   .roleGuide { grid-template-columns: 1fr; gap: 4px; }
   .itemRail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--space-2); }
   .item { flex: 0 0 248px; scroll-snap-align: start; }
+  .sterileRack { flex-wrap:nowrap; overflow-x:auto; padding-bottom:var(--space-2); }
+  .sterileRack button { flex:0 0 210px; }
+  .roleSlots { grid-template-columns:1fr; }
+  .roleSlots button { min-height:96px; }
   .completePanel { align-items: stretch; flex-direction: column; }
 }
