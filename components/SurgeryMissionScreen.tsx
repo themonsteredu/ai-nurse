@@ -18,6 +18,19 @@ import styles from "./SurgeryMissionScreen.module.css";
 
 type DragPoint = { x: number; y: number };
 
+const TOOL_PURPOSE: Record<string, string> = {
+  hemostat: "혈관을 잡아 출혈을 조절할 때 쓰는 잠금형 기구",
+  forceps: "조직이나 거즈를 정교하게 집을 때 쓰는 기구",
+  scalpelHandle: "수술용 칼날을 결합해 사용하는 손잡이",
+  phone: "개인 물품은 멸균 구역 안으로 가져갈 수 없음",
+  openedWrap: "바닥에 닿은 포장은 오염된 것으로 판단",
+  unsealedGauze: "개봉 상태가 확인되지 않은 거즈는 사용 보류",
+};
+
+function SurgicalToolVisual({ itemId }: { itemId: string }) {
+  return <span className={styles.toolVisual} data-tool={itemId} aria-hidden="true" />;
+}
+
 export function SurgeryMissionScreen() {
   const router = useRouter();
   const session = useRequireSession();
@@ -126,8 +139,8 @@ export function SurgeryMissionScreen() {
             <div className={styles.heroShade} />
             <div className={styles.heroCopy}>
               <span>MISSION 04 · OPERATING ROOM</span>
-              <strong>손으로 완성하는<br />멸균 트레이</strong>
-              <p>기구를 끌어서 안전한 위치에 놓으세요.</p>
+              <strong>기구를 알아보고<br />멸균 트레이를 완성하세요</strong>
+              <p>실제 도구의 형태와 역할을 확인한 뒤 알맞은 위치에 배치하세요.</p>
             </div>
           </div>
           <div className={styles.briefingBar}>
@@ -163,9 +176,14 @@ export function SurgeryMissionScreen() {
             >
               <span>STERILE FIELD</span>
               <strong>멸균 트레이</strong>
-              <small>멸균 포장이 확인된 기구</small>
+              <small>기구 사이를 띄우고 손잡이가 같은 방향을 보도록 준비합니다.</small>
               <div className={styles.placedItems}>
-                {items.filter((item) => placements[item.id] === "sterile").map((item) => <i key={item.id}>{item.label}</i>)}
+                {items.filter((item) => placements[item.id] === "sterile").map((item) => (
+                  <figure key={item.id} className={styles.placedTool}>
+                    <SurgicalToolVisual itemId={item.id} />
+                    <figcaption>{item.label}</figcaption>
+                  </figure>
+                ))}
               </div>
             </div>
             <div
@@ -180,7 +198,12 @@ export function SurgeryMissionScreen() {
               <span>HOLD</span>
               <strong>격리 구역</strong>
               <div className={styles.placedItems}>
-                {items.filter((item) => placements[item.id] === "isolate").map((item) => <i key={item.id}>{item.label}</i>)}
+                {items.filter((item) => placements[item.id] === "isolate").map((item) => (
+                  <figure key={item.id} className={styles.placedTool}>
+                    <SurgicalToolVisual itemId={item.id} />
+                    <figcaption>{item.label}</figcaption>
+                  </figure>
+                ))}
               </div>
             </div>
           </div>
@@ -190,6 +213,11 @@ export function SurgeryMissionScreen() {
               <p><span>SUPPLY CART</span><strong>{completed ? "준비 완료" : "물품을 직접 옮기세요"}</strong></p>
               <small>끌기 어렵다면 물품을 누른 뒤 구역을 누르세요.</small>
             </div>
+            <p className={styles.roleGuide}>
+              <span>간호사의 역할</span>
+              <strong>{selectedId ? items.find((item) => item.id === selectedId)?.label : "도구를 선택해 역할을 알아보세요"}</strong>
+              <small>{selectedId ? TOOL_PURPOSE[selectedId] : "수술 전 기구의 수량·포장·멸균 상태를 확인하고 사용 순서에 맞게 준비합니다."}</small>
+            </p>
             <div className={styles.itemRail}>
               {remainingItems.map((item) => (
                 <button
@@ -203,9 +231,12 @@ export function SurgeryMissionScreen() {
                   onPointerUp={(event) => handlePointerUp(event, item)}
                   onPointerCancel={() => { setDraggingId(null); setDragPoint(null); }}
                 >
-                  <span aria-hidden="true">{String(items.indexOf(item) + 1).padStart(2, "0")}</span>
-                  <strong>{item.label}</strong>
-                  <small>{item.caption}</small>
+                  <SurgicalToolVisual itemId={item.id} />
+                  <span className={styles.itemCopy}>
+                    <i aria-hidden="true">{String(items.indexOf(item) + 1).padStart(2, "0")}</i>
+                    <strong>{item.label}</strong>
+                    <small>{item.caption}</small>
+                  </span>
                 </button>
               ))}
             </div>
@@ -222,7 +253,8 @@ export function SurgeryMissionScreen() {
 
           {draggingId && dragPoint ? (
             <div className={styles.dragGhost} style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden="true">
-              {items.find((item) => item.id === draggingId)?.label}
+              <SurgicalToolVisual itemId={draggingId} />
+              <span>{items.find((item) => item.id === draggingId)?.label}</span>
             </div>
           ) : null}
         </section>

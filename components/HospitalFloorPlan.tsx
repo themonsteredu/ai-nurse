@@ -25,12 +25,12 @@ const ROOM_LAYOUT: Record<
   MissionId,
   { left: number; top: number; width: number; height: number }
 > = {
-  er: { left: 5, top: 64, width: 17, height: 13 },
-  ambulance: { left: 79, top: 68, width: 17, height: 13 },
-  healthRoom: { left: 77, top: 17, width: 17, height: 13 },
-  operatingRoom: { left: 27, top: 33, width: 18, height: 13 },
-  icu: { left: 51, top: 17, width: 17, height: 13 },
-  medication: { left: 49, top: 54, width: 18, height: 13 },
+  er: { left: 5, top: 64, width: 15, height: 11 },
+  ambulance: { left: 81, top: 68, width: 15, height: 11 },
+  healthRoom: { left: 79, top: 17, width: 15, height: 11 },
+  operatingRoom: { left: 27, top: 33, width: 16, height: 11 },
+  icu: { left: 51, top: 17, width: 15, height: 11 },
+  medication: { left: 49, top: 54, width: 16, height: 11 },
 };
 
 const MISSION_META: Record<

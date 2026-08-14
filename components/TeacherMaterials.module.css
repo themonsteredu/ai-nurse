@@ -1,0 +1,201 @@
+.trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: var(--touch-target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: #fff;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.trigger span {
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-black);
+}
+
+.trigger small {
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: 0.5rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+}
+
+.backdrop {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(8, 30, 33, 0.66);
+  backdrop-filter: blur(6px);
+}
+
+.dialog {
+  width: min(100%, 620px);
+  max-height: calc(100dvh - var(--space-5) * 2);
+  padding: var(--space-5);
+  overflow-y: auto;
+  border-radius: var(--radius-medium);
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(5, 24, 26, 0.3);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header span,
+.material span {
+  color: var(--color-primary);
+  font-size: 0.62rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.14em;
+}
+
+.header h2 {
+  margin: var(--space-1) 0 0;
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.25rem, 4vw, 1.65rem);
+  letter-spacing: -0.04em;
+}
+
+.header p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.close {
+  flex: 0 0 var(--touch-target-min);
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.passwordForm {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.passwordForm label {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-black);
+}
+
+.passwordForm input {
+  width: 100%;
+  min-height: var(--touch-target-large);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  background: #f8fafa;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.45rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.34em;
+}
+
+.passwordForm input:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid rgba(8, 127, 120, 0.14);
+}
+
+.passwordForm p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.unlock,
+.material button {
+  min-height: var(--touch-target-min);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-black);
+}
+
+.unlock:disabled,
+.material button:disabled { opacity: 0.46; }
+
+.materialList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.accessGranted {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.material {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.material h3 {
+  margin: var(--space-1) 0 0;
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: var(--font-size-body-large);
+  letter-spacing: -0.03em;
+}
+
+.material p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: 1.45;
+}
+
+.material button { width: 112px; }
+
+.error {
+  color: var(--color-emergency) !important;
+  font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 560px) {
+  .trigger {
+    min-width: var(--touch-target-min);
+    width: var(--touch-target-min);
+    padding: 0;
+    align-items: center;
+  }
+  .trigger span { font-size: 0.64rem; }
+  .trigger small { display: none; }
+  .backdrop { align-items: end; padding: 0; }
+  .dialog {
+    max-height: 92dvh;
+    padding: var(--space-5) var(--space-4);
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  }
+  .material { grid-template-columns: 1fr; }
+  .material button { width: 100%; }
+}

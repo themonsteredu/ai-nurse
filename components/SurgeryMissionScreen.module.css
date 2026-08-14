@@ -122,8 +122,10 @@
 .isolateZone strong { margin-top: 3px; font-family: "S-Core Dream", sans-serif; font-size: var(--font-size-heading); }
 .sterileZone small { color: rgba(255,255,255,.78); }
 
-.placedItems { display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: 32px; margin-top: var(--space-3); }
-.placedItems i { padding: 5px 8px; background: rgba(255,255,255,.92); color: var(--color-text); font-size: 0.72rem; font-style: normal; font-weight: 800; }
+.placedItems { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); min-height: 64px; margin-top: var(--space-3); }
+.placedTool { display: grid; min-width: 0; margin: 0; padding: 5px; place-items: center; background: rgba(255,255,255,.9); color: var(--color-text); }
+.placedTool .toolVisual { width: 72px; height: 48px; }
+.placedTool figcaption { overflow: hidden; max-width: 100%; font-size: .62rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 
 .supplyPanel { margin-top: var(--space-4); padding: var(--space-4); background: #fff; }
 .supplyHeader { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
@@ -131,11 +133,15 @@
 .supplyHeader strong { margin-top: 3px; font-size: var(--font-size-body-large); }
 .supplyHeader small { color: var(--color-text-muted); }
 
+.roleGuide { display: grid; grid-template-columns: auto auto minmax(0,1fr); align-items: baseline; gap: var(--space-2) var(--space-3); margin: var(--space-3) 0 0; padding: var(--space-3); border-left: 3px solid var(--color-primary); background: #f2f7f7; }
+.roleGuide span { color: var(--color-primary); font-size: .62rem; font-weight: 800; letter-spacing: .08em; }
+.roleGuide strong { font-size: .82rem; }
+.roleGuide small { color: var(--color-text-muted); font-size: .76rem; line-height: 1.45; }
+
 .itemRail { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-3); margin-top: var(--space-4); }
 .item {
   display: grid;
-  grid-template-columns: 34px 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: 92px minmax(0, 1fr);
   align-items: center;
   min-height: var(--touch-target-large);
   padding: var(--space-3);
@@ -147,9 +153,17 @@
   touch-action: none;
   user-select: none;
 }
-.item > span { grid-row: 1 / 3; color: var(--color-primary); font-size: .68rem; font-weight: 800; }
-.item strong { font-size: .94rem; }
-.item small { color: var(--color-text-muted); font-size: .7rem; }
+.toolVisual { display: block; width: 88px; height: 68px; background-image: url("/assets/nurse/surgical-tools-sprite-v1.png"); background-repeat: no-repeat; background-size: 300% 200%; }
+.toolVisual[data-tool="hemostat"] { background-position: 0 0; }
+.toolVisual[data-tool="forceps"] { background-position: 50% 0; }
+.toolVisual[data-tool="scalpelHandle"] { background-position: 100% 0; }
+.toolVisual[data-tool="phone"] { background-position: 0 100%; }
+.toolVisual[data-tool="openedWrap"] { background-position: 50% 100%; }
+.toolVisual[data-tool="unsealedGauze"] { background-position: 100% 100%; }
+.itemCopy { display: flex; min-width: 0; flex-direction: column; }
+.itemCopy i { color: var(--color-primary); font-size: .58rem; font-style: normal; font-weight: 800; letter-spacing: .08em; }
+.item strong { font-size: .9rem; }
+.item small { color: var(--color-text-muted); font-size: .68rem; }
 .item[data-selected="true"] { border-color: var(--color-primary); background: var(--color-primary-soft); box-shadow: inset 0 0 0 2px var(--color-primary); }
 .item[data-dragging="true"] { opacity: .35; }
 
@@ -160,7 +174,8 @@
 .completePanel p { display: flex; flex-direction: column; margin: 0; }
 .completePanel strong { margin-top: 4px; font-size: var(--font-size-body-large); }
 
-.dragGhost { position: fixed; z-index: 100; transform: translate(-50%,-50%); padding: var(--space-3) var(--space-4); background: #fff; color: var(--color-text); box-shadow: var(--shadow-raised); font-weight: 800; pointer-events: none; }
+.dragGhost { position: fixed; z-index: 100; display:flex; align-items:center; gap:var(--space-2); transform: translate(-50%,-50%); padding: 6px var(--space-3) 6px 6px; background: #fff; color: var(--color-text); box-shadow: var(--shadow-raised); font-size:.76rem; font-weight: 800; pointer-events: none; }
+.dragGhost .toolVisual { width: 70px; height: 52px; }
 
 @media (max-width: 720px) {
   .hero { min-height: 430px; }
@@ -176,7 +191,8 @@
   .sterileZone { left: 4%; right: 4%; bottom: 4%; min-height: 210px; }
   .isolateZone { left: 4%; top: 4%; bottom: auto; width: 46%; min-height: 145px; }
   .supplyHeader { align-items: flex-start; flex-direction: column; }
+  .roleGuide { grid-template-columns: 1fr; gap: 4px; }
   .itemRail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--space-2); }
-  .item { flex: 0 0 210px; scroll-snap-align: start; }
+  .item { flex: 0 0 248px; scroll-snap-align: start; }
   .completePanel { align-items: stretch; flex-direction: column; }
 }

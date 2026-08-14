@@ -15,6 +15,8 @@ import { PrimaryButton } from "./PrimaryButton";
 import { useRequireSession, useSession } from "./SessionProvider";
 import styles from "./MedicationMissionScreen.module.css";
 
+type MismatchField = "patient" | "medicine" | "dose" | "route";
+
 function WristbandScanner({ patientName, birthDate, onComplete }: {
   patientName: string;
   birthDate: string;
@@ -97,6 +99,7 @@ export function MedicationMissionScreen() {
   const [attempted, setAttempted] = useState(false);
   const [resolved, setResolved] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [reviewOptionId, setReviewOptionId] = useState<string | null>(null);
   const dragOriginRef = useRef<{ x: number; y: number } | null>(null);
 
   if (session === null) return null;
@@ -105,6 +108,10 @@ export function MedicationMissionScreen() {
   const cases = getMedicationCases(difficulty);
   const medicationCase = cases[caseIndex];
   const selectedOption = medicationCase.options.find((option) => option.id === selectedOptionId);
+  const reviewOption = medicationCase.options.find((option) => option.id === reviewOptionId);
+  const orderParts = medicationCase.order.split(" ");
+  const expectedDose = orderParts.at(-1) ?? "";
+  const expectedMedicine = orderParts.slice(0, -1).join(" ");
 
   function verifyOption(option: MedicationOption) {
     if (!scanned || resolved) return;
@@ -116,12 +123,39 @@ export function MedicationMissionScreen() {
     setSelectedOptionId(null);
 
     if (!correct) {
+      setReviewOptionId(option.id);
       setFeedback(`${option.medicine} ${option.dose}은 처방과 일치하지 않습니다. 약 이름과 용량을 다시 대조하세요.`);
       return;
     }
 
     setResolved(true);
     setFeedback(medicationCase.explanation);
+  }
+
+  function identifyMismatch(field: MismatchField) {
+    if (!reviewOption) return;
+
+    const mismatch = field === "medicine"
+      ? reviewOption.medicine !== expectedMedicine
+      : field === "dose"
+        ? reviewOption.dose !== expectedDose
+        : false;
+
+    if (!mismatch) {
+      setFeedback(field === "patient"
+        ? "환자 팔찌 정보는 이미 일치합니다. 약품 라벨에서 다른 항목을 찾아보세요."
+        : field === "route"
+          ? "투여 경로는 경구로 일치합니다. 약 이름이나 용량을 다시 보세요."
+          : "이 항목은 처방과 일치합니다. 다른 라벨 항목을 확인하세요.");
+      return;
+    }
+
+    const reason = field === "medicine"
+      ? `약 이름이 처방의 ${expectedMedicine}과 다릅니다.`
+      : `용량이 처방의 ${expectedDose}과 다릅니다.`;
+    setFeedback(`오류 발견: ${reason} 이 약은 보류 구역으로 이동했습니다.`);
+    setReviewOptionId(null);
+    setSelectedOptionId(null);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>, option: MedicationOption) {
@@ -160,6 +194,7 @@ export function MedicationMissionScreen() {
     setAttempted(false);
     setResolved(false);
     setFeedback(null);
+    setReviewOptionId(null);
   }
 
   return (
@@ -248,7 +283,8 @@ export function MedicationMissionScreen() {
                     className={styles.medication}
                     data-selected={selectedOptionId === option.id}
                     data-dragging={draggingOptionId === option.id}
-                    disabled={!scanned || resolved}
+                    data-review={reviewOptionId === option.id}
+                    disabled={!scanned || resolved || reviewOptionId !== null}
                     onPointerDown={(event) => handlePointerDown(event, option)}
                     onPointerMove={(event) => {
                       if (draggingOptionId) setDragPoint({ x: event.clientX, y: event.clientY });
@@ -280,6 +316,30 @@ export function MedicationMissionScreen() {
                   : "약품을 이곳으로 끌어오세요"}</small>
             </button>
           </div>
+
+          {reviewOption ? (
+            <section className={styles.mismatchLab} aria-label="투약 오류 항목 찾기">
+              <div className={styles.mismatchHeader}>
+                <span>ERROR INVESTIGATION</span>
+                <strong>어느 정보가 처방과 다른가요?</strong>
+                <p>직접 오류 항목을 찾아 눌러야 이 약을 보류할 수 있습니다.</p>
+              </div>
+              <div className={styles.mismatchGrid}>
+                <button type="button" onClick={() => identifyMismatch("patient")}>
+                  <span>환자</span><strong>{medicationCase.patientName}</strong><small>팔찌와 대조</small>
+                </button>
+                <button type="button" onClick={() => identifyMismatch("medicine")}>
+                  <span>약 이름</span><strong>{reviewOption.medicine}</strong><small>처방: {expectedMedicine}</small>
+                </button>
+                <button type="button" onClick={() => identifyMismatch("dose")}>
+                  <span>용량</span><strong>{reviewOption.dose}</strong><small>처방: {expectedDose}</small>
+                </button>
+                <button type="button" onClick={() => identifyMismatch("route")}>
+                  <span>경로</span><strong>{medicationCase.route}</strong><small>{reviewOption.form} 확인</small>
+                </button>
+              </div>
+            </section>
+          ) : null}
 
           {feedback ? (
             <div className={styles.feedback} data-correct={resolved} role="status">

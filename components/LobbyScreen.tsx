@@ -22,6 +22,7 @@ import { AppScreen } from "./AppScreen";
 import { HospitalFloorPlan, type HospitalRoom } from "./HospitalFloorPlan";
 import { PrimaryButton } from "./PrimaryButton";
 import { useSession } from "./SessionProvider";
+import { TeacherMaterials } from "./TeacherMaterials";
 import styles from "./LobbyScreen.module.css";
 
 const DIFFICULTY_CHOICES: Array<{
@@ -71,9 +72,10 @@ export function LobbyScreen() {
 
   return (
     <AppScreen
-      title="오늘의 간호 미션"
-      subtitle="병원 여섯 현장에서 간호사의 판단과 행동을 경험하세요."
+      title="골든타임을 지키는 사람들"
+      subtitle="병원 여섯 현장에서 간호사와 응급구조사의 판단을 경험하세요."
       tone="calm"
+      compactTitle
       footer={
         reportReady ? (
           <PrimaryButton fullWidth onClick={() => router.push("/report")}>
@@ -87,11 +89,14 @@ export function LobbyScreen() {
           <span>ACTIVE OPERATOR</span>
           <strong>{session === null ? "미션을 선택하세요" : `${session.studentName} 간호사`}</strong>
         </p>
-        <p className={styles.progress}>
-          <strong>{completed} / {TOTAL_BADGE_COUNT}</strong>
-          <span>COMPLETE</span>
-          <small>배지 {earnedBadgeCount(results)}개 획득</small>
-        </p>
+        <div className={styles.controlActions}>
+          <p className={styles.progress}>
+            <strong>{completed} / {TOTAL_BADGE_COUNT}</strong>
+            <span>COMPLETE</span>
+            <small>배지 {earnedBadgeCount(results)}개 획득</small>
+          </p>
+          <TeacherMaterials />
+        </div>
       </div>
 
       {retryList.length > 0 ? (
