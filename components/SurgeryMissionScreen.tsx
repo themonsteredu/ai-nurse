@@ -17,6 +17,18 @@ import { useRequireSession, useSession } from "./SessionProvider";
 import styles from "./SurgeryMissionScreen.module.css";
 
 type DragPoint = { x: number; y: number };
+type SurgicalRole = "hemostasis" | "grasp" | "incision";
+
+const SURGICAL_ROLES: Array<{
+  id: SurgicalRole;
+  label: string;
+  caption: string;
+  itemId: string;
+}> = [
+  { id: "hemostasis", label: "지혈", caption: "혈관을 잡아 출혈 조절", itemId: "hemostat" },
+  { id: "grasp", label: "조직 잡기", caption: "조직과 거즈를 정교하게 잡기", itemId: "forceps" },
+  { id: "incision", label: "절개 준비", caption: "수술용 칼날을 결합할 손잡이", itemId: "scalpelHandle" },
+];
 
 const TOOL_PURPOSE: Record<string, string> = {
   hemostat: "혈관을 잡아 출혈을 조절할 때 쓰는 잠금형 기구",
@@ -38,6 +50,9 @@ export function SurgeryMissionScreen() {
   const [started, setStarted] = useState(false);
   const [placements, setPlacements] = useState<Record<string, SurgicalDestination>>({});
   const [firstJudgments, setFirstJudgments] = useState<Record<string, boolean>>({});
+  const [rolePlacements, setRolePlacements] = useState<Partial<Record<SurgicalRole, string>>>({});
+  const [roleJudgments, setRoleJudgments] = useState<Record<string, boolean>>({});
+  const [selectedSterileId, setSelectedSterileId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragPoint, setDragPoint] = useState<DragPoint | null>(null);
@@ -50,6 +65,9 @@ export function SurgeryMissionScreen() {
   const items = getSurgicalItems(difficulty);
   const remainingItems = items.filter((item) => placements[item.id] === undefined);
   const completed = remainingItems.length === 0;
+  const sterileItems = items.filter((item) => item.destination === "sterile");
+  const activeRoles = SURGICAL_ROLES.filter((role) => sterileItems.some((item) => item.id === role.itemId));
+  const assemblyCompleted = activeRoles.every((role) => rolePlacements[role.id] === role.itemId);
 
   function placeItem(item: SurgicalItem, destination: SurgicalDestination) {
     const correct = item.destination === destination;
@@ -110,13 +128,38 @@ export function SurgeryMissionScreen() {
   }
 
   function handleFinish() {
-    const correct = Object.values(firstJudgments).filter(Boolean).length;
+    const correct = Object.values(firstJudgments).filter(Boolean).length
+      + Object.values(roleJudgments).filter(Boolean).length;
     saveMissionResult(buildMissionResult(
       "operatingRoom",
-      { correct, total: items.length },
+      { correct, total: items.length + activeRoles.length },
       difficulty,
     ));
     router.push("/unlock/operatingRoom");
+  }
+
+  function placeSterileRole(role: SurgicalRole) {
+    if (!selectedSterileId) return;
+    const expectedItemId = activeRoles.find((candidate) => candidate.id === role)?.itemId;
+    const correct = expectedItemId === selectedSterileId;
+    setRoleJudgments((current) => (
+      current[selectedSterileId] === undefined
+        ? { ...current, [selectedSterileId]: correct }
+        : current
+    ));
+
+    if (!correct) {
+      const selected = items.find((item) => item.id === selectedSterileId);
+      setFeedback({
+        correct: false,
+        text: `${selected?.label ?? "선택한 기구"}의 역할을 다시 확인하세요. 기구 모양과 사용 목적을 함께 비교해야 합니다.`,
+      });
+      return;
+    }
+
+    setRolePlacements((current) => ({ ...current, [role]: selectedSterileId }));
+    setSelectedSterileId(null);
+    setFeedback({ correct: true, text: "기구의 역할과 수술 순서를 정확히 연결했습니다." });
   }
 
   return (
@@ -139,13 +182,13 @@ export function SurgeryMissionScreen() {
             <div className={styles.heroShade} />
             <div className={styles.heroCopy}>
               <span>MISSION 04 · OPERATING ROOM</span>
-              <strong>기구를 알아보고<br />멸균 트레이를 완성하세요</strong>
-              <p>실제 도구의 형태와 역할을 확인한 뒤 알맞은 위치에 배치하세요.</p>
+              <strong>오염을 가려내고<br />역할별 트레이를 완성하세요</strong>
+              <p>멸균 여부를 먼저 판단한 뒤 기구의 역할까지 연결해야 합니다.</p>
             </div>
           </div>
           <div className={styles.briefingBar}>
-            <p><span>목표</span><strong>{items.length}개 물품 분류</strong></p>
-            <p><span>조작</span><strong>끌기 + 눌러 놓기</strong></p>
+            <p><span>1단계</span><strong>{items.length}개 멸균 판정</strong></p>
+            <p><span>2단계</span><strong>{activeRoles.length}개 역할 슬롯 조립</strong></p>
             <PrimaryButton onClick={() => setStarted(true)}>수술 준비 시작</PrimaryButton>
           </div>
         </section>
@@ -245,8 +288,54 @@ export function SurgeryMissionScreen() {
           {feedback ? <p className={styles.feedback} data-correct={feedback.correct} role="status">{feedback.text}</p> : null}
 
           {completed ? (
+            <section className={styles.assemblyPanel} aria-label="수술 기구 역할별 트레이 조립">
+              <header className={styles.assemblyHeader}>
+                <span>STEP 02 · ROLE ASSEMBLY</span>
+                <strong>멸균 기구를 사용 목적에 맞게 다시 배치하세요.</strong>
+                <small>기구 선택 → 역할 슬롯 선택 순서로 진행합니다.</small>
+              </header>
+              <div className={styles.sterileRack}>
+                {sterileItems
+                  .filter((item) => !Object.values(rolePlacements).includes(item.id))
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      data-selected={selectedSterileId === item.id}
+                      onClick={() => {
+                        setSelectedSterileId((current) => current === item.id ? null : item.id);
+                        setFeedback(null);
+                      }}
+                    >
+                      <SurgicalToolVisual itemId={item.id} />
+                      <strong>{item.label}</strong>
+                    </button>
+                  ))}
+              </div>
+              <div className={styles.roleSlots}>
+                {activeRoles.map((role) => {
+                  const placedItem = items.find((item) => item.id === rolePlacements[role.id]);
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      data-filled={Boolean(placedItem)}
+                      data-active={selectedSterileId !== null}
+                      onClick={() => placeSterileRole(role.id)}
+                    >
+                      <span>{role.label}</span>
+                      <strong>{placedItem?.label ?? "기구를 배치하세요"}</strong>
+                      <small>{role.caption}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
+
+          {assemblyCompleted ? (
             <div className={styles.completePanel}>
-              <p><span>STERILE FIELD READY</span><strong>수술 전 안전 준비가 끝났습니다.</strong></p>
+              <p><span>STERILE FIELD READY</span><strong>멸균 판정과 역할별 준비를 모두 마쳤습니다.</strong></p>
               <PrimaryButton onClick={handleFinish}>결과 확인</PrimaryButton>
             </div>
           ) : null}

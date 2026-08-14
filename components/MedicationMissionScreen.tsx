@@ -100,6 +100,7 @@ export function MedicationMissionScreen() {
   const [resolved, setResolved] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [reviewOptionId, setReviewOptionId] = useState<string | null>(null);
+  const [reviewedFields, setReviewedFields] = useState<MismatchField[]>([]);
   const dragOriginRef = useRef<{ x: number; y: number } | null>(null);
 
   if (session === null) return null;
@@ -112,6 +113,7 @@ export function MedicationMissionScreen() {
   const orderParts = medicationCase.order.split(" ");
   const expectedDose = orderParts.at(-1) ?? "";
   const expectedMedicine = orderParts.slice(0, -1).join(" ");
+  const reviewComplete = reviewedFields.length === 4;
 
   function verifyOption(option: MedicationOption) {
     if (!scanned || resolved) return;
@@ -121,41 +123,47 @@ export function MedicationMissionScreen() {
       setAnswers((current) => [...current, correct]);
     }
     setSelectedOptionId(null);
-
-    if (!correct) {
-      setReviewOptionId(option.id);
-      setFeedback(`${option.medicine} ${option.dose}은 처방과 일치하지 않습니다. 약 이름과 용량을 다시 대조하세요.`);
-      return;
-    }
-
-    setResolved(true);
-    setFeedback(medicationCase.explanation);
+    setReviewOptionId(option.id);
+    setReviewedFields([]);
+    setFeedback(null);
   }
 
-  function identifyMismatch(field: MismatchField) {
-    if (!reviewOption) return;
+  function fieldMatches(field: MismatchField) {
+    if (!reviewOption) return false;
+    if (field === "medicine") return reviewOption.medicine === expectedMedicine;
+    if (field === "dose") return reviewOption.dose === expectedDose;
+    return true;
+  }
 
-    const mismatch = field === "medicine"
-      ? reviewOption.medicine !== expectedMedicine
-      : field === "dose"
-        ? reviewOption.dose !== expectedDose
-        : false;
+  function reviewField(field: MismatchField) {
+    setReviewedFields((current) => current.includes(field) ? current : [...current, field]);
+  }
 
-    if (!mismatch) {
-      setFeedback(field === "patient"
-        ? "환자 팔찌 정보는 이미 일치합니다. 약품 라벨에서 다른 항목을 찾아보세요."
-        : field === "route"
-          ? "투여 경로는 경구로 일치합니다. 약 이름이나 용량을 다시 보세요."
-          : "이 항목은 처방과 일치합니다. 다른 라벨 항목을 확인하세요.");
+  function handleDecision(decision: "administer" | "hold") {
+    if (!reviewOption || !reviewComplete) return;
+    const optionCorrect = reviewOption.id === medicationCase.correctOptionId;
+    const decisionCorrect = optionCorrect ? decision === "administer" : decision === "hold";
+
+    if (!decisionCorrect) {
+      setFeedback(optionCorrect
+        ? "네 항목이 모두 일치합니다. 이 경우에는 투약 준비를 진행할 수 있습니다."
+        : "불일치 항목이 있습니다. 투약하지 말고 보류 후 다시 확인해야 합니다.");
       return;
     }
 
-    const reason = field === "medicine"
-      ? `약 이름이 처방의 ${expectedMedicine}과 다릅니다.`
-      : `용량이 처방의 ${expectedDose}과 다릅니다.`;
-    setFeedback(`오류 발견: ${reason} 이 약은 보류 구역으로 이동했습니다.`);
+    if (optionCorrect) {
+      setResolved(true);
+      setFeedback(medicationCase.explanation);
+      return;
+    }
+
+    const mismatches = (["medicine", "dose"] as MismatchField[])
+      .filter((field) => !fieldMatches(field))
+      .map((field) => field === "medicine" ? "약 이름" : "용량");
+    setFeedback(`오류 발견: ${mismatches.join("·")}이 처방과 다릅니다. 약품을 보류하고 다시 선택하세요.`);
     setReviewOptionId(null);
     setSelectedOptionId(null);
+    setReviewedFields([]);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>, option: MedicationOption) {
@@ -195,6 +203,7 @@ export function MedicationMissionScreen() {
     setResolved(false);
     setFeedback(null);
     setReviewOptionId(null);
+    setReviewedFields([]);
   }
 
   return (
@@ -214,12 +223,12 @@ export function MedicationMissionScreen() {
             <div className={styles.heroCopy}>
               <span>MISSION 06 · MEDICATION SAFETY</span>
               <strong>스캔하고,<br />대조하고, 확인하세요</strong>
-              <p>환자 정보와 처방이 모두 일치할 때만 투약 준비가 끝납니다.</p>
+              <p>약을 고른 뒤 네 가지 권리를 직접 대조하고 투약 여부까지 결정하세요.</p>
             </div>
           </div>
           <div className={styles.briefingBar}>
             <p><span>대상</span><strong>{cases.length}명의 환자</strong></p>
-            <p><span>조작</span><strong>스캔 + 약품 끌기</strong></p>
+            <p><span>판단</span><strong>4항목 대조 + 투약 결정</strong></p>
             <PrimaryButton onClick={() => setStarted(true)}>투약 확인 시작</PrimaryButton>
           </div>
         </section>
@@ -227,7 +236,7 @@ export function MedicationMissionScreen() {
         <section className={styles.activity} aria-label="투약 전 환자와 약품 대조 활동">
           <div className={styles.caseHeader}>
             <p><span>VERIFICATION</span><strong>{String(caseIndex + 1).padStart(2, "0")} / {String(cases.length).padStart(2, "0")}</strong></p>
-            <p>팔찌 확인 → 처방 대조 → 약품 배치</p>
+            <p>팔찌 확인 → 약품 배치 → 4항목 감사 → 투약 결정</p>
           </div>
 
           <div className={styles.scanScene}>
@@ -318,25 +327,30 @@ export function MedicationMissionScreen() {
           </div>
 
           {reviewOption ? (
-            <section className={styles.mismatchLab} aria-label="투약 오류 항목 찾기">
+            <section className={styles.mismatchLab} aria-label="투약 전 네 가지 권리 대조">
               <div className={styles.mismatchHeader}>
-                <span>ERROR INVESTIGATION</span>
-                <strong>어느 정보가 처방과 다른가요?</strong>
-                <p>직접 오류 항목을 찾아 눌러야 이 약을 보류할 수 있습니다.</p>
+                <span>STEP 04 · FOUR RIGHTS AUDIT</span>
+                <strong>네 항목을 하나씩 열어 처방과 대조하세요.</strong>
+                <p>모두 확인한 다음에만 투약 또는 보류를 결정할 수 있습니다.</p>
               </div>
               <div className={styles.mismatchGrid}>
-                <button type="button" onClick={() => identifyMismatch("patient")}>
-                  <span>환자</span><strong>{medicationCase.patientName}</strong><small>팔찌와 대조</small>
+                <button type="button" data-reviewed={reviewedFields.includes("patient")} data-match={fieldMatches("patient")} onClick={() => reviewField("patient")}>
+                  <span>환자</span><strong>{medicationCase.patientName}</strong><small>{reviewedFields.includes("patient") ? "팔찌와 일치" : "눌러서 대조"}</small>
                 </button>
-                <button type="button" onClick={() => identifyMismatch("medicine")}>
-                  <span>약 이름</span><strong>{reviewOption.medicine}</strong><small>처방: {expectedMedicine}</small>
+                <button type="button" data-reviewed={reviewedFields.includes("medicine")} data-match={fieldMatches("medicine")} onClick={() => reviewField("medicine")}>
+                  <span>약 이름</span><strong>{reviewOption.medicine}</strong><small>{reviewedFields.includes("medicine") ? `처방 ${expectedMedicine}와 ${fieldMatches("medicine") ? "일치" : "불일치"}` : "눌러서 대조"}</small>
                 </button>
-                <button type="button" onClick={() => identifyMismatch("dose")}>
-                  <span>용량</span><strong>{reviewOption.dose}</strong><small>처방: {expectedDose}</small>
+                <button type="button" data-reviewed={reviewedFields.includes("dose")} data-match={fieldMatches("dose")} onClick={() => reviewField("dose")}>
+                  <span>용량</span><strong>{reviewOption.dose}</strong><small>{reviewedFields.includes("dose") ? `처방 ${expectedDose}와 ${fieldMatches("dose") ? "일치" : "불일치"}` : "눌러서 대조"}</small>
                 </button>
-                <button type="button" onClick={() => identifyMismatch("route")}>
-                  <span>경로</span><strong>{medicationCase.route}</strong><small>{reviewOption.form} 확인</small>
+                <button type="button" data-reviewed={reviewedFields.includes("route")} data-match={fieldMatches("route")} onClick={() => reviewField("route")}>
+                  <span>경로</span><strong>{medicationCase.route}</strong><small>{reviewedFields.includes("route") ? `${reviewOption.form} · 경로 일치` : "눌러서 대조"}</small>
                 </button>
+              </div>
+              <div className={styles.decisionPanel} data-ready={reviewComplete}>
+                <p><span>FINAL DECISION</span><strong>{reviewComplete ? "이 약을 어떻게 할까요?" : `${4 - reviewedFields.length}개 항목을 더 확인하세요.`}</strong></p>
+                <button type="button" disabled={!reviewComplete} onClick={() => handleDecision("hold")}>보류하고 다시 확인</button>
+                <button type="button" disabled={!reviewComplete} onClick={() => handleDecision("administer")}>투약 준비 진행</button>
               </div>
             </section>
           ) : null}
