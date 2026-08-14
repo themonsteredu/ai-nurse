@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -40,6 +41,7 @@ export function LobbyScreen() {
   const [pendingMission, setPendingMission] = useState<MissionId | null>(null);
   const [name, setName] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
+  const [coverDismissed, setCoverDismissed] = useState(false);
 
   const results = session === null ? [] : resultList(session);
   const rooms: HospitalRoom[] = MISSION_LIST.map((mission) => ({
@@ -69,6 +71,57 @@ export function LobbyScreen() {
   const reportReady = session !== null && canOpenReport(session);
   const retryList = session === null ? [] : missionsToRetry(session);
   const canCheckIn = difficulty !== null && isNameReady(name);
+
+  if (session === null && !coverDismissed) {
+    return (
+      <main className={styles.careerCover} aria-label="골든타임 진로체험 표지">
+        <section className={styles.coverVisual} aria-label="간호사와 응급구조사의 환자 이송 현장">
+          <Image
+            className={styles.coverImage}
+            src="/assets/nurse/career-cover-v2.webp"
+            alt="병원 응급실 앞에서 간호사와 응급구조사가 환자를 함께 이송하는 모습"
+            fill
+            priority
+            sizes="(max-width: 720px) 100vw, 48vw"
+          />
+          <div className={styles.coverShade} />
+          <p className={styles.coverSignal}>
+            <span>EMERGENCY NETWORK</span>
+            <strong>READY</strong>
+          </p>
+        </section>
+
+        <section className={styles.coverContent}>
+          <div className={styles.coverBrand} aria-hidden="true">GT</div>
+          <p className={styles.coverEyebrow}>GOLDEN TIME · CAREER EXPERIENCE</p>
+          <h1>골든타임을<br />지키는 사람들</h1>
+          <p className={styles.coverLead}>
+            환자의 가장 가까운 곳에서 관찰하고 판단하고 움직이는 두 직업을 직접 경험하세요.
+          </p>
+
+          <div className={styles.careerRoles} aria-label="체험 직업">
+            <article>
+              <span>01 · NURSE</span>
+              <strong>간호사</strong>
+              <small>관찰 · 판단 · 처치 · 협업</small>
+            </article>
+            <article>
+              <span>02 · EMT</span>
+              <strong>응급구조사</strong>
+              <small>현장평가 · 응급처치 · 이송 · 인계</small>
+            </article>
+          </div>
+
+          <button type="button" className={styles.coverStart} onClick={() => setCoverDismissed(true)}>
+            <span>6개의 병원 현장으로</span>
+            <strong>미션 시작</strong>
+            <i aria-hidden="true">→</i>
+          </button>
+          <small className={styles.coverNotice}>이름과 난이도는 미션을 선택한 뒤 입력합니다.</small>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <AppScreen

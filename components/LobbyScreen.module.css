@@ -1,3 +1,171 @@
+.careerCover {
+  display: grid;
+  grid-template-columns: minmax(380px, 0.92fr) minmax(460px, 1.08fr);
+  min-height: 100dvh;
+  background: #fff;
+}
+
+.coverVisual {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #102f33;
+}
+
+.coverImage { object-fit: cover; object-position: 52% center; }
+
+.coverShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 27, 30, 0.06) 45%, rgba(7, 27, 30, 0.78));
+}
+
+.coverSignal {
+  position: absolute;
+  left: clamp(24px, 4vw, 56px);
+  bottom: clamp(24px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: #fff;
+}
+
+.coverSignal span {
+  font-size: 0.64rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.14em;
+}
+
+.coverSignal strong {
+  padding-left: var(--space-3);
+  border-left: 1px solid rgba(255, 255, 255, 0.45);
+  color: #65d3c8;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.coverContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(40px, 7vw, 104px);
+}
+
+.coverBrand {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-small);
+  background: var(--color-text);
+  color: #fff;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.08em;
+}
+
+.coverEyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.16em;
+}
+
+.coverContent h1 {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text);
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(2.7rem, 5vw, 5.1rem);
+  font-weight: var(--font-weight-black);
+  line-height: 1.02;
+  letter-spacing: -0.065em;
+}
+
+.coverLead {
+  max-width: 34ch;
+  margin: var(--space-5) 0 0;
+  color: var(--color-text-muted);
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.65;
+}
+
+.careerRoles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.careerRoles article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-4) var(--space-4) 0;
+}
+
+.careerRoles article + article {
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-border);
+}
+
+.careerRoles span {
+  color: var(--color-primary);
+  font-size: 0.6rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+}
+
+.careerRoles strong {
+  margin-top: var(--space-2);
+  color: var(--color-text);
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+}
+
+.careerRoles small {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.coverStart {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  width: 100%;
+  min-height: var(--touch-target-large);
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: var(--color-primary);
+  color: #fff;
+  text-align: left;
+}
+
+.coverStart span {
+  grid-column: 1;
+  font-size: 0.64rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  opacity: 0.78;
+}
+
+.coverStart strong { grid-column: 1; font-size: var(--font-size-body-large); }
+.coverStart i { grid-column: 2; grid-row: 1 / 3; font-size: 1.45rem; font-style: normal; }
+
+.coverNotice {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
 .controlBar {
   display: flex;
   align-items: flex-end;
@@ -207,7 +375,28 @@
   line-height: 1.55;
 }
 
+@media (max-width: 900px) {
+  .careerCover { grid-template-columns: 1fr; }
+  .coverVisual { min-height: 48dvh; }
+  .coverImage { object-position: 50% 42%; }
+  .coverContent { padding: var(--space-6) var(--space-5) var(--space-7); }
+  .coverBrand { display: none; }
+}
+
 @media (max-width: 560px) {
+  .coverVisual { min-height: 43dvh; }
+  .coverImage { object-position: 50% 43%; }
+  .coverContent { justify-content: flex-start; padding: var(--space-5) var(--space-4) var(--space-6); }
+  .coverBrand { display: none; }
+  .coverEyebrow { font-size: 0.58rem; }
+  .coverContent h1 { margin-top: var(--space-2); font-size: clamp(2.05rem, 10.8vw, 2.65rem); }
+  .coverLead { margin-top: var(--space-3); font-size: 0.9rem; line-height: 1.55; }
+  .careerRoles { margin-top: var(--space-4); }
+  .careerRoles article { padding: var(--space-3) var(--space-3) var(--space-3) 0; }
+  .careerRoles article + article { padding-left: var(--space-3); }
+  .careerRoles strong { font-size: 1rem; }
+  .careerRoles small { font-size: 0.65rem; }
+  .coverStart { margin-top: var(--space-4); }
   .controlBar { align-items: flex-start; gap: var(--space-3); }
   .controlActions { align-items: flex-end; gap: var(--space-2); }
   .progress span,
