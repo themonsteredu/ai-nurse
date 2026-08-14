@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * 병원 공간을 흉내 낸 CSS 평면도가 아니라, 세 현장을 연결한 미션 네트워크입니다.
- * 기능상 각 노드 전체가 기존과 동일한 미션 진입 버튼입니다.
+ * 위에서 내려다본 3D 병원 캠퍼스에 세 현장 진입 버튼을 얹은 미션 지도입니다.
+ * 배경 이미지는 시각적 맥락만 제공하며, 각 노드 전체가 실제 미션 진입 버튼입니다.
  */
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import type { MissionId } from "@/data/types";
@@ -24,9 +25,9 @@ const ROOM_LAYOUT: Record<
   MissionId,
   { left: number; top: number; width: number; height: number }
 > = {
-  er: { left: 3, top: 7, width: 41, height: 39 },
-  ambulance: { left: 56, top: 7, width: 41, height: 39 },
-  healthRoom: { left: 29.5, top: 58, width: 41, height: 35 },
+  er: { left: 4, top: 52, width: 29, height: 24 },
+  ambulance: { left: 69, top: 56, width: 27, height: 24 },
+  healthRoom: { left: 58, top: 10, width: 34, height: 24 },
 };
 
 const MISSION_META: Record<
@@ -79,69 +80,70 @@ export function HospitalFloorPlan({
   const enteringRoom = rooms.find((room) => room.missionId === enteringMission);
 
   return (
-    <section className={styles.network} aria-label="병원 미션 네트워크">
+    <section className={styles.network} aria-label="3D 병원 미션 지도">
       <div className={styles.networkHeader}>
-        <span>HOSPITAL MISSION NETWORK</span>
-        <p><i aria-hidden="true" /> 현장 연결 정상</p>
+        <span>LIVE HOSPITAL CAMPUS</span>
+        <p><i aria-hidden="true" /> 3개 현장 연결 정상</p>
       </div>
 
-      <svg
-        className={styles.routeLines}
-        viewBox="0 0 1000 560"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path d="M 235 158 L 500 158 L 765 158" />
-        <path d="M 500 158 L 500 414" />
-      </svg>
+      <div className={styles.campusStage}>
+        <Image
+          className={styles.campusImage}
+          src="/assets/nurse/hospital-campus-3d.webp"
+          alt="위에서 내려다본 현대적인 병원 캠퍼스. 응급실 입구와 구급차 출동 구역, 병동 건물이 연결되어 있다."
+          fill
+          priority
+          sizes="(max-width: 640px) 100vw, 1200px"
+        />
+        <div className={styles.campusShade} aria-hidden="true" />
 
-      <div className={styles.positionMarker} aria-hidden="true">
-        <span />
-        <small>YOU ARE HERE</small>
+        <div className={styles.positionMarker} aria-hidden="true">
+          <span />
+          <small>MISSION CONTROL</small>
+        </div>
+
+        {rooms.map((room) => {
+          const layout = ROOM_LAYOUT[room.missionId];
+          const meta = MISSION_META[room.missionId];
+          const status = room.badgeEarned
+            ? "COMPLETE"
+            : room.visited
+              ? "RETRY"
+              : "READY";
+
+          return (
+            <button
+              key={room.missionId}
+              type="button"
+              className={styles.missionNode}
+              data-mission={room.missionId}
+              data-status={status.toLowerCase()}
+              data-entering={enteringMission === room.missionId}
+              style={{
+                left: `${layout.left}%`,
+                top: `${layout.top}%`,
+                width: `${layout.width}%`,
+                height: `${layout.height}%`,
+              }}
+              disabled={enteringMission !== null}
+              onClick={() => beginMissionEntry(room.missionId)}
+              aria-label={`미션 ${room.order}, ${meta.category}, ${meta.displayTitle}, 상태 ${status}`}
+            >
+              <span className={styles.nodeNumber} aria-hidden="true">
+                {String(room.order).padStart(2, "0")}
+              </span>
+              <span className={styles.nodeTopline}>
+                <span>MISSION {String(room.order).padStart(2, "0")}</span>
+                <span className={styles.nodeStatus}>{status}</span>
+              </span>
+              <span className={styles.nodeCategory}>{meta.category}</span>
+              <span className={styles.nodeTitle}>{meta.displayTitle}</span>
+              <span className={styles.nodeTask}>{meta.task}</span>
+              <span className={styles.nodeAction}>현장 입장 <i aria-hidden="true">→</i></span>
+            </button>
+          );
+        })}
       </div>
-
-      {rooms.map((room) => {
-        const layout = ROOM_LAYOUT[room.missionId];
-        const meta = MISSION_META[room.missionId];
-        const status = room.badgeEarned
-          ? "COMPLETE"
-          : room.visited
-            ? "RETRY"
-            : "READY";
-
-        return (
-          <button
-            key={room.missionId}
-            type="button"
-            className={styles.missionNode}
-            data-mission={room.missionId}
-            data-status={status.toLowerCase()}
-            data-entering={enteringMission === room.missionId}
-            style={{
-              left: `${layout.left}%`,
-              top: `${layout.top}%`,
-              width: `${layout.width}%`,
-              height: `${layout.height}%`,
-            }}
-            disabled={enteringMission !== null}
-            onClick={() => beginMissionEntry(room.missionId)}
-            aria-label={`미션 ${room.order}, ${meta.category}, ${meta.displayTitle}, 상태 ${status}`}
-          >
-            <span className={styles.nodeNumber} aria-hidden="true">
-              {String(room.order).padStart(2, "0")}
-            </span>
-            <span className={styles.nodeTopline}>
-              <span>MISSION {String(room.order).padStart(2, "0")}</span>
-              <span className={styles.nodeStatus}>{status}</span>
-            </span>
-            <span className={styles.nodeCategory}>{meta.category}</span>
-            <span className={styles.nodeTitle}>{meta.displayTitle}</span>
-            <span className={styles.nodeTask}>{meta.task}</span>
-            <span className={styles.nodeAction}>OPEN MISSION <i aria-hidden="true">→</i></span>
-          </button>
-        );
-      })}
 
       {enteringRoom ? (
         <div className={styles.entryBrief} role="status" aria-live="polite">
