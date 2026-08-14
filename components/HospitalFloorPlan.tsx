@@ -25,9 +25,9 @@ const ROOM_LAYOUT: Record<
   MissionId,
   { left: number; top: number; width: number; height: number }
 > = {
-  er: { left: 4, top: 52, width: 29, height: 24 },
-  ambulance: { left: 69, top: 56, width: 27, height: 24 },
-  healthRoom: { left: 58, top: 10, width: 34, height: 24 },
+  er: { left: 9, top: 59, width: 19, height: 13 },
+  ambulance: { left: 76, top: 62, width: 18, height: 13 },
+  healthRoom: { left: 70, top: 19, width: 19, height: 13 },
 };
 
 const MISSION_META: Record<
@@ -74,7 +74,11 @@ export function HospitalFloorPlan({
   function beginMissionEntry(missionId: MissionId) {
     if (enteringMission !== null) return;
     setEnteringMission(missionId);
-    enterTimerRef.current = window.setTimeout(() => onEnterRoom(missionId), 420);
+    enterTimerRef.current = window.setTimeout(() => {
+      onEnterRoom(missionId);
+      setEnteringMission(null);
+      enterTimerRef.current = null;
+    }, 420);
   }
 
   const enteringRoom = rooms.find((room) => room.missionId === enteringMission);
@@ -129,17 +133,14 @@ export function HospitalFloorPlan({
               onClick={() => beginMissionEntry(room.missionId)}
               aria-label={`미션 ${room.order}, ${meta.category}, ${meta.displayTitle}, 상태 ${status}`}
             >
-              <span className={styles.nodeNumber} aria-hidden="true">
+              <span className={styles.nodeIndex} aria-hidden="true">
                 {String(room.order).padStart(2, "0")}
               </span>
-              <span className={styles.nodeTopline}>
-                <span>MISSION {String(room.order).padStart(2, "0")}</span>
-                <span className={styles.nodeStatus}>{status}</span>
+              <span className={styles.nodeCopy}>
+                <span className={styles.nodeCategory}>{meta.category}</span>
+                <strong className={styles.nodeTitle}>{meta.displayTitle}</strong>
               </span>
-              <span className={styles.nodeCategory}>{meta.category}</span>
-              <span className={styles.nodeTitle}>{meta.displayTitle}</span>
-              <span className={styles.nodeTask}>{meta.task}</span>
-              <span className={styles.nodeAction}>현장 입장 <i aria-hidden="true">→</i></span>
+              <span className={styles.nodeStatus}><i aria-hidden="true" />{status}</span>
             </button>
           );
         })}

@@ -15,9 +15,10 @@
  * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
  */
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { useSession } from "./SessionProvider";
+import { playUiSound } from "./ui-sound";
 import styles from "./AppScreen.module.css";
 
 /**
@@ -56,6 +57,24 @@ export function AppScreen({
 }: AppScreenProps) {
   const { soundEnabled, toggleSound } = useSession();
 
+  useEffect(() => {
+    if (!soundEnabled) return;
+
+    const playInteractionSound = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("button:not(:disabled), a[href]")) playUiSound("tap");
+    };
+
+    document.addEventListener("pointerdown", playInteractionSound);
+    return () => document.removeEventListener("pointerdown", playInteractionSound);
+  }, [soundEnabled]);
+
+  function handleSoundToggle() {
+    if (!soundEnabled) playUiSound("enabled");
+    toggleSound();
+  }
+
   return (
     <div className={styles.screen} data-tone={tone}>
       <header className={styles.header}>
@@ -73,7 +92,7 @@ export function AppScreen({
         <button
           type="button"
           className={styles.soundButton}
-          onClick={toggleSound}
+          onClick={handleSoundToggle}
           aria-pressed={soundEnabled}
           aria-label={soundEnabled ? "소리 끄기" : "소리 켜기"}
         >
