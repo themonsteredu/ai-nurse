@@ -12,6 +12,75 @@ import { PrimaryButton } from "./PrimaryButton";
 import { useRequireSession, useSession } from "./SessionProvider";
 import styles from "./IcuMissionScreen.module.css";
 
+function interpolate(start: number, end: number, progress: number) {
+  return Math.round(start + (end - start) * progress);
+}
+
+function baselineFor(value: number, normal: number, low: number, high: number) {
+  return value < low || value > high ? normal : value;
+}
+
+function TrendScrubber({ progress, completed, onProgress, onComplete }: {
+  progress: number;
+  completed: boolean;
+  onProgress: (progress: number) => void;
+  onComplete: () => void;
+}) {
+  const draggingRef = useRef(false);
+  const progressRef = useRef(progress);
+
+  function update(event: ReactPointerEvent<HTMLButtonElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const next = Math.max(0, Math.min(1, (event.clientX - rect.left - 28) / (rect.width - 56)));
+    progressRef.current = next;
+    onProgress(next);
+  }
+
+  function finish() {
+    draggingRef.current = false;
+    if (progressRef.current >= 0.86) {
+      progressRef.current = 1;
+      onProgress(1);
+      onComplete();
+    } else if (!completed) {
+      progressRef.current = 0;
+      onProgress(0);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className={styles.trendScrubber}
+      data-complete={completed}
+      aria-label={completed ? "10초 모니터 추세 확인 완료" : "손잡이를 오른쪽으로 밀어 10초 모니터 추세 재생"}
+      onPointerDown={(event) => {
+        if (completed) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        draggingRef.current = true;
+        update(event);
+      }}
+      onPointerMove={(event) => { if (draggingRef.current) update(event); }}
+      onPointerUp={finish}
+      onPointerCancel={() => { draggingRef.current = false; if (!completed) { progressRef.current = 0; onProgress(0); } }}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && !completed) {
+          event.preventDefault();
+          progressRef.current = 1;
+          onProgress(1);
+          onComplete();
+        }
+      }}
+    >
+      <span className={styles.trendRail}><i style={{ width: `${progress * 100}%` }} /></span>
+      <span className={styles.trendHandle} style={{ left: `calc(${progress * 100}% - ${progress * 56}px)` }}>▶</span>
+      <span className={styles.trendStart}>10초 전</span>
+      <strong>{completed ? "현재 변화 확인 완료" : "오른쪽으로 밀어 추세 재생"}</strong>
+      <span className={styles.trendNow}>현재</span>
+    </button>
+  );
+}
+
 function SwipeResponder({ inactive, completed, onComplete }: {
   inactive: boolean;
   completed: boolean;
@@ -78,6 +147,8 @@ export function IcuMissionScreen() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [resolved, setResolved] = useState(false);
+  const [trendProgress, setTrendProgress] = useState(0);
+  const [trendReviewed, setTrendReviewed] = useState(false);
 
   if (session === null) return null;
 
@@ -106,6 +177,8 @@ export function IcuMissionScreen() {
     setRoundIndex((current) => current + 1);
     setSelectedPatientId(null);
     setResolved(false);
+    setTrendProgress(0);
+    setTrendReviewed(false);
   }
 
   return (
@@ -138,7 +211,18 @@ export function IcuMissionScreen() {
         <section className={styles.activity} aria-label="중환자실 모니터 관찰 활동">
           <div className={styles.roundHeader}>
             <p><span>LIVE ROUND</span><strong>{String(roundIndex + 1).padStart(2, "0")} / {String(rounds.length).padStart(2, "0")}</strong></p>
-            <p className={styles.situation}>{round.situation}</p>
+            <p className={styles.situation}>{round.situation} 추세를 재생해 변화를 찾으세요.</p>
+          </div>
+
+          <div className={styles.trendPanel}>
+            <p><span>STEP 01 · TREND REPLAY</span><strong>10초 전 수치가 현재까지 어떻게 변했는지 직접 재생하세요.</strong></p>
+            <TrendScrubber
+              key={round.id}
+              progress={trendProgress}
+              completed={trendReviewed}
+              onProgress={setTrendProgress}
+              onComplete={() => setTrendReviewed(true)}
+            />
           </div>
 
           <div className={styles.monitorStage}>
@@ -155,6 +239,32 @@ export function IcuMissionScreen() {
               {round.patients.map((patient) => {
                 const selected = selectedPatientId === patient.id;
                 const urgent = resolved && patient.id === round.urgentPatientId;
+                const [systolic, diastolic] = patient.bloodPressure.split("/").map(Number);
+                const displayHeartRate = interpolate(
+                  baselineFor(patient.heartRate, 82, 55, 110),
+                  patient.heartRate,
+                  trendProgress,
+                );
+                const displaySpo2 = interpolate(
+                  baselineFor(patient.spo2, 97, 94, 101),
+                  patient.spo2,
+                  trendProgress,
+                );
+                const displayResp = interpolate(
+                  baselineFor(patient.resp, 16, 10, 26),
+                  patient.resp,
+                  trendProgress,
+                );
+                const displaySystolic = interpolate(
+                  baselineFor(systolic, 118, 90, 141),
+                  systolic,
+                  trendProgress,
+                );
+                const displayDiastolic = interpolate(
+                  baselineFor(diastolic, 72, 55, 91),
+                  diastolic,
+                  trendProgress,
+                );
                 return (
                   <button
                     key={patient.id}
@@ -162,21 +272,24 @@ export function IcuMissionScreen() {
                     className={styles.monitor}
                     data-selected={selected}
                     data-urgent={urgent}
-                    disabled={resolved}
+                    disabled={resolved || !trendReviewed}
                     onClick={() => setSelectedPatientId(patient.id)}
                   >
                     <span className={styles.bed}>{patient.bed}</span>
                     <span className={styles.patientName}>{patient.label}</span>
                     <svg className={styles.wave} viewBox="0 0 240 54" aria-hidden="true">
-                      <path d="M0 30h32l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h40" />
+                      <path
+                        d="M0 30h32l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h40"
+                        style={{ opacity: 0.45 + trendProgress * 0.55 }}
+                      />
                     </svg>
                     <dl className={styles.vitals}>
-                      <div><dt>HR</dt><dd>{patient.heartRate}</dd></div>
-                      <div data-alert={patient.spo2 < 92}><dt>SpO₂</dt><dd>{patient.spo2}%</dd></div>
-                      <div data-alert={patient.resp < 10 || patient.resp > 28}><dt>RESP</dt><dd>{patient.resp}</dd></div>
-                      <div data-alert={Number(patient.bloodPressure.split("/")[0]) < 90}><dt>BP</dt><dd>{patient.bloodPressure}</dd></div>
+                      <div data-alert={displayHeartRate < 55 || displayHeartRate > 110}><dt>HR</dt><dd>{displayHeartRate}</dd></div>
+                      <div data-alert={displaySpo2 < 92}><dt>SpO₂</dt><dd>{displaySpo2}%</dd></div>
+                      <div data-alert={displayResp < 10 || displayResp > 28}><dt>RESP</dt><dd>{displayResp}</dd></div>
+                      <div data-alert={displaySystolic < 90}><dt>BP</dt><dd>{displaySystolic}/{displayDiastolic}</dd></div>
                     </dl>
-                    <span className={styles.monitorStatus}>{patient.status}</span>
+                    <span className={styles.monitorStatus}>{trendReviewed ? patient.status : trendProgress > 0 ? "추세 재생 중" : "10초 전 기준"}</span>
                   </button>
                 );
               })}
@@ -186,11 +299,15 @@ export function IcuMissionScreen() {
           <div className={styles.responsePanel}>
             <div className={styles.selectionCopy}>
               <span>PRIORITY RESPONSE</span>
-              <strong>{selectedPatient ? `${selectedPatient.bed} ${selectedPatient.label} 환자` : "먼저 확인할 모니터를 선택하세요"}</strong>
+              <strong>{!trendReviewed
+                ? "먼저 10초 추세를 끝까지 재생하세요"
+                : selectedPatient
+                  ? `${selectedPatient.bed} ${selectedPatient.label} 환자`
+                  : "가장 먼저 확인할 모니터를 선택하세요"}</strong>
             </div>
             <SwipeResponder
               key={round.id}
-              inactive={selectedPatientId === null}
+              inactive={!trendReviewed || selectedPatientId === null}
               completed={resolved}
               onComplete={handleRespond}
             />

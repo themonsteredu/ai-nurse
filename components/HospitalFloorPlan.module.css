@@ -107,14 +107,14 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-width: var(--touch-target-min);
   min-height: var(--touch-target-large);
-  padding: var(--space-2) var(--space-3);
+  padding: 7px 9px;
   border: 1px solid rgba(255, 255, 255, 0.52);
   border-left: 3px solid var(--node-accent);
   border-radius: var(--radius-small);
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.82);
   color: var(--color-text);
   text-align: left;
   box-shadow: 0 7px 22px rgba(8, 35, 38, 0.18);
@@ -151,13 +151,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--node-accent);
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.04em;
 }
@@ -171,7 +171,7 @@
 
 .nodeCategory {
   color: var(--node-accent);
-  font-size: 0.52rem;
+  font-size: 0.45rem;
   font-weight: var(--font-weight-black);
   line-height: 1;
   letter-spacing: 0.09em;
@@ -180,7 +180,7 @@
 .nodeTitle {
   margin-top: 3px;
   font-family: "S-Core Dream", "Pretendard", sans-serif;
-  font-size: clamp(0.88rem, 1.35vw, 1.08rem);
+  font-size: clamp(0.78rem, 1.05vw, 0.94rem);
   font-weight: var(--font-weight-black);
   line-height: 1.08;
   letter-spacing: -0.035em;
@@ -192,7 +192,7 @@
   align-items: center;
   gap: 4px;
   color: var(--node-accent);
-  font-size: 0.5rem;
+  font-size: 0.43rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.06em;
 }
@@ -250,13 +250,13 @@
   }
 
   .nodeIndex {
-    flex-basis: 30px;
-    width: 30px;
-    height: 30px;
+    flex-basis: 27px;
+    width: 27px;
+    height: 27px;
   }
 
   .nodeCategory { display: none; }
-  .nodeTitle { margin-top: 0; font-size: 0.84rem; }
+  .nodeTitle { margin-top: 0; font-size: 0.76rem; }
 
   .nodeStatus {
     position: absolute;
@@ -325,8 +325,8 @@
     height: 12% !important;
   }
 
-  .nodeIndex { flex-basis: 30px; width: 30px; height: 30px; }
-  .nodeTitle { font-size: 0.94rem; }
+  .nodeIndex { flex-basis: 28px; width: 28px; height: 28px; }
+  .nodeTitle { font-size: 0.82rem; }
   .nodeStatus {
     position: absolute;
     top: 6px;

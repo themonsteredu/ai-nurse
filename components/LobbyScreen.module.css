@@ -26,7 +26,13 @@
 .operator strong {
   margin-top: var(--space-1);
   color: var(--color-text);
-  font-size: var(--font-size-body-large);
+  font-size: var(--font-size-body);
+}
+
+.controlActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
 .progress {
@@ -39,7 +45,7 @@
 
 .progress strong {
   color: var(--color-primary);
-  font-size: var(--font-size-heading);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
   font-weight: var(--font-weight-black);
   font-variant-numeric: tabular-nums;
 }
@@ -202,7 +208,10 @@
 }
 
 @media (max-width: 560px) {
-  .controlBar { align-items: flex-start; }
+  .controlBar { align-items: flex-start; gap: var(--space-3); }
+  .controlActions { align-items: flex-end; gap: var(--space-2); }
+  .progress span,
+  .progress small { display: none; }
   .operator strong { max-width: 15ch; }
   .checkInBackdrop { align-items: end; padding: 0; }
   .checkIn {

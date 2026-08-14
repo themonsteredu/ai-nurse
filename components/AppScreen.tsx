@@ -54,6 +54,8 @@ type AppScreenProps = {
   title: string;
   subtitle?: string;
   tone?: ScreenTone;
+  /** 긴 제목을 쓰는 화면에서 헤더 글자만 한 단계 줄입니다. */
+  compactTitle?: boolean;
   /** 화면 아래쪽에 고정으로 붙일 내용 (예: 다음 버튼) */
   footer?: ReactNode;
   children: ReactNode;
@@ -63,6 +65,7 @@ export function AppScreen({
   title,
   subtitle,
   tone = "calm",
+  compactTitle = false,
   footer,
   children,
 }: AppScreenProps) {
@@ -88,7 +91,7 @@ export function AppScreen({
 
   return (
     <div className={styles.screen} data-tone={tone}>
-      <header className={styles.header}>
+      <header className={styles.header} data-compact-title={compactTitle}>
         <div className={styles.brandMark} aria-hidden="true">GT</div>
 
         <div className={styles.headerText}>
