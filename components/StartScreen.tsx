@@ -22,6 +22,7 @@
  *    단, 면책 문구와 개인정보 안내는 반드시 화면에 남아 있어야 합니다.
  */
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -80,7 +81,28 @@ export function StartScreen() {
       subtitle="간호사가 되어 세 곳의 현장을 체험해요"
       tone="calm"
     >
-      <div className={styles.layout}>
+      <div className={styles.start}>
+        <section className={styles.cover} aria-labelledby="career-cover-title">
+          <Image
+            className={styles.coverImage}
+            src="/assets/nurse/career-cover-v2.webp"
+            alt="응급실 앞에서 환자 이송을 준비하는 간호사와 응급구조사"
+            fill
+            priority
+            sizes="(max-width: 760px) 100vw, 980px"
+          />
+          <div className={styles.coverRoles} aria-label="체험 직업군">
+            <span>NURSE · 병원 간호</span>
+            <span>PARAMEDIC · 119 현장</span>
+          </div>
+          <div className={styles.coverCopy}>
+            <span>CAREER SIMULATION</span>
+            <h2 id="career-cover-title">골든타임을 지키는 사람들</h2>
+            <p>환자를 관찰하고, 판단하고, 가장 필요한 처치를 결정하세요.</p>
+          </div>
+        </section>
+
+        <div className={styles.layout}>
         {/* 1. 이름 입력 */}
         <section className={styles.section}>
           <label className={styles.label} htmlFor="student-name">
@@ -157,6 +179,7 @@ export function StartScreen() {
             이름을 쓰고 모드를 고르면 시작할 수 있어요.
           </p>
         ) : null}
+        </div>
       </div>
     </AppScreen>
   );

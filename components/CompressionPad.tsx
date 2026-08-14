@@ -31,6 +31,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 import type { Difficulty } from "@/data/types";
 import {
@@ -153,6 +154,14 @@ export function CompressionPad({ difficulty, onFinish }: CompressionPadProps) {
   if (phase === "ready") {
     return (
       <div className={styles.ready}>
+        <Image
+          className={styles.sceneImage}
+          src="/assets/nurse/cpr-placement-v2.webp"
+          alt="가슴압박 위치를 연습하는 성인 심폐소생술 훈련 마네킹"
+          fill
+          priority
+          sizes="(max-width: 760px) 100vw, 900px"
+        />
         <p className={styles.readyLabel}>손을 가슴 한가운데에 올려두세요</p>
         <p className={styles.readyCount} aria-live="assertive">
           {countdown > 0 ? countdown : "시작!"}
@@ -175,10 +184,41 @@ export function CompressionPad({ difficulty, onFinish }: CompressionPadProps) {
         onPointerDown={handleTap}
         aria-label="가슴 압박하기. 원이 가장 작아질 때 누르세요."
       >
+        <Image
+          className={styles.sceneImage}
+          src="/assets/nurse/cpr-placement-v2.webp"
+          alt="가슴 중앙을 드러낸 성인 심폐소생술 훈련 마네킹"
+          fill
+          priority
+          sizes="(max-width: 860px) 100vw, 680px"
+        />
+        <span className={styles.placementGuide} aria-hidden="true">
+          <span>PRESS POINT</span>
+          <strong>가슴 중앙</strong>
+          <small>흉골 아래쪽</small>
+        </span>
         {/* 리듬 가이드 원 — ref 로 직접 움직입니다 */}
         <span ref={circleRef} className={styles.guideCircle} aria-hidden="true" />
+        <span className={styles.guideCore} aria-hidden="true" />
+        {tapCount > 0 ? (
+          <span key={tapCount} className={styles.tapWave} aria-hidden="true" />
+        ) : null}
         <span className={styles.tapLabel}>누르기</span>
         <span className={styles.tapCount}>{tapCount}회</span>
+        <span className={styles.techniqueBar} aria-hidden="true">
+          <span>
+            <small>위치</small>
+            <strong>가슴 중앙</strong>
+          </span>
+          <span>
+            <small>깊이</small>
+            <strong>약 5~6cm</strong>
+          </span>
+          <span>
+            <small>반동</small>
+            <strong>완전 이완</strong>
+          </span>
+        </span>
       </button>
 
       {/* 오른쪽: 속도와 남은 시간 */}

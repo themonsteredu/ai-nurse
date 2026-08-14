@@ -56,9 +56,9 @@
   --font-size-display: clamp(2.5rem, 5vw, 4rem);
   --font-size-title: clamp(1.5rem, 2.5vw, 2.05rem);
   --font-size-heading: clamp(1.22rem, 2vw, 1.55rem);
-  --font-size-body-large: clamp(1.02rem, 1.5vw, 1.18rem);
+  --font-size-body-large: clamp(1.0625rem, 1.5vw, 1.22rem);
   --font-size-body: 1rem;
-  --font-size-caption: 0.8125rem;
+  --font-size-caption: 0.875rem;
 
   --font-weight-regular: 400;
   --font-weight-medium: 600;

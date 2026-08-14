@@ -32,6 +32,7 @@
  *       - 틀린 직후 해설 카드가 바로 뜰 것 (기획서 요구사항)
  */
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -120,6 +121,10 @@ export function TriageMissionScreen() {
   const [drag, setDrag] = useState<DragState | null>(null);
   const [hoveredZone, setHoveredZone] = useState<TriageLevel | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [phase]);
 
   /** 구역들의 화면 위치. 끌어다 놓기를 판정할 때 씁니다. */
   const zoneElements = useRef(new Map<TriageLevel, HTMLElement>());
@@ -299,23 +304,42 @@ export function TriageMissionScreen() {
     return (
       <AppScreen title={mission.title} subtitle={mission.subtitle} tone="urgent">
         <div className={styles.briefing}>
+          <section className={styles.briefingScene} aria-label="응급실 중증도 분류 훈련 장면">
+            <Image
+              className={styles.briefingImage}
+              src="/assets/nurse/triage-briefing-v2.webp"
+              alt="응급실에서 간호사가 환자 상태를 확인하고 응급구조사에게 환자를 인계받는 훈련 장면"
+              fill
+              priority
+              sizes="(max-width: 760px) 100vw, 760px"
+            />
+            <p className={styles.briefingSceneLabel}>
+              <span>TRIAGE INTAKE</span>
+              <strong>관찰 · 우선순위 · 인계</strong>
+            </p>
+          </section>
+
           <p className={styles.briefingText}>{mission.briefing}</p>
 
           <ul className={styles.briefingFacts}>
             <li>
-              환자 <strong>{patients.length}명</strong>을 분류합니다
+              <span>분류 대상</span>
+              <strong>{patients.length}<small>명</small></strong>
             </li>
             <li>
-              구역은 <strong>{zones.length}개</strong>예요
+              <span>중증도 구역</span>
+              <strong>{zones.length}<small>개</small></strong>
             </li>
             <li>
-              {timeLimitMs === null
-                ? "시간 제한은 없어요. 천천히 생각해도 됩니다"
-                : `제한시간 ${Math.round(timeLimitMs / 60000)}분`}
+              <span>제한 시간</span>
+              <strong>
+                {timeLimitMs === null ? "없음" : Math.round(timeLimitMs / 60000)}
+                {timeLimitMs === null ? null : <small>분</small>}
+              </strong>
             </li>
             <li>
-              <strong>{passThreshold(difficulty)}%</strong> 이상 맞히면 배지를
-              받아요
+              <span>통과 기준</span>
+              <strong>{passThreshold(difficulty)}<small>%</small></strong>
             </li>
           </ul>
 

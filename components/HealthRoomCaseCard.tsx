@@ -33,6 +33,43 @@ import { isCorrectFollowUp, isCorrectTreatment } from "@/lib/health-room";
 import { PrimaryButton } from "./PrimaryButton";
 import styles from "./HealthRoomCaseCard.module.css";
 
+const HEALTH_CASE_SCENES: Record<
+  string,
+  { src: string; alt: string; status: string }
+> = {
+  "hr-nosebleed": {
+    src: "/assets/nurse/health-nosebleed.webp",
+    alt: "고개를 앞으로 숙이고 코를 잡는 학생에게 간호사가 거즈를 건네는 훈련 장면",
+    status: "코피 자세 확인",
+  },
+  "hr-burn": {
+    src: "/assets/nurse/health-burn.webp",
+    alt: "학생이 손등을 흐르는 찬물에 식히도록 간호사가 안내하는 훈련 장면",
+    status: "화상 부위 냉각",
+  },
+  "hr-sprain": {
+    src: "/assets/nurse/health-sprain.webp",
+    alt: "학생의 발목을 올리고 천으로 감싼 냉찜질 팩을 대는 간호사",
+    status: "발목 보호와 냉찜질",
+  },
+  "hr-beesting": {
+    src: "/assets/nurse/health-beesting.webp",
+    alt: "학생의 팔에 납작한 카드로 벌침 제거 방법을 보여주는 간호사",
+    status: "벌침 제거 방법 확인",
+  },
+  "hr-hyperventilation": {
+    src: "/assets/nurse/health-hyperventilation.webp",
+    alt: "긴장한 학생과 눈높이를 맞추고 천천히 호흡하도록 세어주는 간호사",
+    status: "호흡 안정 돕기",
+  },
+};
+
+const FALLBACK_SCENE = {
+  src: "/assets/nurse/health-room.webp",
+  alt: "보건실에서 학생의 상태를 확인하는 간호사",
+  status: "친구 상태 살피기",
+};
+
 type HealthRoomCaseCardProps = {
   healthCase: HealthRoomCase;
   /** 몇 번째 상황인지 (1부터) */
@@ -61,6 +98,7 @@ export function HealthRoomCaseCard({
 }: HealthRoomCaseCardProps) {
   const treatmentAnswered = treatmentId !== null;
   const followUpAnswered = followUpId !== null;
+  const scene = HEALTH_CASE_SCENES[healthCase.id] ?? FALLBACK_SCENE;
 
   return (
     <div className={styles.card}>
@@ -72,6 +110,7 @@ export function HealthRoomCaseCard({
 
       <section
         className={styles.healthScene}
+        data-case={healthCase.id}
         data-phase={!treatmentAnswered ? "observe" : !followUpAnswered ? "treat" : "follow-up"}
         aria-label={
           !treatmentAnswered
@@ -83,16 +122,16 @@ export function HealthRoomCaseCard({
       >
         <Image
           className={styles.sceneImage}
-          src="/assets/nurse/health-room.webp"
-          alt="보건실에서 학생의 상태를 확인하는 간호사"
+          src={scene.src}
+          alt={scene.alt}
           fill
           sizes="(max-width: 760px) 100vw, 900px"
         />
         <p className={styles.sceneStatus}>
-          <span>WARD STATUS</span>
+          <span>CARE SCENE</span>
           <strong>
             {!treatmentAnswered
-              ? "친구 상태 살피기"
+              ? scene.status
               : !followUpAnswered
                 ? "첫 처치 완료 · 다음 행동 판단"
                 : "관찰 기록 완료"}

@@ -26,8 +26,9 @@
  * ✅ 코덱스(디자인 담당 AI)는 이 파일의 생김새를 마음껏 바꿔도 됩니다.
  */
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { getHealthRoomCases } from "@/data/health-room-cases";
 import { MISSIONS } from "@/data/missions";
@@ -66,6 +67,10 @@ export function HealthRoomMissionScreen() {
   const [followUps, setFollowUps] = useState<FollowUpAnswers>({});
   const [logAnswers, setLogAnswers] = useState<HealthLogAnswers>({});
   const [logSubmitted, setLogSubmitted] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [phase, caseIndex]);
 
   const currentCase = cases[caseIndex];
   const isLastCase = caseIndex >= cases.length - 1;
@@ -111,6 +116,21 @@ export function HealthRoomMissionScreen() {
     return (
       <AppScreen title={mission.title} subtitle={mission.subtitle} tone="warm">
         <div className={styles.briefing}>
+          <section className={styles.briefingScene} aria-label="보건실 진로체험 안내">
+            <Image
+              className={styles.briefingImage}
+              src="/assets/nurse/health-room.webp"
+              alt="보건실에서 학생의 상태를 확인하고 기록하는 간호사"
+              fill
+              priority
+              sizes="(max-width: 760px) 100vw, 760px"
+            />
+            <p className={styles.briefingSceneLabel}>
+              <span>SCHOOL HEALTH NURSING</span>
+              <strong>관찰 · 처치 · 기록</strong>
+            </p>
+          </section>
+
           <p className={styles.briefingText}>{mission.briefing}</p>
 
           <ul className={styles.briefingFacts}>

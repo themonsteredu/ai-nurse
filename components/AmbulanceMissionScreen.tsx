@@ -26,7 +26,7 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AED_PAD_COUNT } from "@/data/aed-pads";
 import { getDispatchSteps } from "@/data/dispatch-steps";
@@ -51,6 +51,7 @@ import {
 import { accuracyPercent, buildMissionResult, passThreshold } from "@/lib/scoring";
 
 import { AedBodyDiagram } from "./AedBodyDiagram";
+import { AedOperationSequence } from "./AedOperationSequence";
 import { AppScreen } from "./AppScreen";
 import { CompressionPad } from "./CompressionPad";
 import { DispatchOrderStep } from "./DispatchOrderStep";
@@ -66,6 +67,7 @@ type Phase =
   | "compressionResult"
   | "aed"
   | "aedResult"
+  | "aedSequence"
   | "finished";
 
 export function AmbulanceMissionScreen() {
@@ -85,6 +87,10 @@ export function AmbulanceMissionScreen() {
   const [tapCount, setTapCount] = useState(0);
   const [selectedPadIds, setSelectedPadIds] = useState<string[]>([]);
   const [aedTally, setAedTally] = useState<ScoreTally | null>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [phase]);
 
   /* ---------------- ① 신고 순서 ---------------- */
 
@@ -181,14 +187,24 @@ export function AmbulanceMissionScreen() {
 
           <ol className={styles.taskList}>
             <li>
-              <strong>신고하기</strong> — 무엇부터 해야 할지 순서 맞추기
+              <span className={styles.taskCopy}>
+                <strong>신고하기</strong>
+                <span>무엇부터 해야 할지 순서 맞추기</span>
+              </span>
             </li>
             <li>
-              <strong>가슴 압박</strong> — 분당 {bpm.min}~{bpm.max}회 리듬으로{" "}
-              {durationSeconds}초
+              <span className={styles.taskCopy}>
+                <strong>가슴 압박</strong>
+                <span>
+                  분당 {bpm.min}~{bpm.max}회 리듬으로 {durationSeconds}초
+                </span>
+              </span>
             </li>
             <li>
-              <strong>자동심장충격기</strong> — 패드 붙일 자리 찾기
+              <span className={styles.taskCopy}>
+                <strong>자동심장충격기</strong>
+                <span>패드 위치를 찾고 작동 순서 체험하기</span>
+              </span>
             </li>
           </ol>
 
@@ -333,8 +349,8 @@ export function AmbulanceMissionScreen() {
         tone="focused"
         footer={
           revealed ? (
-            <PrimaryButton fullWidth onClick={() => setPhase("finished")}>
-              미션 결과 보기
+            <PrimaryButton fullWidth onClick={() => setPhase("aedSequence")}>
+              AED 작동 순서 체험하기
             </PrimaryButton>
           ) : null
         }
@@ -364,6 +380,18 @@ export function AmbulanceMissionScreen() {
             </p>
           )}
         </div>
+      </AppScreen>
+    );
+  }
+
+  if (phase === "aedSequence") {
+    return (
+      <AppScreen
+        title="AED 작동 순서"
+        subtitle="안전 확인부터 가슴압박 재개까지 올바른 순서로 실행하세요."
+        tone="focused"
+      >
+        <AedOperationSequence onFinish={() => setPhase("finished")} />
       </AppScreen>
     );
   }

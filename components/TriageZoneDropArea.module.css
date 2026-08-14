@@ -48,7 +48,7 @@
 
 .code {
   color: var(--zone-color);
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.12em;
 }
@@ -73,7 +73,7 @@
 
 .action {
   color: var(--color-text);
-  font-size: var(--font-size-caption);
+  font-size: 0.9rem;
   font-weight: var(--font-weight-bold);
 }
 
@@ -82,7 +82,7 @@
   overflow: hidden;
   margin-top: var(--space-1);
   color: var(--color-text-muted);
-  font-size: 0.73rem;
+  font-size: 0.84rem;
   font-weight: var(--font-weight-medium);
   line-height: 1.4;
   -webkit-box-orient: vertical;
@@ -102,13 +102,13 @@
 
 .count {
   color: var(--color-text-muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
 }
 
 .select {
   color: var(--zone-color);
-  font-size: 0.64rem;
+  font-size: 0.73rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.1em;
 }
@@ -124,5 +124,7 @@
 }
 
 @media (max-width: 640px) {
-  .zone { flex: 0 0 176px; width: 176px; scroll-snap-align: start; }
+  .zone { flex: 0 0 min(78vw, 286px); width: min(78vw, 286px); scroll-snap-align: start; }
+  .label { font-size: 1.2rem; }
+  .rule { -webkit-line-clamp: 4; }
 }
