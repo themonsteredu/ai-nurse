@@ -1,38 +1,19 @@
 "use client";
 
-/**
- * 로비 화면 — 미션을 고르는 곳. 미션이 끝날 때마다 여기로 돌아옵니다.
- *
- * 무엇을 하나:
- *  1. 위에서 내려다본 병원 조감도를 보여줍니다
- *  2. 부서 구역을 누르면 그 미션으로 들어갑니다
- *  3. 다녀온 구역은 불이 켜지고, 배지를 받으면 별이 붙습니다
- *  4. 세 미션을 다 끝내면 최종 리포트 버튼이 나타납니다
- *
- * 어떤 데이터를 쓰나:
- *  - data/missions.ts        : 부서 이름, 설명, 배지 이름
- *  - lib/badges.ts           : 배지를 받았는지 판정
- *  - lib/session.ts          : 어느 미션을 끝냈는지
- *  - components/HospitalFloorPlan.tsx : 조감도 그림과 부서 버튼
- *
- * 이 파일은 "무엇을 보여줄지" 정하고, 실제로 그리는 일은
- * HospitalFloorPlan 이 합니다.
- *
- * 감정 톤: 병원에 막 도착한 설렘. 어디로 갈지 고르는 기분.
- *
- * ✅ 코덱스(디자인 담당 AI)는 이 파일을 바꿔도 됩니다.
- */
-
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
+import { DISCLAIMER_SHORT, PRIVACY_NOTICE } from "@/data/disclaimer";
 import { MISSION_LIST } from "@/data/missions";
-import type { MissionId } from "@/data/types";
-import { hasBadge, earnedBadgeCount, TOTAL_BADGE_COUNT } from "@/lib/badges";
+import { STUDENT_NAME_MAX_LENGTH } from "@/data/rules";
+import type { Difficulty, MissionId } from "@/data/types";
+import { earnedBadgeCount, hasBadge, TOTAL_BADGE_COUNT } from "@/lib/badges";
+import { passThreshold } from "@/lib/scoring";
 import {
   canOpenReport,
   completedMissionCount,
   isMissionComplete,
+  isNameReady,
   missionsToRetry,
   resultList,
 } from "@/lib/session";
@@ -40,39 +21,53 @@ import {
 import { AppScreen } from "./AppScreen";
 import { HospitalFloorPlan, type HospitalRoom } from "./HospitalFloorPlan";
 import { PrimaryButton } from "./PrimaryButton";
-import { useRequireSession } from "./SessionProvider";
+import { useSession } from "./SessionProvider";
 import styles from "./LobbyScreen.module.css";
+
+const DIFFICULTY_CHOICES: Array<{
+  value: Difficulty;
+  label: string;
+  description: string;
+}> = [
+  { value: "elementary", label: "소통 모드", description: "초등 3~6학년" },
+  { value: "middle", label: "중등 모드", description: "중학생 · 더 많은 판단 정보" },
+];
 
 export function LobbyScreen() {
   const router = useRouter();
-  const session = useRequireSession();
+  const { session, startSession } = useSession();
+  const [pendingMission, setPendingMission] = useState<MissionId | null>(null);
+  const [name, setName] = useState("");
+  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
 
-  // 새로고침으로 진행 상황이 사라졌으면 시작 화면으로 되돌아가는 중입니다.
-  if (session === null) return null;
-
-  const results = resultList(session);
-
-  // 조감도에 넘겨줄 부서 세 곳의 상태를 만듭니다.
+  const results = session === null ? [] : resultList(session);
   const rooms: HospitalRoom[] = MISSION_LIST.map((mission) => ({
     missionId: mission.id,
     title: mission.title,
     subtitle: mission.subtitle,
     order: mission.order,
-    visited: isMissionComplete(session, mission.id),
-    badgeEarned: hasBadge(results, mission.id),
+    visited: session === null ? false : isMissionComplete(session, mission.id),
+    badgeEarned: session === null ? false : hasBadge(results, mission.id),
   }));
 
   const handleEnterRoom = useCallback((missionId: MissionId) => {
+    if (session === null) {
+      setPendingMission(missionId);
+      return;
+    }
     router.push(`/mission/${missionId}`);
-  }, [router]);
+  }, [router, session]);
 
-  const completed = completedMissionCount(session);
+  function handleCheckIn() {
+    if (pendingMission === null || difficulty === null || !isNameReady(name)) return;
+    startSession(name, difficulty);
+    router.push(`/mission/${pendingMission}`);
+  }
 
-  // 기획서 기준: 배지 3개를 다 모아야 리포트가 열립니다.
-  const reportReady = canOpenReport(session);
-
-  // 다녀왔지만 통과 못 해서 다시 도전해야 하는 미션들
-  const retryList = missionsToRetry(session);
+  const completed = session === null ? 0 : completedMissionCount(session);
+  const reportReady = session !== null && canOpenReport(session);
+  const retryList = session === null ? [] : missionsToRetry(session);
+  const canCheckIn = difficulty !== null && isNameReady(name);
 
   return (
     <AppScreen
@@ -90,7 +85,7 @@ export function LobbyScreen() {
       <div className={styles.controlBar}>
         <p className={styles.operator}>
           <span>ACTIVE OPERATOR</span>
-          <strong>{session.studentName} 간호사</strong>
+          <strong>{session === null ? "미션을 선택하세요" : `${session.studentName} 간호사`}</strong>
         </p>
         <p className={styles.progress}>
           <strong>{completed} / {TOTAL_BADGE_COUNT}</strong>
@@ -99,16 +94,72 @@ export function LobbyScreen() {
         </p>
       </div>
 
-      {/* 배지를 못 받은 곳이 있으면 다시 도전하라고 알려줍니다 */}
       {retryList.length > 0 ? (
         <p className={styles.retryNotice}>
-          배지 3개를 다 모아야 최종 리포트가 열려요. 아직 배지를 못 받은 곳에
-          다시 도전해보세요.
+          배지 3개를 모두 모아야 최종 리포트가 열려요. 아직 배지를 못 받은 곳에 다시 도전해보세요.
         </p>
       ) : null}
 
-      {/* 세 현장을 연결한 미션 네트워크 */}
       <HospitalFloorPlan rooms={rooms} onEnterRoom={handleEnterRoom} />
+
+      {pendingMission !== null ? (
+        <div className={styles.checkInBackdrop} role="presentation" onMouseDown={() => setPendingMission(null)}>
+          <section
+            className={styles.checkIn}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="check-in-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className={styles.checkInHeader}>
+              <div>
+                <span>MISSION CHECK-IN</span>
+                <h2 id="check-in-title">출동 정보를 입력하세요</h2>
+              </div>
+              <button type="button" className={styles.closeButton} onClick={() => setPendingMission(null)} aria-label="닫기">
+                ×
+              </button>
+            </div>
+
+            <label className={styles.inputLabel} htmlFor="student-name">이름</label>
+            <input
+              id="student-name"
+              className={styles.nameInput}
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={STUDENT_NAME_MAX_LENGTH}
+              placeholder="수료증에 표시할 이름"
+              autoComplete="off"
+              autoFocus
+            />
+            <p className={styles.privacy}>{PRIVACY_NOTICE}</p>
+
+            <p className={styles.inputLabel}>난이도</p>
+            <div className={styles.difficultyGrid}>
+              {DIFFICULTY_CHOICES.map((choice) => (
+                <button
+                  key={choice.value}
+                  type="button"
+                  className={styles.difficultyButton}
+                  data-selected={difficulty === choice.value}
+                  aria-pressed={difficulty === choice.value}
+                  onClick={() => setDifficulty(choice.value)}
+                >
+                  <strong>{choice.label}</strong>
+                  <span>{choice.description}</span>
+                  <small>통과 기준 {passThreshold(choice.value)}%</small>
+                </button>
+              ))}
+            </div>
+
+            <p className={styles.disclaimer}>{DISCLAIMER_SHORT}</p>
+            <PrimaryButton fullWidth disabled={!canCheckIn} onClick={handleCheckIn}>
+              선택한 미션 시작
+            </PrimaryButton>
+          </section>
+        </div>
+      ) : null}
     </AppScreen>
   );
 }
