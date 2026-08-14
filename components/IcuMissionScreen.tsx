@@ -98,11 +98,13 @@ function TrendScrubber({ progress, completed, onProgress, onComplete }: {
         }
       }}
     >
-      <span className={styles.trendRail}><i style={{ width: `${progress * 100}%` }} /></span>
-      <span className={styles.trendHandle} style={{ left: `calc(${progress * 100}% - ${progress * 56}px)` }}>▶</span>
-      <span className={styles.trendStart}>10초 전</span>
-      <strong>{completed ? "현재 변화 확인 완료" : "오른쪽으로 밀어 추세 재생"}</strong>
-      <span className={styles.trendNow}>현재</span>
+      <span className={styles.trendRail}>
+        <i style={{ width: `${progress * 100}%` }} />
+        <b style={{ left: `calc(${progress * 100}% - ${progress * 20}px)` }} />
+      </span>
+      <span className={styles.visuallyHidden}>
+        {completed ? "현재 변화 확인 완료" : "오른쪽으로 밀어 10초 추세 재생"}
+      </span>
     </button>
   );
 }
@@ -247,7 +249,7 @@ export function IcuMissionScreen() {
             <div className={styles.heroShade} />
             <div className={styles.heroCopy}>
               <span>MISSION 05 · INTENSIVE CARE</span>
-              <strong>변화는 숫자보다<br />먼저 신호를 보냅니다</strong>
+              <strong>변화는 숫자보다 먼저 신호를 보냅니다</strong>
               <p>세 모니터를 비교하고 환자 선택과 위험 근거를 함께 제출하세요.</p>
             </div>
           </div>
@@ -264,17 +266,6 @@ export function IcuMissionScreen() {
             <p className={styles.situation}>{round.situation} 추세를 재생해 변화를 찾으세요.</p>
           </div>
 
-          <div className={styles.trendPanel}>
-            <p><span>STEP 01 · TREND REPLAY</span><strong>10초 전 수치가 현재까지 어떻게 변했는지 직접 재생하세요.</strong></p>
-            <TrendScrubber
-              key={round.id}
-              progress={trendProgress}
-              completed={trendReviewed}
-              onProgress={setTrendProgress}
-              onComplete={() => setTrendReviewed(true)}
-            />
-          </div>
-
           <div className={styles.monitorStage}>
             <Image
               className={styles.stageImage}
@@ -289,13 +280,25 @@ export function IcuMissionScreen() {
               }}
             />
             <div className={styles.stageShade} />
-            <div className={styles.replayHud} data-active={trendProgress > 0} data-complete={trendReviewed} aria-hidden="true">
-              <p><span>MONITOR REPLAY</span><strong>{String(Math.round(trendProgress * 10)).padStart(2, "0")}.0s</strong></p>
-              <div className={styles.replayTrack}>
-                <i style={{ width: `${trendProgress * 100}%` }} />
-                <b style={{ left: `calc(${trendProgress * 100}% - ${trendProgress * 10}px)` }} />
-              </div>
-              <small>{trendReviewed ? "LIVE FEED CONNECTED" : trendProgress > 0 ? "PATIENT CHANGE DETECTING" : "10 SECONDS AGO"}</small>
+            <div className={styles.replayHud} data-active={trendProgress > 0} data-complete={trendReviewed}>
+              <p>
+                <span>STEP 01 · MONITOR REPLAY</span>
+                <strong>{String(Math.round(trendProgress * 10)).padStart(2, "0")}.0s</strong>
+              </p>
+              <TrendScrubber
+                key={round.id}
+                progress={trendProgress}
+                completed={trendReviewed}
+                onProgress={setTrendProgress}
+                onComplete={() => setTrendReviewed(true)}
+              />
+              <small>
+                {trendReviewed
+                  ? "LIVE FEED CONNECTED"
+                  : trendProgress > 0
+                    ? "PATIENT CHANGE DETECTING"
+                    : "오른쪽으로 밀어 10초 변화를 재생하세요"}
+              </small>
             </div>
             <div className={styles.monitorBank}>
               {round.patients.map((patient) => {
