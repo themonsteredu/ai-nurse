@@ -126,6 +126,9 @@
 .missionNode[data-mission="er"] { --node-accent: var(--color-mission-er); }
 .missionNode[data-mission="ambulance"] { --node-accent: var(--color-mission-ambulance); }
 .missionNode[data-mission="healthRoom"] { --node-accent: var(--color-mission-health-room); }
+.missionNode[data-mission="operatingRoom"] { --node-accent: #087f78; }
+.missionNode[data-mission="icu"] { --node-accent: #d83a4e; }
+.missionNode[data-mission="medication"] { --node-accent: #426c8f; }
 
 .missionNode:hover:not(:disabled),
 .missionNode:focus-visible {
@@ -240,13 +243,39 @@
   .entryBrief, .entryBrief i { animation: none; }
 }
 
+@media (min-width: 641px) and (max-width: 1100px) {
+  .missionNode {
+    gap: 6px;
+    padding: var(--space-2);
+  }
+
+  .nodeIndex {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .nodeCategory { display: none; }
+  .nodeTitle { margin-top: 0; font-size: 0.84rem; }
+
+  .nodeStatus {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    font-size: 0.43rem;
+  }
+
+  .nodeStatus i { width: 4px; height: 4px; }
+}
+
 @media (max-width: 640px) {
   .networkHeader { padding-inline: var(--space-3); }
   .networkHeader p { display: none; }
 
-  .campusStage { height: 430px; }
-  .campusImage { object-position: 52% center; }
-  .positionMarker { top: 48%; }
+  .campusStage { height: 660px; }
+  .campusImage { object-position: 52% top; }
+  .campusShade { background: linear-gradient(180deg, rgba(5,24,26,.04), rgba(5,24,26,.1) 43%, rgba(5,24,26,.86) 60%, #102f33 100%); }
+  .positionMarker { top: 43%; }
   .positionMarker small { display: none; }
 
   .missionNode {
@@ -256,31 +285,59 @@
 
   .missionNode[data-mission="er"] {
     left: 3% !important;
-    top: 66% !important;
+    top: 58% !important;
     width: 42% !important;
-    height: 18% !important;
+    height: 12% !important;
   }
 
   .missionNode[data-mission="ambulance"] {
     left: 55% !important;
-    top: 68% !important;
+    top: 58% !important;
     width: 42% !important;
-    height: 18% !important;
+    height: 12% !important;
   }
 
   .missionNode[data-mission="healthRoom"] {
-    left: 55% !important;
-    top: 12% !important;
+    left: 3% !important;
+    top: 71% !important;
     width: 42% !important;
-    height: 18% !important;
+    height: 12% !important;
+  }
+
+  .missionNode[data-mission="operatingRoom"] {
+    left: 55% !important;
+    top: 71% !important;
+    width: 42% !important;
+    height: 12% !important;
+  }
+
+  .missionNode[data-mission="icu"] {
+    left: 3% !important;
+    top: 84% !important;
+    width: 42% !important;
+    height: 12% !important;
+  }
+
+  .missionNode[data-mission="medication"] {
+    left: 55% !important;
+    top: 84% !important;
+    width: 42% !important;
+    height: 12% !important;
   }
 
   .nodeIndex { flex-basis: 30px; width: 30px; height: 30px; }
   .nodeTitle { font-size: 0.94rem; }
+  .nodeStatus {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    font-size: 0.43rem;
+  }
+  .nodeStatus i { width: 4px; height: 4px; }
 }
 
 @media (max-width: 390px) {
-  .campusStage { height: 410px; }
+  .campusStage { height: 640px; }
   .nodeCategory { display: none; }
   .nodeStatus { font-size: 0.46rem; }
 }

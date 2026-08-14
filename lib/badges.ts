@@ -28,7 +28,7 @@ export function hasBadge(
   return results.some((item) => item.missionId === missionId && item.passed);
 }
 
-/** 로비의 배지 점등에 쓸, 미션 3개의 배지 상태 목록. */
+/** 로비의 배지 점등에 쓸 전체 미션의 배지 상태 목록. */
 export function badgeStatuses(results: MissionResult[]): BadgeStatus[] {
   return MISSION_LIST.map((mission) => ({
     missionId: mission.id,
@@ -43,12 +43,12 @@ export function earnedBadgeCount(results: MissionResult[]): number {
   return MISSION_LIST.filter((mission) => hasBadge(results, mission.id)).length;
 }
 
-/** 배지 세 개를 모두 받았는지. */
+/** 전체 배지를 모두 받았는지. */
 export function hasAllBadges(results: MissionResult[]): boolean {
   return earnedBadgeCount(results) === MISSION_LIST.length;
 }
 
-/** 전체 배지 개수 (지금은 3개). */
+/** 현재 등록된 전체 배지 개수. */
 export const TOTAL_BADGE_COUNT = MISSION_LIST.length;
 
 /** 이 미션의 배지 이름. */
