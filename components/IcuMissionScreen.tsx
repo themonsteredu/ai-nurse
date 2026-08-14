@@ -283,8 +283,20 @@ export function IcuMissionScreen() {
               fill
               priority
               sizes="(max-width: 760px) 100vw, 1180px"
+              style={{
+                transform: `scale(${1.02 + trendProgress * 0.045}) translate3d(${-8 * trendProgress}px, ${3 * trendProgress}px, 0)`,
+                filter: `brightness(${0.94 + trendProgress * 0.08}) saturate(${0.9 + trendProgress * 0.18})`,
+              }}
             />
             <div className={styles.stageShade} />
+            <div className={styles.replayHud} data-active={trendProgress > 0} data-complete={trendReviewed} aria-hidden="true">
+              <p><span>MONITOR REPLAY</span><strong>{String(Math.round(trendProgress * 10)).padStart(2, "0")}.0s</strong></p>
+              <div className={styles.replayTrack}>
+                <i style={{ width: `${trendProgress * 100}%` }} />
+                <b style={{ left: `calc(${trendProgress * 100}% - ${trendProgress * 10}px)` }} />
+              </div>
+              <small>{trendReviewed ? "LIVE FEED CONNECTED" : trendProgress > 0 ? "PATIENT CHANGE DETECTING" : "10 SECONDS AGO"}</small>
+            </div>
             <div className={styles.monitorBank}>
               {round.patients.map((patient) => {
                 const selected = selectedPatientId === patient.id;
@@ -322,6 +334,7 @@ export function IcuMissionScreen() {
                     className={styles.monitor}
                     data-selected={selected}
                     data-urgent={urgent}
+                    data-changing={trendProgress > 0 && !trendReviewed}
                     disabled={resolved || !trendReviewed}
                     onClick={() => {
                       setSelectedPatientId(patient.id);
@@ -331,9 +344,20 @@ export function IcuMissionScreen() {
                     <span className={styles.bed}>{patient.bed}</span>
                     <span className={styles.patientName}>{patient.label}</span>
                     <svg className={styles.wave} viewBox="0 0 240 54" aria-hidden="true">
-                      <path
-                        d="M0 30h32l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h40"
-                        style={{ opacity: 0.45 + trendProgress * 0.55 }}
+                      <g
+                        className={styles.waveStream}
+                        style={{ animationDuration: `${Math.max(0.42, Math.min(1.35, 60 / displayHeartRate))}s` }}
+                      >
+                        <path d="M0 30h32l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h40" />
+                        <path d="M0 30h32l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h31l7-2 6-22 8 43 9-19h40" transform="translate(240 0)" />
+                      </g>
+                      <line
+                        className={styles.waveCursor}
+                        x1="0"
+                        y1="7"
+                        x2="0"
+                        y2="48"
+                        style={{ animationDuration: `${Math.max(0.42, Math.min(1.35, 60 / displayHeartRate))}s` }}
                       />
                     </svg>
                     <dl className={styles.vitals}>
