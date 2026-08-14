@@ -13,7 +13,7 @@
 .position {
   margin: 0;
   color: var(--color-primary);
-  font-size: var(--font-size-caption);
+  font-size: 0.9rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.08em;
 }
@@ -21,7 +21,7 @@
 .title {
   margin: calc(var(--space-3) * -1) 0 0;
   font-family: "S-Core Dream", "Pretendard", sans-serif;
-  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
   font-weight: var(--font-weight-black);
   line-height: var(--line-height-tight);
   letter-spacing: -0.035em;
@@ -31,7 +31,7 @@
   margin: 0;
   padding: var(--space-3) 0 var(--space-3) var(--space-4);
   border-left: 3px solid var(--color-mission-health-room);
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-normal);
@@ -72,14 +72,14 @@
 
 .sceneStatus span {
   color: #a9d9d5;
-  font-size: 0.63rem;
+  font-size: 0.72rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.13em;
 }
 
 .sceneStatus strong {
   font-family: "S-Core Dream", "Pretendard", sans-serif;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-black);
 }
 
@@ -93,7 +93,7 @@
 .questionLabel {
   margin: 0;
   font-family: "S-Core Dream", "Pretendard", sans-serif;
-  font-size: clamp(1.08rem, 1.8vw, 1.3rem);
+  font-size: clamp(1.18rem, 2vw, 1.4rem);
   font-weight: var(--font-weight-black);
 }
 
@@ -181,9 +181,11 @@
 
 @media (max-width: 620px) {
   .card { gap: var(--space-4); padding: var(--space-4); }
+  .title { font-size: clamp(1.45rem, 7vw, 1.8rem); }
+  .situation { padding-left: var(--space-3); font-size: 1.04rem; line-height: 1.65; }
   .explanation { margin-left: 0; }
-  .healthScene { min-height: 320px; aspect-ratio: 1.15 / 1; }
-  .sceneImage { object-position: 47% center; }
+  .healthScene { min-height: 300px; aspect-ratio: 4 / 3; }
+  .sceneImage { object-position: center; }
   .sceneStatus { left: var(--space-3); right: var(--space-3); bottom: var(--space-3); max-width: none; }
-  .choiceLabel { font-size: 0.96rem; }
+  .choiceLabel { font-size: 1rem; line-height: 1.55; }
 }

@@ -17,6 +17,56 @@
   line-height: 1.6;
 }
 
+.briefingScene {
+  position: relative;
+  min-height: 320px;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-large);
+  background: #102f33;
+  box-shadow: var(--shadow-raised);
+  overflow: hidden;
+}
+
+.briefingScene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(8, 31, 34, 0.76), transparent 58%);
+  pointer-events: none;
+}
+
+.briefingImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.briefingSceneLabel {
+  position: absolute;
+  z-index: 2;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3) 0 var(--space-1) var(--space-4);
+  border-left: 3px solid var(--color-mission-er);
+  color: #fff;
+}
+
+.briefingSceneLabel span {
+  color: #f4b6bf;
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.13em;
+}
+
+.briefingSceneLabel strong {
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: var(--font-size-heading);
+}
+
 .briefingFacts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -27,13 +77,35 @@
 }
 
 .briefingFacts li {
-  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 106px;
+  padding: var(--space-4) var(--space-5);
   color: var(--color-text-muted);
 }
 
 .briefingFacts li:nth-child(odd) { border-right: var(--border-thin) solid var(--color-border); }
 .briefingFacts li:nth-child(-n + 2) { border-bottom: var(--border-thin) solid var(--color-border); }
-.briefingFacts strong { color: var(--color-mission-er); font-weight: var(--font-weight-black); }
+.briefingFacts span {
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+}
+
+.briefingFacts strong {
+  color: var(--color-text);
+  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-weight: var(--font-weight-black);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.briefingFacts small {
+  margin-left: 3px;
+  color: var(--color-mission-er);
+  font-size: 0.92rem;
+}
 
 .briefingNote {
   margin: 0;
@@ -69,7 +141,7 @@
   gap: var(--space-2);
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
+  font-size: 0.84rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.08em;
 }
@@ -109,7 +181,7 @@
   display: block;
   margin-bottom: 2px;
   color: var(--color-mission-er);
-  font-size: 0.67rem;
+  font-size: 0.76rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.14em;
 }
@@ -117,7 +189,7 @@
 .actionHeader h2 {
   margin: 0;
   color: var(--color-text);
-  font-size: var(--font-size-body-large);
+  font-size: clamp(1.16rem, 2vw, 1.4rem);
   font-weight: var(--font-weight-black);
   line-height: 1.3;
 }
@@ -125,7 +197,7 @@
 .actionHeader p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
@@ -183,9 +255,9 @@
 }
 
 @media (max-width: 640px) {
-  .briefingFacts { grid-template-columns: 1fr; }
-  .briefingFacts li:nth-child(odd) { border-right: 0; }
-  .briefingFacts li:not(:last-child) { border-bottom: var(--border-thin) solid var(--color-border); }
+  .briefingScene { min-height: 290px; aspect-ratio: 4 / 3; }
+  .briefingSceneLabel { left: var(--space-3); right: var(--space-3); bottom: var(--space-3); }
+  .briefingFacts li { min-height: 96px; padding: var(--space-3) var(--space-4); }
 
   .actionHeader { align-items: flex-start; flex-direction: column; gap: var(--space-1); }
   .actionHeader p { white-space: normal; }

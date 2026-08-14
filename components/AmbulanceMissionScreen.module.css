@@ -92,6 +92,28 @@
   letter-spacing: 0.06em;
 }
 
+.taskCopy {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.taskCopy strong {
+  color: var(--color-text);
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: var(--font-size-body-large);
+  line-height: 1.3;
+}
+
+.taskCopy > span {
+  min-width: 0;
+  color: var(--color-text-muted);
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
 .briefingNote,
 .stepNote,
 .cycleNote {
@@ -261,6 +283,7 @@
   .briefingHero { aspect-ratio: 1.18 / 1; }
   .briefingImage { object-position: 58% center; }
   .briefingOverlay { left: var(--space-3); right: var(--space-3); bottom: var(--space-3); }
+  .taskCopy { grid-template-columns: 1fr; gap: var(--space-1); }
   .aedLayout { grid-template-columns: 1fr; gap: var(--space-4); }
   .breakdown { grid-template-columns: 1fr; }
   .breakdown li,
