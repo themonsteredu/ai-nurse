@@ -1,30 +1,22 @@
 .network {
   position: relative;
   width: 100%;
-  min-height: 560px;
-  background: #eef2f3;
+  background: #102f33;
   overflow: hidden;
   isolation: isolate;
 }
 
-.network::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(112deg, rgba(255, 255, 255, 0.88), transparent 45%);
-  pointer-events: none;
-}
-
 .networkHeader {
-  position: absolute;
-  z-index: 3;
-  left: var(--space-4);
-  right: var(--space-4);
-  top: var(--space-3);
+  position: relative;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--color-text-muted);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: #102f33;
+  color: #d9e6e5;
   font-size: 0.67rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.15em;
@@ -35,6 +27,7 @@
   align-items: center;
   gap: var(--space-2);
   margin: 0;
+  color: #a9bfbd;
   letter-spacing: 0;
 }
 
@@ -42,61 +35,69 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: #54c8bd;
 }
 
-.routeLines {
+.campusStage {
+  position: relative;
+  height: clamp(440px, 46vw, 580px);
+  overflow: hidden;
+  background: #dfe7e6;
+}
+
+.campusImage {
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+
+.campusShade {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  background: linear-gradient(180deg, rgba(5, 24, 26, 0.08), rgba(5, 24, 26, 0.02) 50%, rgba(5, 24, 26, 0.24));
   pointer-events: none;
-}
-
-.routeLines path {
-  fill: none;
-  stroke: #aebbbc;
-  stroke-width: 1.5;
-  stroke-dasharray: 5 6;
 }
 
 .positionMarker {
   position: absolute;
   z-index: 3;
   left: 50%;
-  top: 28.2%;
+  top: 51%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: 0.6rem;
+  color: #fff;
+  font-size: 0.58rem;
   font-weight: var(--font-weight-black);
   letter-spacing: 0.08em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.72);
   pointer-events: none;
 }
 
 .positionMarker span {
   position: relative;
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #fff;
   border-radius: 50%;
   background: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
 }
 
 .positionMarker span::after {
   content: "";
   position: absolute;
-  inset: -8px;
-  border: 1px solid var(--color-primary);
+  inset: -10px;
+  border: 1px solid #fff;
   border-radius: 50%;
   animation: pulse 1.8s ease-out infinite;
 }
 
 @keyframes pulse {
-  from { transform: scale(0.5); opacity: 0.8; }
+  from { transform: scale(0.5); opacity: 0.85; }
   to { transform: scale(1.45); opacity: 0; }
 }
 
@@ -108,14 +109,16 @@
   flex-direction: column;
   align-items: flex-start;
   min-width: var(--touch-target-min);
-  min-height: var(--touch-target-min);
-  padding: var(--space-4) var(--space-5);
+  min-height: var(--touch-target-large);
+  padding: var(--space-3) var(--space-4);
   border: 0;
   border-top: 3px solid var(--node-accent);
-  border-radius: 0;
-  background: var(--color-surface);
+  border-radius: var(--radius-small);
+  background: rgba(255, 255, 255, 0.94);
   color: var(--color-text);
   text-align: left;
+  box-shadow: 0 10px 30px rgba(8, 35, 38, 0.2);
+  backdrop-filter: blur(12px);
   overflow: hidden;
   transition: transform var(--transition-normal), background var(--transition-fast), box-shadow var(--transition-normal);
 }
@@ -126,25 +129,27 @@
 
 .missionNode:hover:not(:disabled),
 .missionNode:focus-visible {
-  transform: translateY(-4px);
+  z-index: 5;
+  transform: translateY(-4px) scale(1.015);
   background: #fff;
-  box-shadow: var(--shadow-raised);
+  box-shadow: 0 16px 38px rgba(8, 35, 38, 0.3);
 }
 
 .missionNode[data-entering="true"] {
-  z-index: 5;
-  transform: translateY(-6px) scale(1.015);
-  box-shadow: var(--shadow-raised);
+  z-index: 6;
+  transform: translateY(-5px) scale(1.025);
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(8, 35, 38, 0.34);
 }
 
 .missionNode:disabled { cursor: wait; }
 
 .nodeNumber {
   position: absolute;
-  right: var(--space-4);
-  bottom: -0.28em;
-  color: #f0f3f3;
-  font-size: clamp(5rem, 11vw, 8.8rem);
+  right: var(--space-2);
+  bottom: -0.22em;
+  color: #edf1f1;
+  font-size: clamp(4rem, 7vw, 6.4rem);
   font-weight: var(--font-weight-black);
   line-height: 1;
   letter-spacing: -0.08em;
@@ -157,19 +162,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
   width: 100%;
   color: var(--color-text-muted);
-  font-size: 0.66rem;
+  font-size: 0.61rem;
   font-weight: var(--font-weight-black);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
 .nodeStatus {
-  padding: 2px var(--space-2);
+  padding-left: var(--space-2);
   border-left: 2px solid var(--node-accent);
   color: var(--node-accent);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
 .missionNode[data-status="complete"] .nodeStatus {
@@ -182,28 +187,28 @@
   z-index: 1;
   margin-top: auto;
   color: var(--node-accent);
-  font-size: clamp(0.75rem, 1.2vw, 0.92rem);
+  font-size: 0.68rem;
   font-weight: var(--font-weight-black);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
 .nodeTitle {
   position: relative;
   z-index: 1;
-  margin-top: var(--space-1);
+  margin-top: 2px;
   font-family: "S-Core Dream", "Pretendard", sans-serif;
-  font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+  font-size: clamp(1.32rem, 2.5vw, 2rem);
   font-weight: var(--font-weight-black);
-  line-height: 1.05;
+  line-height: 1.02;
   letter-spacing: -0.05em;
 }
 
 .nodeTask {
   position: relative;
   z-index: 1;
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
+  font-size: 0.76rem;
   font-weight: var(--font-weight-medium);
 }
 
@@ -213,11 +218,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  margin-top: var(--space-2);
   color: var(--color-text);
   font-size: 0.68rem;
   font-weight: var(--font-weight-black);
-  letter-spacing: 0.1em;
 }
 
 .nodeAction i {
@@ -229,7 +233,7 @@
 .entryBrief {
   position: absolute;
   z-index: 10;
-  inset: 0;
+  inset: 44px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -266,34 +270,48 @@
 }
 
 @media (max-width: 640px) {
-  .network { min-height: 690px; }
-  .networkHeader { position: relative; inset: auto; padding: var(--space-3) var(--space-4); }
+  .networkHeader { padding-inline: var(--space-3); }
   .networkHeader p { display: none; }
-  .routeLines { display: none; }
 
-  .network::after {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    left: 24px;
-    top: 72px;
-    bottom: 32px;
-    border-left: 1px dashed #aebbbc;
-  }
-
-  .positionMarker { left: 24px; top: 64px; transform: translateX(-50%); }
+  .campusStage { height: 430px; }
+  .campusImage { object-position: 52% center; }
+  .positionMarker { top: 48%; }
   .positionMarker small { display: none; }
 
   .missionNode {
-    left: 42px !important;
-    width: calc(100% - 58px) !important;
-    height: 184px !important;
-    padding: var(--space-4);
+    padding: var(--space-2) var(--space-3);
   }
 
-  .missionNode[data-mission="er"] { top: 62px !important; }
-  .missionNode[data-mission="ambulance"] { top: 264px !important; }
-  .missionNode[data-mission="healthRoom"] { top: 466px !important; }
-  .nodeNumber { font-size: 6.2rem; }
-  .nodeTitle { font-size: 2rem; }
+  .missionNode[data-mission="er"] {
+    left: 3% !important;
+    top: 57% !important;
+    width: 46% !important;
+    height: 30% !important;
+  }
+
+  .missionNode[data-mission="ambulance"] {
+    left: 51% !important;
+    top: 61% !important;
+    width: 46% !important;
+    height: 30% !important;
+  }
+
+  .missionNode[data-mission="healthRoom"] {
+    left: 48% !important;
+    top: 7% !important;
+    width: 49% !important;
+    height: 30% !important;
+  }
+
+  .nodeNumber { font-size: 4.3rem; }
+  .nodeCategory { display: none; }
+  .nodeTitle { margin-top: auto; font-size: 1.35rem; }
+  .nodeTask { font-size: 0.68rem; }
+  .nodeAction { margin-top: var(--space-1); font-size: 0.64rem; }
+}
+
+@media (max-width: 390px) {
+  .campusStage { height: 410px; }
+  .nodeTopline { font-size: 0.55rem; }
+  .nodeTask { display: none; }
 }

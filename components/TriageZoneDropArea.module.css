@@ -8,13 +8,14 @@
   gap: var(--space-1);
   min-width: 0;
   min-height: var(--drop-zone-min-height);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2);
   border: 0;
   border-top: 3px solid var(--zone-color);
   border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text);
   text-align: left;
+  box-shadow: inset 0 0 0 1px var(--color-border);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
@@ -27,7 +28,7 @@
 .zone:not(:disabled):hover,
 .zone:not(:disabled):focus-visible {
   background: var(--color-surface-muted);
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 1px var(--zone-color), var(--shadow-card);
   transform: translateY(-3px);
 }
 
@@ -86,7 +87,7 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.4;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .zoneFooter {

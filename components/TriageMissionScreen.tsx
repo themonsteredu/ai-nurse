@@ -485,7 +485,7 @@ export function TriageMissionScreen() {
               <span>PRIORITY ACTION</span>
               <h2 id="priority-action-title">가장 먼저 배정할 우선순위를 선택하세요.</h2>
             </div>
-            <p>패널을 끌어 놓거나 타일을 직접 누를 수 있습니다.</p>
+            <p>환자 상태와 활력징후를 근거로 판단하세요.</p>
           </div>
 
           <div className={styles.zoneRow}>
