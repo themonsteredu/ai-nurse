@@ -2,7 +2,7 @@
  * 앱 전체가 공유하는 "용어 사전" 파일.
  *
  * 여기 있는 건 값이 아니라 "이름의 정의"입니다.
- * 예: 난이도는 초등/중등 둘 뿐이고, 미션은 세 개 뿐이라는 약속.
+ * 예: 난이도는 초등/중등 둘 뿐이고, 미션 ID는 아래 목록만 쓴다는 약속.
  *
  * ⚠️ 코덱스(디자인 담당 AI)는 이 파일을 수정하지 않습니다.
  */
@@ -10,8 +10,14 @@
 /** 난이도. 시작 화면에서 학생이 고릅니다. */
 export type Difficulty = "elementary" | "middle";
 
-/** 미션(부서) 종류. 로비의 카드 3장과 1:1로 대응합니다. */
-export type MissionId = "er" | "ambulance" | "healthRoom";
+/** 미션(부서) 종류. 로비의 현장 표지와 1:1로 대응합니다. */
+export type MissionId =
+  | "er"
+  | "ambulance"
+  | "healthRoom"
+  | "operatingRoom"
+  | "icu"
+  | "medication";
 
 /**
  * 중증도 분류 구역 색깔. 미션 1에서 사용합니다.

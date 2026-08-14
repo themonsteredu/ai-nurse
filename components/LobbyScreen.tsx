@@ -72,7 +72,7 @@ export function LobbyScreen() {
   return (
     <AppScreen
       title="오늘의 간호 미션"
-      subtitle="병원 곳곳에서 세 가지 상황이 발생했습니다."
+      subtitle="병원 여섯 현장에서 간호사의 판단과 행동을 경험하세요."
       tone="calm"
       footer={
         reportReady ? (
@@ -96,7 +96,7 @@ export function LobbyScreen() {
 
       {retryList.length > 0 ? (
         <p className={styles.retryNotice}>
-          배지 3개를 모두 모아야 최종 리포트가 열려요. 아직 배지를 못 받은 곳에 다시 도전해보세요.
+          배지 {TOTAL_BADGE_COUNT}개를 모두 모아야 최종 리포트가 열려요. 아직 배지를 못 받은 곳에 다시 도전해보세요.
         </p>
       ) : null}
 

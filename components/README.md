@@ -18,7 +18,7 @@
 |---|---|
 | `SessionProvider.tsx` | 학생의 진행 상황을 화면들 사이에서 공유 (브라우저 메모리에만) |
 | `StartScreen.tsx` | 이름 입력 + 난이도 선택 + 면책 문구 |
-| `LobbyScreen.tsx` | 부서 카드 3개, 배지 점등 |
+| `LobbyScreen.tsx` | 3D 병원 지도와 부서 6곳, 배지 점등 |
 | `UnlockCodeScreen.tsx` | 통과 코드 네 자리 입력 |
 | `TriagePatientCard.tsx` | 미션 1 — 끌어다 놓는 환자 카드 |
 | `TriageZoneDropArea.tsx` | 미션 1 — 색깔 구역(놓는 자리) |
@@ -29,6 +29,9 @@
 | `AedBodyDiagram.tsx` | 미션 2 — 패드 붙일 몸 그림 |
 | `HealthRoomCaseCard.tsx` | 미션 3 — 상황과 선택지 |
 | `HealthLogBuilder.tsx` | 미션 3 — 보건일지 문장 조립 (중등 전용) |
+| `SurgeryMissionScreen.tsx` | 미션 4 — 수술 기구 멸균 분류 |
+| `IcuMissionScreen.tsx` | 미션 5 — 중환자 모니터 우선순위 판단 |
+| `MedicationMissionScreen.tsx` | 미션 6 — 환자 팔찌와 약품 대조 |
 | `FinalReport.tsx` | 배지, 점수, 간호 유형, 진로 정보 |
 | `Certificate.tsx` | 이름·날짜가 들어간 수료증 |
 

@@ -18,7 +18,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "골든타임 — 간호사 진로체험",
   description:
-    "초등 3학년~중학생을 위한 간호사 진로체험 웹앱. 응급실, 119 구급차, 보건실 세 곳을 체험합니다.",
+    "초등 3학년~중학생을 위한 간호사 진로체험 웹앱. 응급실, 119, 보건실, 수술실, 중환자실, 투약실을 체험합니다.",
 };
 
 export const viewport: Viewport = {

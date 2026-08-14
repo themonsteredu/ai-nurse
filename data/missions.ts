@@ -58,6 +58,36 @@ export const MISSIONS: Record<MissionId, MissionInfo> = {
     mood: "따뜻하고 안심되는 분위기. 부드럽고 친절한 느낌.",
     order: 3,
   },
+  operatingRoom: {
+    id: "operatingRoom",
+    title: "수술실",
+    subtitle: "멸균선을 지켜라",
+    briefing:
+      "수술 전 준비가 시작됐어요. 기구를 직접 옮겨 멸균 트레이를 완성하고, 오염 위험 물품은 격리 구역으로 분리하세요.",
+    badgeName: "수술 안전 배지",
+    mood: "정교하고 활기찬 분위기. 손을 움직여 정확한 위치를 완성하는 느낌.",
+    order: 4,
+  },
+  icu: {
+    id: "icu",
+    title: "중환자실",
+    subtitle: "모니터의 변화를 읽어라",
+    briefing:
+      "여러 환자의 활력징후가 동시에 바뀌고 있어요. 모니터를 비교해 가장 먼저 확인할 환자를 고르고 신속 대응하세요.",
+    badgeName: "집중 관찰 배지",
+    mood: "차분하지만 긴장감 있는 분위기. 변화를 읽고 즉시 움직이는 느낌.",
+    order: 5,
+  },
+  medication: {
+    id: "medication",
+    title: "투약실",
+    subtitle: "한 번 더 확인",
+    briefing:
+      "투약 전에는 환자와 처방, 약품이 정확히 일치해야 해요. 팔찌를 스캔하고 알맞은 약품을 확인 트레이로 옮기세요.",
+    badgeName: "투약 안전 배지",
+    mood: "밝고 정확한 분위기. 스캔하고 대조하며 오류를 찾아내는 느낌.",
+    order: 6,
+  },
 };
 
 /** 로비에 보여줄 순서대로 정렬된 미션 목록. */

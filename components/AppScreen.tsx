@@ -29,13 +29,24 @@ import styles from "./AppScreen.module.css";
  *  warm       — 따뜻함 (보건실)
  *  celebrate  — 축하 (최종 리포트)
  */
-export type ScreenTone = "calm" | "urgent" | "focused" | "warm" | "celebrate";
+export type ScreenTone =
+  | "calm"
+  | "urgent"
+  | "focused"
+  | "warm"
+  | "surgical"
+  | "critical"
+  | "medication"
+  | "celebrate";
 
 const TONE_LABEL: Record<ScreenTone, string> = {
   calm: "GOLDEN TIME · NURSE MISSION",
   urgent: "MISSION 01 · EMERGENCY",
   focused: "MISSION 02 · AMBULANCE",
   warm: "MISSION 03 · WARD",
+  surgical: "MISSION 04 · OPERATING ROOM",
+  critical: "MISSION 05 · INTENSIVE CARE",
+  medication: "MISSION 06 · MEDICATION SAFETY",
   celebrate: "MISSION COMPLETE",
 };
 

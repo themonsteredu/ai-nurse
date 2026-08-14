@@ -10,6 +10,9 @@
 .screen[data-tone="urgent"] { --screen-accent: var(--color-mission-er); }
 .screen[data-tone="focused"] { --screen-accent: var(--color-mission-ambulance); }
 .screen[data-tone="warm"] { --screen-accent: var(--color-mission-health-room); }
+.screen[data-tone="surgical"] { --screen-accent: #087f78; }
+.screen[data-tone="critical"] { --screen-accent: #d83a4e; }
+.screen[data-tone="medication"] { --screen-accent: #087f78; }
 
 .header {
   position: relative;

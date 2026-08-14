@@ -105,7 +105,7 @@ export function nextMission(state: SessionState): MissionId | null {
   return remaining?.id ?? null;
 }
 
-/** 세 미션을 모두 끝냈는지 (통과 여부와 관계없이 다녀왔는지). */
+/** 등록된 미션을 모두 끝냈는지 (통과 여부와 관계없이 다녀왔는지). */
 export function isAllMissionsComplete(state: SessionState): boolean {
   return MISSION_LIST.every((mission) =>
     isMissionComplete(state, mission.id),
@@ -115,8 +115,8 @@ export function isAllMissionsComplete(state: SessionState): boolean {
 /**
  * 최종 리포트를 열 수 있는지.
  *
- * 기획서 기준: "배지 3개를 다 모아야 리포트가 열린다."
- * 즉 세 미션을 다녀오기만 해서는 안 되고, 세 곳 모두 통과해야 합니다.
+ * 현재 기준: "배지 6개를 다 모아야 리포트가 열린다."
+ * 즉 여섯 미션을 다녀오기만 해서는 안 되고, 여섯 곳 모두 통과해야 합니다.
  * 통과하지 못한 미션은 로비에서 다시 도전할 수 있습니다.
  */
 export function canOpenReport(state: SessionState): boolean {
