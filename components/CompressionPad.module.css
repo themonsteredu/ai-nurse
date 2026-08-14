@@ -1,71 +1,84 @@
 .ready {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  min-height: 60dvh;
-  text-align: center;
-}
-
-.readyLabel {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-heading);
-  font-weight: var(--font-weight-bold);
-}
-
-.readyCount {
-  display: grid;
-  place-items: center;
-  width: min(42vw, 280px);
-  aspect-ratio: 1;
-  margin: 0;
-  border: var(--border-accent) solid var(--color-mission-ambulance);
-  border-radius: 50%;
-  background: var(--color-mission-ambulance-soft);
-  color: var(--color-mission-ambulance);
-  font-size: 8rem;
-  font-weight: var(--font-weight-black);
-  line-height: 1;
-  box-shadow: var(--shadow-raised);
-}
-
-.readyHint {
-  margin: 0;
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-medium);
-}
-
-.pad {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
-  gap: var(--space-5);
-  align-items: stretch;
-  padding: var(--space-4);
-  border-radius: var(--radius-extra-large);
-  transition: background var(--transition-normal);
-}
-
-.pad[data-zone="slow"] { background: rgba(23, 56, 61, 0.14); }
-
-.tapArea {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  min-height: 430px;
-  padding: var(--space-5);
-  border: var(--border-accent) solid var(--color-mission-ambulance);
-  border-radius: var(--radius-extra-large);
-  background:
-    radial-gradient(circle, var(--color-mission-ambulance-soft) 0 30%, transparent 31%),
-    linear-gradient(rgba(70, 98, 94, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(70, 98, 94, 0.055) 1px, transparent 1px),
-    var(--color-surface);
-  background-size: auto, 28px 28px, 28px 28px, auto;
+  gap: var(--space-3);
+  min-height: min(62dvh, 620px);
+  padding: var(--space-7) var(--space-5);
+  border-radius: var(--radius-large);
+  background: url("/assets/nurse/cpr-training.webp") center / cover no-repeat;
+  color: #fff;
+  text-align: center;
+  box-shadow: var(--shadow-raised);
+  overflow: hidden;
+}
+
+.ready::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 31, 34, 0.58);
+}
+
+.readyLabel,
+.readyCount,
+.readyHint { position: relative; z-index: 1; }
+
+.readyLabel {
+  margin: 0;
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  font-weight: var(--font-weight-black);
+}
+
+.readyCount {
+  display: grid;
+  place-items: center;
+  min-width: 112px;
+  min-height: 112px;
+  margin: var(--space-2) 0;
+  border: var(--border-medium) solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  background: rgba(8, 31, 34, 0.62);
+  color: #fff;
+  font-size: clamp(3.4rem, 10vw, 5.5rem);
+  font-weight: var(--font-weight-black);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  backdrop-filter: blur(10px);
+}
+
+.readyHint {
+  margin: 0;
+  color: #d4e3e2;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.65fr);
+  gap: var(--space-5);
+  align-items: stretch;
+  max-width: 980px;
+  margin: 0 auto;
+  transition: background-color var(--transition-normal);
+}
+
+.pad[data-zone="slow"] {
+  padding: var(--space-3);
+  background: rgba(16, 47, 51, 0.08);
+}
+
+.tapArea {
+  position: relative;
+  min-height: 480px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-large);
+  background: url("/assets/nurse/cpr-training.webp") center / cover no-repeat;
   box-shadow: var(--shadow-raised);
   touch-action: none;
   overflow: hidden;
@@ -74,66 +87,66 @@
 .tapArea::before {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(330px, 72%);
-  height: 82%;
-  transform: translate(-50%, -50%);
-  border: 5px solid #657875;
-  border-radius: 60px 60px 24px 24px;
-  background:
-    radial-gradient(circle at 50% 14%, #efb79e 0 29px, #aa725b 30px 33px, transparent 34px),
-    linear-gradient(90deg, transparent 24%, #d7e7ee 24% 76%, transparent 76%),
-    #f8fbfb;
-  box-shadow: 0 9px 0 rgba(55, 79, 75, 0.2);
-  opacity: 0.72;
+  inset: 0;
+  background: rgba(8, 31, 34, 0.18);
   pointer-events: none;
 }
 
 .tapArea::after {
   content: "손바닥 전체로 힘차게";
   position: absolute;
-  z-index: 4;
-  bottom: var(--space-5);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
+  left: var(--space-4);
+  bottom: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-small);
+  background: rgba(8, 31, 34, 0.8);
+  color: #fff;
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
-  box-shadow: var(--shadow-card);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
 }
 
-.tapArea:active { background-color: var(--color-warning-soft); }
+.tapArea:active::before { background: rgba(233, 130, 50, 0.24); }
 
 .guideCircle {
   position: absolute;
   z-index: 2;
-  width: min(280px, 65%);
+  left: 42%;
+  top: 53%;
+  translate: -50% -50%;
+  width: min(250px, 48%);
   aspect-ratio: 1;
-  border: var(--border-accent) solid var(--color-on-primary);
+  border: 4px solid rgba(255, 255, 255, 0.94);
   border-radius: 50%;
-  background: var(--color-mission-ambulance);
-  box-shadow: 0 0 0 var(--space-3) var(--color-mission-ambulance-soft);
+  background: rgba(233, 130, 50, 0.78);
+  box-shadow: 0 0 0 var(--space-3) rgba(233, 130, 50, 0.18);
   opacity: 1;
   transition: opacity var(--transition-normal);
   pointer-events: none;
 }
 
+/* transform은 CompressionPad.tsx의 ref 애니메이션 전용입니다. transition 금지. */
 .tapLabel,
 .tapCount {
-  position: relative;
+  position: absolute;
   z-index: 3;
-  color: var(--color-on-primary);
-  text-shadow: 0 2px 8px rgba(23, 56, 61, 0.28);
+  left: 42%;
+  translate: -50% -50%;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(8, 31, 34, 0.45);
+  pointer-events: none;
 }
 
 .tapLabel {
-  font-size: var(--font-size-title);
+  top: 50%;
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
   font-weight: var(--font-weight-black);
 }
 
 .tapCount {
+  top: 58%;
   font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-black);
   font-variant-numeric: tabular-nums;
@@ -147,36 +160,49 @@
 
 .timeBox {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-5);
-  border: var(--border-thin) solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--touch-target-min);
+  padding: var(--space-3) 0;
+  border-top: var(--border-thin) solid var(--color-border);
+  border-bottom: var(--border-thin) solid var(--color-border);
 }
 
-.timeLabel { color: var(--color-text-muted); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
-.timeValue { font-size: var(--font-size-title); font-weight: var(--font-weight-black); font-variant-numeric: tabular-nums; }
+.timeLabel {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+}
+
+.timeValue {
+  color: var(--color-text);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-black);
+  font-variant-numeric: tabular-nums;
+}
 
 .guideGoneNote {
   margin: 0;
-  padding: var(--space-4);
-  border-radius: var(--radius-medium);
-  background: var(--color-primary-soft);
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
   color: var(--color-primary-strong);
   font-weight: var(--font-weight-bold);
-  text-align: center;
+  line-height: 1.45;
 }
 
 @media (max-width: 860px) {
   .pad { grid-template-columns: 1fr; }
-  .side { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 560px) {
-  .pad { padding: 0; }
-  .tapArea { min-height: 360px; }
+  .ready { min-height: 520px; }
+  .pad[data-zone="slow"] { padding: 0; }
+  .tapArea { min-height: 430px; background-position: 48% center; }
+  .guideCircle,
+  .tapLabel,
+  .tapCount { left: 40%; }
   .side { grid-template-columns: 1fr; }
 }

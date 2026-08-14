@@ -1,5 +1,25 @@
 @import "../styles/design-tokens.css";
 
+/*
+ * S-Core Dream은 제목에만 사용합니다.
+ * 본문까지 제목용 글꼴로 바꾸면 작은 화면에서 긴 안내문이 답답해집니다.
+ */
+@font-face {
+  font-family: "S-Core Dream";
+  src: url("/assets/fonts/S-CoreDream-4Regular.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "S-Core Dream";
+  src: url("/assets/fonts/S-CoreDream-8Heavy.woff") format("woff");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }

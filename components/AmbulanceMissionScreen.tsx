@@ -25,6 +25,7 @@
  */
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 
 import { AED_PAD_COUNT } from "@/data/aed-pads";
@@ -155,8 +156,27 @@ export function AmbulanceMissionScreen() {
 
   if (phase === "briefing") {
     return (
-      <AppScreen title={mission.title} subtitle={mission.subtitle} tone="focused">
+      <AppScreen
+        title="119 현장 대응"
+        subtitle="세 단계의 판단과 처치를 수행하세요."
+        tone="focused"
+      >
         <div className={styles.briefing}>
+          <section className={styles.briefingHero}>
+            <Image
+              className={styles.briefingImage}
+              src="/assets/nurse/dispatch-scene.webp"
+              alt="야외 응급 대응 훈련 현장"
+              fill
+              priority
+              sizes="(max-width: 760px) 100vw, 760px"
+            />
+            <div className={styles.briefingOverlay}>
+              <span>MISSION OBJECTIVE</span>
+              <strong>관찰 · 신고 · 처치</strong>
+            </div>
+          </section>
+
           <p className={styles.briefingText}>{mission.briefing}</p>
 
           <ol className={styles.taskList}>
@@ -189,7 +209,11 @@ export function AmbulanceMissionScreen() {
 
   if (phase === "dispatch") {
     return (
-      <AppScreen title="① 신고하기" subtitle="무엇부터 해야 할까요?" tone="focused">
+      <AppScreen
+        title="신고 순서 판단"
+        subtitle="현장을 확인하고 가장 먼저 할 행동부터 결정하세요."
+        tone="focused"
+      >
         <DispatchOrderStep steps={steps} onFinish={handleDispatchFinish} />
       </AppScreen>
     );
@@ -198,7 +222,7 @@ export function AmbulanceMissionScreen() {
   if (phase === "dispatchResult" && dispatchTally) {
     return (
       <AppScreen
-        title="① 신고하기 결과"
+        title="신고 판단 결과"
         tone="focused"
         footer={
           <PrimaryButton fullWidth onClick={() => setPhase("compression")}>
@@ -246,7 +270,7 @@ export function AmbulanceMissionScreen() {
   if (phase === "compression") {
     return (
       <AppScreen
-        title="② 가슴 압박"
+        title="가슴압박 리듬"
         subtitle={`원이 가장 작아질 때 눌러주세요 · ${durationSeconds}초`}
         tone="focused"
       >
@@ -261,7 +285,7 @@ export function AmbulanceMissionScreen() {
   if (phase === "compressionResult" && compressionTally) {
     return (
       <AppScreen
-        title="② 가슴 압박 결과"
+        title="가슴압박 결과"
         tone="focused"
         footer={
           <PrimaryButton fullWidth onClick={() => setPhase("aed")}>
@@ -300,7 +324,7 @@ export function AmbulanceMissionScreen() {
     const revealed = phase === "aedResult";
     return (
       <AppScreen
-        title="③ 자동심장충격기"
+        title="AED 패드 위치"
         subtitle={
           revealed
             ? undefined
@@ -348,7 +372,7 @@ export function AmbulanceMissionScreen() {
 
   return (
     <AppScreen
-      title="출동을 마쳤어요"
+      title="119 출동 완료"
       tone="focused"
       footer={
         <PrimaryButton fullWidth onClick={handleFinish}>
@@ -364,7 +388,7 @@ export function AmbulanceMissionScreen() {
           </p>
           <p className={styles.scoreBadge}>
             {missionResult.passed
-              ? `★ ${mission.badgeName} 획득!`
+              ? `${mission.badgeName} 획득`
               : `${passThreshold(difficulty)}% 이상이면 배지를 받아요`}
           </p>
         </section>

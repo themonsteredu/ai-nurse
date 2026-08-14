@@ -25,6 +25,8 @@
  * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
  */
 
+import Image from "next/image";
+
 import type { HealthRoomCase } from "@/data/health-room-cases";
 import { isCorrectFollowUp, isCorrectTreatment } from "@/lib/health-room";
 
@@ -79,20 +81,15 @@ export function HealthRoomCaseCard({
               : "처치와 후속 행동을 마친 단계"
         }
       >
-        <div className={styles.sceneFloor} aria-hidden="true" />
-        <div className={styles.sceneBed} aria-hidden="true">
-          <span className={styles.scenePillow} />
-          <span className={styles.sceneStudent} />
-        </div>
-        <div className={styles.sceneNurse} aria-hidden="true">
-          <span className={styles.nurseHead} />
-          <span className={styles.nurseBody}>+</span>
-        </div>
-        <div className={styles.sceneCabinet} aria-hidden="true">+</div>
-        <div className={styles.sceneSink} aria-hidden="true" />
-        <div className={styles.sceneDesk} aria-hidden="true" />
+        <Image
+          className={styles.sceneImage}
+          src="/assets/nurse/health-room.webp"
+          alt="보건실에서 학생의 상태를 확인하는 간호사"
+          fill
+          sizes="(max-width: 760px) 100vw, 900px"
+        />
         <p className={styles.sceneStatus}>
-          <span>보건실 현장</span>
+          <span>WARD STATUS</span>
           <strong>
             {!treatmentAnswered
               ? "친구 상태 살피기"
@@ -127,7 +124,7 @@ export function HealthRoomCaseCard({
                   onClick={() => onPickTreatment(choice.id)}
                 >
                   <span className={styles.choiceMark} aria-hidden="true">
-                    {state === "correct" ? "⭕" : state === "wrong" ? "❌" : ""}
+                    {state === "correct" ? "✓" : state === "wrong" ? "×" : ""}
                   </span>
                   <span className={styles.choiceLabel}>{choice.label}</span>
                 </button>
@@ -169,7 +166,7 @@ export function HealthRoomCaseCard({
                     onClick={() => onPickFollowUp(choice.id)}
                   >
                     <span className={styles.choiceMark} aria-hidden="true">
-                      {state === "correct" ? "⭕" : state === "wrong" ? "❌" : ""}
+                      {state === "correct" ? "✓" : state === "wrong" ? "×" : ""}
                     </span>
                     <span className={styles.choiceLabel}>{choice.label}</span>
                   </button>
@@ -193,9 +190,9 @@ export function HealthRoomCaseCard({
       {treatmentAnswered && followUpAnswered ? (
         <div className={styles.nextArea}>
           <p className={styles.summary}>
-            처치 {isCorrectTreatment(healthCase.id, treatmentId) ? "⭕" : "❌"}{" "}
+            처치 {isCorrectTreatment(healthCase.id, treatmentId) ? "적절" : "다시 확인"}{" "}
             · 다음 조치{" "}
-            {isCorrectFollowUp(healthCase.id, followUpId) ? "⭕" : "❌"}
+            {isCorrectFollowUp(healthCase.id, followUpId) ? "적절" : "다시 확인"}
           </p>
           <PrimaryButton fullWidth onClick={onNext}>
             {isLast ? "보건실 정리하기" : "다음 친구 맞이하기"}

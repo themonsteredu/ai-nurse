@@ -5,7 +5,7 @@
  * 기능상 각 노드 전체가 기존과 동일한 미션 진입 버튼입니다.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { MissionId } from "@/data/types";
 
@@ -60,12 +60,21 @@ export function HospitalFloorPlan({
   onEnterRoom,
 }: HospitalFloorPlanProps) {
   const [enteringMission, setEnteringMission] = useState<MissionId | null>(null);
+  const enterTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (enteringMission === null) return;
-    const timer = window.setTimeout(() => onEnterRoom(enteringMission), 420);
-    return () => window.clearTimeout(timer);
-  }, [enteringMission, onEnterRoom]);
+    return () => {
+      if (enterTimerRef.current !== null) {
+        window.clearTimeout(enterTimerRef.current);
+      }
+    };
+  }, []);
+
+  function beginMissionEntry(missionId: MissionId) {
+    if (enteringMission !== null) return;
+    setEnteringMission(missionId);
+    enterTimerRef.current = window.setTimeout(() => onEnterRoom(missionId), 420);
+  }
 
   const enteringRoom = rooms.find((room) => room.missionId === enteringMission);
 
@@ -116,7 +125,7 @@ export function HospitalFloorPlan({
               height: `${layout.height}%`,
             }}
             disabled={enteringMission !== null}
-            onClick={() => setEnteringMission(room.missionId)}
+            onClick={() => beginMissionEntry(room.missionId)}
             aria-label={`미션 ${room.order}, ${meta.category}, ${meta.displayTitle}, 상태 ${status}`}
           >
             <span className={styles.nodeNumber} aria-hidden="true">

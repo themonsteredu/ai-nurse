@@ -24,6 +24,7 @@
  */
 
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 import { MISSION_LIST } from "@/data/missions";
 import type { MissionId } from "@/data/types";
@@ -61,9 +62,9 @@ export function LobbyScreen() {
     badgeEarned: hasBadge(results, mission.id),
   }));
 
-  function handleEnterRoom(missionId: MissionId) {
+  const handleEnterRoom = useCallback((missionId: MissionId) => {
     router.push(`/mission/${missionId}`);
-  }
+  }, [router]);
 
   const completed = completedMissionCount(session);
 

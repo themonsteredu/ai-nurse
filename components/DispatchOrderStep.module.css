@@ -1,290 +1,258 @@
 .layout {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.16fr) minmax(330px, 0.84fr);
+  align-items: start;
   gap: var(--space-5);
-  max-width: 980px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
 .instruction {
   grid-column: 1 / -1;
   margin: 0;
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-medium);
-  background: var(--color-mission-ambulance-soft);
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-mission-ambulance);
+  color: var(--color-text-muted);
   font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
+  line-height: 1.55;
 }
 
+.instruction strong { color: var(--color-text); }
+
 .scene {
-  position: relative;
-  grid-column: 1 / -1;
-  min-height: 230px;
-  border: 5px solid #647673;
+  position: sticky;
+  top: var(--space-5);
+  min-width: 0;
+  aspect-ratio: 3 / 2;
   border-radius: var(--radius-large);
-  background: #dfe9df;
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.72), var(--shadow-raised);
+  background: #152f31;
+  box-shadow: var(--shadow-raised);
   overflow: hidden;
 }
 
-.sidewalk {
-  position: absolute;
-  inset: 0 46% 0 0;
-  background:
-    linear-gradient(rgba(72, 94, 90, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(72, 94, 90, 0.08) 1px, transparent 1px),
-    #e7e0d5;
-  background-size: 32px 32px;
+.sceneImage {
+  object-fit: cover;
+  object-position: center;
 }
-
-.road {
-  position: absolute;
-  inset: 0 0 0 54%;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  background: #71807e;
-}
-
-.road span {
-  width: 7%;
-  height: 84%;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.82);
-}
-
-.victim,
-.responder {
-  position: absolute;
-  z-index: 2;
-  width: 78px;
-  height: 132px;
-  transition: transform var(--transition-normal);
-}
-
-.victim { left: 25%; top: 48%; transform: translate(-50%, -50%) rotate(78deg); }
-.responder { left: 9%; top: 48%; transform: translate(-50%, -50%); }
-.scene[data-stage="0"] .responder { transform: translate(-50%, -50%) translateX(-24px); }
-.scene[data-stage="1"] .responder,
-.scene[data-stage="2"] .responder { transform: translate(-50%, -50%) translateX(30px); }
-.scene[data-stage="3"] .responder,
-.scene[data-stage="4"] .responder,
-.scene[data-stage="5"] .responder { transform: translate(-50%, -50%) translateX(53px); }
-
-.victimHead,
-.responderHead {
-  position: absolute;
-  left: 50%;
-  top: 4px;
-  transform: translateX(-50%);
-  width: 44px;
-  height: 44px;
-  border: 4px solid #ab745d;
-  border-radius: 50%;
-  background: #eeb59c;
-}
-
-.victimBody,
-.responderBody {
-  position: absolute;
-  left: 50%;
-  top: 46px;
-  transform: translateX(-50%);
-  width: 68px;
-  height: 78px;
-  border-radius: 25px 25px 15px 15px;
-  background: #e2a34e;
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.35);
-}
-
-.responderBody { background: #3e8780; }
-
-.phone {
-  position: absolute;
-  z-index: 3;
-  left: 41%;
-  top: 19%;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 68px;
-  border: 5px solid #263f3c;
-  border-radius: 9px;
-  background: #f7fbfa;
-  color: var(--color-mission-ambulance);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-black);
-  opacity: 0.25;
-  transform: scale(0.78);
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
-}
-
-.scene[data-stage="3"] .phone,
-.scene[data-stage="4"] .phone,
-.scene[data-stage="5"] .phone { opacity: 1; transform: scale(1); }
 
 .sceneCallout {
   position: absolute;
-  z-index: 4;
-  right: var(--space-4);
+  z-index: 2;
+  left: var(--space-4);
   bottom: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  width: min(38%, 330px);
+  gap: 2px;
+  max-width: calc(100% - var(--space-8));
   padding: var(--space-3) var(--space-4);
-  border-left: 6px solid var(--color-mission-ambulance);
-  border-radius: var(--radius-medium);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: var(--shadow-card);
+  border-left: 3px solid var(--color-mission-ambulance);
+  border-radius: var(--radius-small);
+  background: rgba(8, 31, 34, 0.82);
+  color: #fff;
+  backdrop-filter: blur(10px);
 }
 
-.sceneCallout > span { color: var(--color-text-muted); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
-.sceneCallout > strong { font-size: var(--font-size-body-large); font-weight: var(--font-weight-black); }
+.sceneCallout span,
+.sceneCallout small {
+  color: #9dd3cf;
+  font-size: 0.65rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.12em;
+}
 
-.sceneProgress { display: flex; gap: var(--space-1); margin-top: var(--space-1); }
-.sceneProgress i {
-  display: grid;
-  place-items: center;
-  width: 29px;
-  height: 29px;
-  border: 2px solid var(--color-border-strong);
-  border-radius: 50%;
-  background: var(--color-surface-muted);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-caption);
-  font-style: normal;
+.sceneCallout strong {
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: var(--font-size-body-large);
   font-weight: var(--font-weight-black);
 }
-.sceneProgress i[data-state="current"] { border-color: var(--color-mission-ambulance); background: var(--color-mission-ambulance-soft); color: var(--color-mission-ambulance); }
-.sceneProgress i[data-state="done"] { border-color: var(--color-success); background: var(--color-success); color: #fff; }
 
-.arrangedList,
+.sceneCallout small { margin-top: var(--space-1); font-size: 0.56rem; }
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: 0 0 0 var(--space-5);
+  border-left: var(--border-thin) solid var(--color-border);
+}
+
+.decisionHeader p,
+.poolLabel {
+  margin: 0 0 var(--space-1);
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.14em;
+}
+
+.decisionHeader h2 {
+  margin: 0;
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: clamp(1.24rem, 2vw, 1.58rem);
+  line-height: 1.25;
+  letter-spacing: -0.035em;
+}
+
+.progress {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+
+.progress::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 1px;
+  background: var(--color-border-strong);
+}
+
+.progress li {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+
+.progress span,
+.progress button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: var(--border-medium) solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-background);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-black);
+}
+
+.progress button {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.progress li[data-state="current"] span {
+  border-color: var(--color-mission-ambulance);
+  background: var(--color-mission-ambulance);
+  color: #fff;
+}
+
+.chosenTrail,
 .poolList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.arrangedList {
-  padding: var(--space-4);
-  border: var(--border-thin) solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: rgba(255, 255, 255, 0.7);
+.chosenTrail {
+  border-top: var(--border-thin) solid var(--color-border);
 }
 
-.arrangedCard,
-.emptySlot {
-  display: flex;
+.chosenTrail button {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  min-height: var(--touch-target-large);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-medium);
+  min-height: var(--touch-target-min);
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: var(--border-thin) solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
   text-align: left;
 }
 
-.arrangedCard {
-  border: var(--border-bold) solid var(--color-mission-ambulance);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-}
-
-.emptySlot {
-  border: var(--border-bold) dashed var(--color-border-strong);
-  background: var(--color-surface-muted);
-}
-
-.orderBadge {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-medium);
-  background: var(--color-mission-ambulance);
-  color: var(--color-on-primary);
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-black);
-}
-
-.orderBadge[data-empty="true"] {
-  background: var(--color-border);
-  color: var(--color-text-muted);
-}
-
-.cardLabel,
-.emptyText {
-  flex: 1;
-  font-size: var(--font-size-body-large);
-}
-
-.cardLabel { font-weight: var(--font-weight-bold); }
-.emptyText { color: var(--color-text-muted); }
-
-.undoHint {
-  color: var(--color-text-muted);
+.chosenTrail b {
+  color: var(--color-primary);
   font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
 }
+
+.chosenTrail span { min-width: 0; font-weight: var(--font-weight-bold); }
+.chosenTrail small { color: var(--color-text-muted); font-weight: var(--font-weight-bold); }
 
 .pool {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  border: var(--border-thin) solid var(--color-border);
-  border-radius: var(--radius-large);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-}
-
-.poolLabel {
-  margin: 0;
-  color: var(--color-mission-ambulance);
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-black);
+  gap: var(--space-2);
 }
 
 .poolCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
   width: 100%;
   min-height: var(--touch-target-large);
-  padding: var(--space-3) var(--space-4);
-  border: var(--border-bold) solid var(--color-border);
-  border-radius: var(--radius-medium);
-  background: var(--color-surface-muted);
-  font-size: var(--font-size-body-large);
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: var(--border-thin) solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
   font-weight: var(--font-weight-bold);
+  line-height: 1.4;
   text-align: left;
-  transition: border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
 }
 
-.poolCard:hover {
-  border-color: var(--color-mission-ambulance);
-  background: var(--color-mission-ambulance-soft);
-  transform: translateX(4px);
+.poolCard:hover,
+.poolCard:focus-visible { color: var(--color-primary); }
+
+.poolCard i {
+  color: var(--color-border-strong);
+  font-size: 1.2rem;
+  font-style: normal;
 }
 
-.layout > button { grid-column: 1 / -1; }
+.actionIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-primary);
+}
 
-@media (max-width: 760px) {
+.actionIcon svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.workspace > button { margin-top: var(--space-1); }
+
+@media (max-width: 840px) {
   .layout { grid-template-columns: 1fr; }
-  .instruction,
-  .layout > button { grid-column: auto; }
-  .scene { grid-column: auto; min-height: 270px; }
-  .sceneCallout { width: min(48%, 300px); }
+  .scene { position: relative; top: auto; }
+  .workspace { padding: 0; border-left: 0; }
 }
 
 @media (max-width: 520px) {
-  .scene { min-height: 320px; }
-  .sidewalk { right: 34%; }
-  .road { left: 66%; }
-  .sceneCallout { left: var(--space-3); right: var(--space-3); width: auto; }
-  .victim { left: 39%; top: 39%; }
-  .responder { left: 13%; top: 39%; }
-  .phone { left: 56%; top: 12%; }
+  .layout { gap: var(--space-4); }
+  .instruction { font-size: 0.96rem; }
+  .scene { aspect-ratio: 1.2 / 1; }
+  .sceneImage { object-position: 57% center; }
+  .sceneCallout { left: var(--space-3); right: var(--space-3); bottom: var(--space-3); max-width: none; }
+  .sceneCallout small { display: none; }
+  .decisionHeader h2 { font-size: 1.25rem; }
+  .progress span { width: 34px; height: 34px; }
+  .poolCard { font-size: 0.94rem; }
 }

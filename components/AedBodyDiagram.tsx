@@ -21,6 +21,8 @@
  * ✅ 코덱스(디자인 담당 AI)는 이 파일을 마음껏 바꿔도 됩니다.
  */
 
+import Image from "next/image";
+
 import { AED_PAD_SPOTS, AED_PAD_COUNT } from "@/data/aed-pads";
 
 import styles from "./AedBodyDiagram.module.css";
@@ -42,31 +44,16 @@ export function AedBodyDiagram({
 
   return (
     <div className={styles.diagram}>
-      {/* ---------- 뒤쪽: 사람 몸 그림 (누를 수 없는 배경) ---------- */}
-      <svg
-        className={styles.body}
-        viewBox="0 0 200 260"
-        aria-hidden="true"
-        focusable="false"
-      >
-        {/* 머리 */}
-        <circle cx="100" cy="34" r="26" className={styles.bodyShape} />
-        {/* 목 */}
-        <rect x="88" y="56" width="24" height="16" className={styles.bodyShape} />
-        {/* 몸통 */}
-        <path
-          d="M62 72 Q100 62 138 72 L146 168 Q100 180 54 168 Z"
-          className={styles.bodyShape}
-        />
-        {/* 팔 */}
-        <path d="M62 76 L38 96 L32 160 L48 162 L58 104 Z" className={styles.bodyShape} />
-        <path d="M138 76 L162 96 L168 160 L152 162 L142 104 Z" className={styles.bodyShape} />
-        {/* 다리 */}
-        <path d="M78 176 L72 250 L92 250 L98 180 Z" className={styles.bodyShape} />
-        <path d="M122 176 L128 250 L108 250 L102 180 Z" className={styles.bodyShape} />
-        {/* 가슴 한가운데 기준선 */}
-        <line x1="100" y1="80" x2="100" y2="160" className={styles.centerLine} />
-      </svg>
+      {/* CSS 도형 대신 별도 제작한 AED 훈련 마네킹 에셋을 사용합니다. */}
+      <Image
+        className={styles.bodyImage}
+        src="/assets/nurse/aed-mannequin.webp"
+        alt="AED 패드 위치를 연습하는 인체 모형"
+        fill
+        priority
+        sizes="(max-width: 760px) 94vw, 430px"
+      />
+      <p className={styles.assetLabel}>AED TRAINING MANNEQUIN</p>
 
       {/* ---------- 앞쪽: 붙일 수 있는 자리 ---------- */}
       {AED_PAD_SPOTS.map((spot) => {
