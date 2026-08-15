@@ -14,11 +14,26 @@ import { buildMissionResult } from "@/lib/scoring";
 import { AppScreen } from "./AppScreen";
 import { PrimaryButton } from "./PrimaryButton";
 import { useRequireSession, useSession } from "./SessionProvider";
+import {
+  getCountResponse,
+  getHandoffPrompt,
+  getHandoffResponse,
+  getPrepResponse,
+  getRolePrompt,
+  getRoleResponse,
+  INCIDENT_RESPONSES,
+  SURGERY_DIALOGUES,
+  SURGERY_SCENES,
+  type SurgeryDialogueLine,
+  type SurgeryStoryScene,
+} from "./surgery-story";
+import { playUiSound } from "./ui-sound";
 import styles from "./SurgeryMissionScreen.module.css";
 
 type DragPoint = { x: number; y: number };
 type SurgicalRole = "hemostasis" | "grasp" | "incision";
 type SurgeryPhase = "setup" | "handoff" | "incident" | "count" | "complete";
+type Feedback = { correct: boolean; lines: SurgeryDialogueLine[] };
 
 const SURGICAL_ROLES: Array<{
   id: SurgicalRole;
@@ -32,22 +47,89 @@ const SURGICAL_ROLES: Array<{
 ];
 
 const TOOL_PURPOSE: Record<string, string> = {
-  hemostat: "혈관을 잡아 출혈을 조절할 때 쓰는 잠금형 기구",
-  forceps: "조직이나 거즈를 정교하게 집을 때 쓰는 기구",
+  hemostat: "혈관을 잡아 출혈을 조절하는 잠금형 기구",
+  forceps: "조직이나 거즈를 정교하게 집는 기구",
   scalpelHandle: "수술용 칼날을 결합해 사용하는 손잡이",
-  phone: "개인 물품은 멸균 구역 안으로 가져갈 수 없음",
-  openedWrap: "바닥에 닿은 포장은 오염된 것으로 판단",
-  unsealedGauze: "개봉 상태가 확인되지 않은 거즈는 사용 보류",
+  phone: "개인 물품이라 멸균 구역 안으로 가져갈 수 없음",
+  openedWrap: "바닥에 닿아 오염된 것으로 판단하는 포장",
+  unsealedGauze: "개봉 상태를 신뢰할 수 없어 사용을 보류하는 거즈",
 };
+
+const COUNT_LOCATIONS = {
+  floor: "바닥",
+  bin: "폐기통",
+  drape: "수술포 주변",
+} as const;
 
 function SurgicalToolVisual({ itemId }: { itemId: string }) {
   return <span className={styles.toolVisual} data-tool={itemId} aria-hidden="true" />;
 }
 
+function DialoguePanel({ lines }: { lines: SurgeryDialogueLine[] }) {
+  return (
+    <div className={styles.dialoguePanel} role="status" aria-live="polite">
+      {lines.slice(-2).map((line, index) => (
+        <p key={`${line.speaker}-${line.text}-${index}`} data-speaker={line.speaker}>
+          <span>{line.speaker}</span>
+          <strong>“{line.text}”</strong>
+        </p>
+      ))}
+    </div>
+  );
+}
+
+type CinematicSceneProps = {
+  sceneId: SurgeryStoryScene;
+  dialogue: SurgeryDialogueLine[];
+  children?: React.ReactNode;
+  urgency?: number;
+  transferringToolId?: string | null;
+};
+
+function CinematicScene({
+  sceneId,
+  dialogue,
+  children,
+  urgency,
+  transferringToolId,
+}: CinematicSceneProps) {
+  const scene = SURGERY_SCENES[sceneId];
+
+  return (
+    <section className={styles.cinematicScene} data-scene={sceneId} aria-label={scene.alt}>
+      <Image
+        key={scene.src}
+        className={styles.cinematicImage}
+        src={scene.src}
+        alt={scene.alt}
+        fill
+        priority
+        sizes="(max-width: 760px) 100vw, 1180px"
+      />
+      <div className={styles.sceneShade} />
+      <span className={styles.sceneEyebrow}>{scene.eyebrow}</span>
+      {typeof urgency === "number" ? (
+        <div className={styles.urgencyIndicator} data-alert={urgency >= 70}>
+          <span>TEAM TEMPO</span>
+          <strong>{urgency < 45 ? "STEADY" : urgency < 70 ? "FOCUSED" : "URGENT"}</strong>
+          <i><b style={{ width: `${urgency}%` }} /></i>
+        </div>
+      ) : null}
+      {children}
+      {transferringToolId ? (
+        <div className={styles.transferCue} aria-hidden="true">
+          <SurgicalToolVisual itemId={transferringToolId} />
+        </div>
+      ) : null}
+      <DialoguePanel lines={dialogue} />
+    </section>
+  );
+}
+
 export function SurgeryMissionScreen() {
   const router = useRouter();
   const session = useRequireSession();
-  const { saveMissionResult } = useSession();
+  const { saveMissionResult, soundEnabled } = useSession();
   const [started, setStarted] = useState(false);
   const [placements, setPlacements] = useState<Record<string, SurgicalDestination>>({});
   const [firstJudgments, setFirstJudgments] = useState<Record<string, boolean>>({});
@@ -57,15 +139,19 @@ export function SurgeryMissionScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragPoint, setDragPoint] = useState<DragPoint | null>(null);
-  const [feedback, setFeedback] = useState<{ correct: boolean; text: string } | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [phase, setPhase] = useState<SurgeryPhase>("setup");
   const [requestIndex, setRequestIndex] = useState(0);
   const [requestVisible, setRequestVisible] = useState(false);
   const [requestJudgments, setRequestJudgments] = useState<boolean[]>([]);
   const [urgency, setUrgency] = useState(12);
+  const [transferToolId, setTransferToolId] = useState<string | null>(null);
+  const [handoffAdvancePending, setHandoffAdvancePending] = useState(false);
   const [incidentFirstCorrect, setIncidentFirstCorrect] = useState<boolean | null>(null);
+  const [incidentResolved, setIncidentResolved] = useState(false);
   const [countFirstCorrect, setCountFirstCorrect] = useState<boolean | null>(null);
   const [missingGauzeFound, setMissingGauzeFound] = useState(false);
+  const [countResolved, setCountResolved] = useState(false);
   const dragOriginRef = useRef<DragPoint | null>(null);
 
   const difficulty = session?.difficulty ?? "elementary";
@@ -74,15 +160,50 @@ export function SurgeryMissionScreen() {
   const completed = remainingItems.length === 0;
   const sterileItems = items.filter((item) => item.destination === "sterile");
   const activeRoles = SURGICAL_ROLES.filter((role) => sterileItems.some((item) => item.id === role.itemId));
-  const assemblyCompleted = activeRoles.every((role) => rolePlacements[role.id] === role.itemId);
+  const currentRole = activeRoles.find((role) => rolePlacements[role.id] !== role.itemId);
+  const assemblyCompleted = currentRole === undefined;
   const activeRequest = activeRoles[requestIndex];
+  const activeRequestItem = items.find((item) => item.id === activeRequest?.itemId);
+  const activeRequestLabel = activeRequestItem?.label ?? activeRequest?.label ?? "요청 기구";
+
+  const storyScene: SurgeryStoryScene = !started
+    ? "briefing"
+    : phase === "setup"
+      ? completed ? "instrumentCheck" : "prep"
+      : phase === "handoff"
+        ? requestIndex === 0 ? "handoff" : "surgeryProgress"
+        : phase;
+
+  const baseDialogue = phase === "setup"
+    ? completed
+      ? currentRole ? getRolePrompt(currentRole.label) : [
+        { speaker: "수술실 간호사" as const, text: "기구 준비가 끝났습니다. 수술팀 요청에 대응하겠습니다." },
+      ]
+      : SURGERY_DIALOGUES.prep
+    : phase === "handoff" && requestVisible && activeRequest
+      ? getHandoffPrompt(activeRequestLabel)
+      : SURGERY_DIALOGUES[storyScene];
+  const dialogue = feedback?.lines ?? baseDialogue;
+
+  const setupRatio = items.length === 0 ? 0 : Object.keys(placements).length / items.length;
+  const roleRatio = activeRoles.length === 0 ? 0 : Object.keys(rolePlacements).length / activeRoles.length;
+  const progress = phase === "setup"
+    ? Math.round((setupRatio * 28) + (roleRatio * 17))
+    : phase === "handoff"
+      ? 45 + Math.round(((requestIndex + (handoffAdvancePending ? 1 : 0)) / activeRoles.length) * 30)
+      : phase === "incident" ? 80
+        : phase === "count" ? 90
+          : 100;
 
   useEffect(() => {
-    if (phase !== "handoff" || requestVisible || !activeRequest) return;
+    if (phase !== "handoff" || requestVisible || handoffAdvancePending || !activeRequest) return;
     const delays = [650, 1050, 820];
-    const timeout = window.setTimeout(() => setRequestVisible(true), delays[requestIndex % delays.length]);
+    const timeout = window.setTimeout(() => {
+      setFeedback(null);
+      setRequestVisible(true);
+    }, delays[requestIndex % delays.length]);
     return () => window.clearTimeout(timeout);
-  }, [phase, requestVisible, requestIndex, activeRequest]);
+  }, [phase, requestVisible, handoffAdvancePending, requestIndex, activeRequest]);
 
   useEffect(() => {
     if (phase !== "handoff" || !requestVisible) return;
@@ -90,7 +211,46 @@ export function SurgeryMissionScreen() {
     return () => window.clearInterval(interval);
   }, [phase, requestVisible]);
 
+  useEffect(() => {
+    if (!handoffAdvancePending) return;
+    const timeout = window.setTimeout(() => {
+      setTransferToolId(null);
+      setFeedback(null);
+      setHandoffAdvancePending(false);
+      if (requestIndex === activeRoles.length - 1) {
+        setPhase("incident");
+      } else {
+        setRequestIndex((current) => current + 1);
+      }
+    }, 950);
+    return () => window.clearTimeout(timeout);
+  }, [handoffAdvancePending, requestIndex, activeRoles.length]);
+
+  useEffect(() => {
+    if (!incidentResolved) return;
+    const timeout = window.setTimeout(() => {
+      setFeedback(null);
+      setIncidentResolved(false);
+      setPhase("count");
+    }, 1250);
+    return () => window.clearTimeout(timeout);
+  }, [incidentResolved]);
+
+  useEffect(() => {
+    if (!countResolved) return;
+    const timeout = window.setTimeout(() => {
+      setFeedback(null);
+      setCountResolved(false);
+      setPhase("complete");
+    }, 1350);
+    return () => window.clearTimeout(timeout);
+  }, [countResolved]);
+
   if (session === null) return null;
+
+  function playMissionSound(sound: Parameters<typeof playUiSound>[0]) {
+    if (soundEnabled) playUiSound(sound);
+  }
 
   function placeItem(item: SurgicalItem, destination: SurgicalDestination) {
     const correct = item.destination === destination;
@@ -98,24 +258,15 @@ export function SurgeryMissionScreen() {
       current[item.id] === undefined ? { ...current, [item.id]: correct } : current
     ));
     setSelectedId(null);
+    setFeedback({ correct, lines: getPrepResponse(item.label, destination, correct) });
 
     if (!correct) {
-      setFeedback({
-        correct: false,
-        text: destination === "sterile"
-          ? `${item.label} 항목은 멸균 상태를 확인할 수 없어 격리해야 해요.`
-          : `${item.label} 항목은 멸균 포장이 확인된 수술 기구예요.`,
-      });
+      playMissionSound("warning");
       return;
     }
 
+    playMissionSound("instrument");
     setPlacements((current) => ({ ...current, [item.id]: destination }));
-    setFeedback({
-      correct: true,
-      text: destination === "sterile"
-        ? `${item.label} 항목을 멸균 트레이에 안전하게 배치했습니다.`
-        : `${item.label} 항목을 오염 위험 구역으로 분리했습니다.`,
-    });
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>, item: SurgicalItem) {
@@ -164,305 +315,309 @@ export function SurgeryMissionScreen() {
     router.push("/unlock/operatingRoom");
   }
 
-  function placeSterileRole(role: SurgicalRole) {
-    if (!selectedSterileId) return;
-    const expectedItemId = activeRoles.find((candidate) => candidate.id === role)?.itemId;
-    const correct = expectedItemId === selectedSterileId;
+  function placeSterileRole() {
+    if (!selectedSterileId || !currentRole) return;
+    const correct = currentRole.itemId === selectedSterileId;
     setRoleJudgments((current) => (
       current[selectedSterileId] === undefined
         ? { ...current, [selectedSterileId]: correct }
         : current
     ));
+    const selected = items.find((item) => item.id === selectedSterileId);
+    setFeedback({ correct, lines: getRoleResponse(selected?.label ?? "선택한 기구", correct) });
 
     if (!correct) {
-      const selected = items.find((item) => item.id === selectedSterileId);
-      setFeedback({
-        correct: false,
-        text: `${selected?.label ?? "선택한 기구"}의 역할을 다시 확인하세요. 기구 모양과 사용 목적을 함께 비교해야 합니다.`,
-      });
+      playMissionSound("warning");
       return;
     }
 
-    setRolePlacements((current) => ({ ...current, [role]: selectedSterileId }));
+    playMissionSound("instrument");
+    setRolePlacements((current) => ({ ...current, [currentRole.id]: selectedSterileId }));
     setSelectedSterileId(null);
-    setFeedback({ correct: true, text: "기구의 역할과 수술 순서를 정확히 연결했습니다." });
   }
 
   function handleRequestedTool(itemId: string) {
-    if (phase !== "handoff" || !requestVisible || !activeRequest) return;
+    if (phase !== "handoff" || !requestVisible || !activeRequest || handoffAdvancePending) return;
     const correct = itemId === activeRequest.itemId;
     setRequestJudgments((current) => (
       current.length === requestIndex ? [...current, correct] : current
     ));
+    setFeedback({ correct, lines: getHandoffResponse(activeRequestLabel, correct) });
+
     if (!correct) {
+      playMissionSound("warning");
       setUrgency((current) => Math.min(100, current + 15));
-      setFeedback({ correct: false, text: "요청한 기구와 다릅니다. 이름과 역할을 다시 확인해 안전하게 전달하세요." });
       return;
     }
-    setFeedback({ correct: true, text: `${activeRequest.label} 요청에 맞는 기구를 안전하게 전달했습니다.` });
+
+    playMissionSound("instrument");
     setRequestVisible(false);
+    setTransferToolId(itemId);
+    setHandoffAdvancePending(true);
     setUrgency((current) => Math.max(8, current - 18));
-    if (requestIndex === activeRoles.length - 1) {
-      setPhase("incident");
-      return;
-    }
-    setRequestIndex((current) => current + 1);
   }
 
   function handleSterileIncident(choice: "reuse" | "replace") {
+    if (incidentResolved) return;
     const correct = choice === "replace";
     if (incidentFirstCorrect === null) setIncidentFirstCorrect(correct);
+    setFeedback({ correct, lines: correct ? INCIDENT_RESPONSES.resolved : INCIDENT_RESPONSES.retry });
+
     if (!correct) {
-      setFeedback({ correct: false, text: "멸균 영역 밖으로 나온 기구는 다시 사용할 수 없습니다. 환자 감염을 막기 위해 새 기구가 필요합니다." });
+      playMissionSound("warning");
       return;
     }
-    setFeedback({ correct: true, text: "오염 가능 기구를 격리하고 새 멸균 기구로 교체했습니다." });
-    setPhase("count");
+
+    playMissionSound("success");
+    setIncidentResolved(true);
   }
 
-  function inspectCountLocation(location: "floor" | "bin" | "drape") {
+  function inspectCountLocation(location: keyof typeof COUNT_LOCATIONS) {
+    if (countResolved) return;
     const correct = location === "drape";
     if (countFirstCorrect === null) setCountFirstCorrect(correct);
+    setFeedback({ correct, lines: getCountResponse(COUNT_LOCATIONS[location], correct) });
+
     if (!correct) {
-      setFeedback({ correct: false, text: "아직 거즈 수가 맞지 않습니다. 수술포와 기구대 주변을 차례로 다시 확인하세요." });
+      playMissionSound("warning");
       return;
     }
+
+    playMissionSound("success");
     setMissingGauzeFound(true);
-    setPhase("complete");
-    setFeedback({ correct: true, text: "수술포 아래에서 남은 거즈를 찾아 사용 5개·회수 5개가 일치합니다." });
+    setCountResolved(true);
   }
 
+  const placedSterileItems = items.filter((item) => placements[item.id] === "sterile");
+  const isolatedItems = items.filter((item) => placements[item.id] === "isolate");
+
   return (
-    <AppScreen
-      title="수술실"
-      subtitle="멸균선을 지켜라"
-      tone="surgical"
-    >
+    <AppScreen title="수술실" subtitle="수술팀의 안전을 연결하세요" tone="surgical">
       {!started ? (
         <section className={styles.briefing}>
-          <div className={styles.hero}>
-            <Image
-              className={styles.heroImage}
-              src="/assets/nurse/surgery-room-v1.webp"
-              alt="수술 전 간호사가 멸균 기구 트레이를 준비하는 장면"
-              fill
-              priority
-              sizes="(max-width: 760px) 100vw, 1180px"
-            />
-            <div className={styles.heroShade} />
-            <div className={styles.heroCopy}>
-              <span>MISSION 04 · OPERATING ROOM</span>
-              <strong>준비하고, 전달하고<br />끝까지 확인하세요</strong>
-              <p>멸균 준비부터 팀 요청, 돌발 오염과 마지막 카운트까지 직접 대응합니다.</p>
-            </div>
-          </div>
-          <div className={styles.briefingBar}>
-            <p><span>준비</span><strong>멸균 판정 + 역할 조립</strong></p>
-            <p><span>수술 중</span><strong>팀 요청 + 돌발상황 + 카운트</strong></p>
-            <PrimaryButton onClick={() => setStarted(true)}>수술 준비 시작</PrimaryButton>
+          <CinematicScene sceneId="briefing" dialogue={SURGERY_DIALOGUES.briefing} />
+          <div className={styles.briefingDock}>
+            <p>
+              <span>YOUR ROLE</span>
+              <strong>오늘 당신은 수술실 간호사입니다.</strong>
+              <small>멸균 준비부터 기구 전달, 사고 대응, 마지막 카운트까지 팀 안에서 판단합니다.</small>
+            </p>
+            <PrimaryButton onClick={() => {
+              playMissionSound("transition");
+              setStarted(true);
+            }}>
+              수술 준비 시작
+            </PrimaryButton>
           </div>
         </section>
       ) : (
-        <section className={styles.activity} data-phase={phase} aria-label="수술실 준비와 협업 시뮬레이션">
-          <div className={styles.statusBar}>
-            <p><span>STERILE SETUP</span><strong>{Object.keys(placements).length} / {items.length}</strong></p>
-            <div className={styles.progressTrack}><i style={{ width: `${(Object.keys(placements).length / items.length) * 100}%` }} /></div>
-          </div>
-
-          <div className={styles.scene}>
-            <Image
-              className={styles.sceneImage}
-              src="/assets/nurse/surgery-room-v1.webp"
-              alt="멸균 트레이를 준비하는 수술실"
-              fill
-              priority
-              sizes="(max-width: 760px) 100vw, 1180px"
-            />
-            <div
-              className={styles.sterileZone}
-              data-surgical-destination="sterile"
-              data-active={selectedId !== null}
-              onClick={() => {
-                const item = items.find((candidate) => candidate.id === selectedId);
-                if (item) placeItem(item, "sterile");
-              }}
-            >
-              <span>STERILE FIELD</span>
-              <strong>멸균 트레이</strong>
-              <small>기구 사이를 띄우고 손잡이가 같은 방향을 보도록 준비합니다.</small>
-              <div className={styles.placedItems}>
-                {items.filter((item) => placements[item.id] === "sterile").map((item) => (
-                  <figure key={item.id} className={styles.placedTool}>
-                    <SurgicalToolVisual itemId={item.id} />
-                    <figcaption>{item.label}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-            <div
-              className={styles.isolateZone}
-              data-surgical-destination="isolate"
-              data-active={selectedId !== null}
-              onClick={() => {
-                const item = items.find((candidate) => candidate.id === selectedId);
-                if (item) placeItem(item, "isolate");
-              }}
-            >
-              <span>HOLD</span>
-              <strong>격리 구역</strong>
-              <div className={styles.placedItems}>
-                {items.filter((item) => placements[item.id] === "isolate").map((item) => (
-                  <figure key={item.id} className={styles.placedTool}>
-                    <SurgicalToolVisual itemId={item.id} />
-                    <figcaption>{item.label}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.supplyPanel}>
-            <div className={styles.supplyHeader}>
-              <p><span>SUPPLY CART</span><strong>{completed ? "준비 완료" : "물품을 직접 옮기세요"}</strong></p>
-              <small>끌기 어렵다면 물품을 누른 뒤 구역을 누르세요.</small>
-            </div>
-            <p className={styles.roleGuide}>
-              <span>간호사의 역할</span>
-              <strong>{selectedId ? items.find((item) => item.id === selectedId)?.label : "도구를 선택해 역할을 알아보세요"}</strong>
-              <small>{selectedId ? TOOL_PURPOSE[selectedId] : "수술 전 기구의 수량·포장·멸균 상태를 확인하고 사용 순서에 맞게 준비합니다."}</small>
-            </p>
-            <div className={styles.itemRail}>
-              {remainingItems.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={styles.item}
-                  data-selected={selectedId === item.id}
-                  data-dragging={draggingId === item.id}
-                  onPointerDown={(event) => handlePointerDown(event, item)}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={(event) => handlePointerUp(event, item)}
-                  onPointerCancel={() => { setDraggingId(null); setDragPoint(null); }}
-                >
-                  <SurgicalToolVisual itemId={item.id} />
-                  <span className={styles.itemCopy}>
-                    <i aria-hidden="true">{String(items.indexOf(item) + 1).padStart(2, "0")}</i>
-                    <strong>{item.label}</strong>
-                    <small>{item.caption}</small>
-                  </span>
-                </button>
+        <section className={styles.activity} data-phase={phase} aria-label="수술팀 협업 시뮬레이션">
+          <div className={styles.missionStatus}>
+            <p><span>OPERATING ROOM</span><strong>{progress}%</strong></p>
+            <div className={styles.progressTrack}><i style={{ width: `${progress}%` }} /></div>
+            <ol aria-label="수술 미션 진행 단계">
+              {[
+                ["setup", "준비"],
+                ["handoff", "전달"],
+                ["incident", "오염 대응"],
+                ["count", "카운트"],
+                ["complete", "종료"],
+              ].map(([id, label], index) => (
+                <li key={id} data-current={phase === id} data-done={progress >= [1, 46, 81, 91, 100][index]}>{label}</li>
               ))}
-            </div>
+            </ol>
           </div>
 
-          {feedback ? <p className={styles.feedback} data-correct={feedback.correct} role="status">{feedback.text}</p> : null}
-
-          {completed ? (
-            <section className={styles.assemblyPanel} aria-label="수술 기구 역할별 트레이 조립">
-              <header className={styles.assemblyHeader}>
-                <span>STEP 02 · ROLE ASSEMBLY</span>
-                <strong>멸균 기구를 사용 목적에 맞게 다시 배치하세요.</strong>
-                <small>기구 선택 → 역할 슬롯 선택 순서로 진행합니다.</small>
-              </header>
-              <div className={styles.sterileRack}>
-                {sterileItems
-                  .filter((item) => !Object.values(rolePlacements).includes(item.id))
-                  .map((item) => (
+          {phase === "setup" && !completed ? (
+            <>
+              <CinematicScene sceneId="prep" dialogue={dialogue} />
+              <section className={styles.prepWorkbench} aria-label="멸균 물품 판별 준비대">
+                <header>
+                  <p><span>STERILE PREP</span><strong>포장 상태를 보고 물품을 옮기세요.</strong></p>
+                  <small>끌어 놓거나, 물품을 누른 뒤 구역을 누를 수 있습니다.</small>
+                </header>
+                <div className={styles.destinationRow}>
+                  <button
+                    type="button"
+                    data-surgical-destination="sterile"
+                    data-active={selectedId !== null}
+                    onClick={() => {
+                      const item = items.find((candidate) => candidate.id === selectedId);
+                      if (item) placeItem(item, "sterile");
+                    }}
+                  >
+                    <span>사용 가능</span><strong>멸균 준비대</strong><small>{placedSterileItems.map((item) => item.label).join(" · ") || "아직 비어 있음"}</small>
+                  </button>
+                  <button
+                    type="button"
+                    data-surgical-destination="isolate"
+                    data-active={selectedId !== null}
+                    onClick={() => {
+                      const item = items.find((candidate) => candidate.id === selectedId);
+                      if (item) placeItem(item, "isolate");
+                    }}
+                  >
+                    <span>사용 보류</span><strong>격리 구역</strong><small>{isolatedItems.map((item) => item.label).join(" · ") || "아직 비어 있음"}</small>
+                  </button>
+                </div>
+                <div className={styles.instrumentRail}>
+                  {remainingItems.map((item) => (
                     <button
                       key={item.id}
                       type="button"
-                      data-selected={selectedSterileId === item.id}
-                      onClick={() => {
-                        setSelectedSterileId((current) => current === item.id ? null : item.id);
-                        setFeedback(null);
-                      }}
+                      className={styles.instrumentCard}
+                      data-selected={selectedId === item.id}
+                      data-dragging={draggingId === item.id}
+                      onPointerDown={(event) => handlePointerDown(event, item)}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={(event) => handlePointerUp(event, item)}
+                      onPointerCancel={() => { setDraggingId(null); setDragPoint(null); }}
                     >
                       <SurgicalToolVisual itemId={item.id} />
-                      <strong>{item.label}</strong>
+                      <span><strong>{item.label}</strong><small>{item.caption}</small></span>
                     </button>
                   ))}
-              </div>
-              <div className={styles.roleSlots}>
-                {activeRoles.map((role) => {
-                  const placedItem = items.find((item) => item.id === rolePlacements[role.id]);
-                  return (
-                    <button
-                      key={role.id}
-                      type="button"
-                      data-filled={Boolean(placedItem)}
-                      data-active={selectedSterileId !== null}
-                      onClick={() => placeSterileRole(role.id)}
-                    >
-                      <span>{role.label}</span>
-                      <strong>{placedItem?.label ?? "기구를 배치하세요"}</strong>
-                      <small>{role.caption}</small>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
+                </div>
+              </section>
+            </>
           ) : null}
 
-          {assemblyCompleted ? (
-            <div className={styles.completePanel}>
-              <p><span>STERILE FIELD READY</span><strong>준비가 끝났습니다. 이제 수술팀의 실시간 요청에 대응하세요.</strong></p>
-              <PrimaryButton onClick={() => { setPhase("handoff"); setFeedback(null); }}>수술팀 호출 시작</PrimaryButton>
-            </div>
+          {phase === "setup" && completed ? (
+            <>
+              <CinematicScene sceneId="instrumentCheck" dialogue={dialogue} />
+              <section className={styles.instrumentCheck} aria-label="수술 기구 역할 확인">
+                <header>
+                  <p><span>INSTRUMENT CHECK</span><strong>{currentRole ? `${currentRole.label} 기구를 준비하세요.` : "기구 준비가 끝났습니다."}</strong></p>
+                  <small>{currentRole?.caption ?? "수술팀 호출을 시작할 수 있습니다."}</small>
+                </header>
+                <div className={styles.preparedTools} aria-label="준비 완료 기구">
+                  {activeRoles.map((role) => {
+                    const prepared = items.find((item) => item.id === rolePlacements[role.id]);
+                    return (
+                      <div key={role.id} data-ready={Boolean(prepared)}>
+                        <span>{role.label}</span>
+                        {prepared ? <SurgicalToolVisual itemId={prepared.id} /> : null}
+                        <strong>{prepared?.label ?? "준비 대기"}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!assemblyCompleted ? (
+                  <div className={styles.instrumentChoice}>
+                    <div className={styles.instrumentRail}>
+                      {sterileItems
+                        .filter((item) => !Object.values(rolePlacements).includes(item.id))
+                        .map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            className={styles.instrumentCard}
+                            data-selected={selectedSterileId === item.id}
+                            onClick={() => {
+                              setSelectedSterileId((current) => current === item.id ? null : item.id);
+                              setFeedback(null);
+                            }}
+                          >
+                            <SurgicalToolVisual itemId={item.id} />
+                            <span><strong>{item.label}</strong><small>{TOOL_PURPOSE[item.id]}</small></span>
+                          </button>
+                        ))}
+                    </div>
+                    <button type="button" className={styles.placeOnTray} disabled={!selectedSterileId} onClick={placeSterileRole}>
+                      선택한 기구를 준비대에 놓기
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.teamReady}>
+                    <p><span>STERILE FIELD READY</span><strong>준비가 끝났습니다. 이제 집도의의 요청에 대응하세요.</strong></p>
+                    <PrimaryButton onClick={() => {
+                      playMissionSound("transition");
+                      setFeedback(null);
+                      setPhase("handoff");
+                    }}>
+                      수술팀 호출 시작
+                    </PrimaryButton>
+                  </div>
+                )}
+              </section>
+            </>
           ) : null}
 
           {phase === "handoff" ? (
-            <section className={styles.handoffStage} aria-label="수술팀 기구 요청 대응">
-              <Image className={styles.handoffImage} src="/assets/nurse/surgery-room-v1.webp" alt="수술팀이 기구를 요청하는 수술실" fill priority sizes="(max-width:760px) 100vw, 1180px" />
-              <div className={styles.handoffShade} />
-              <div className={styles.requestConsole} data-live={requestVisible}>
-                <p><span>LIVE REQUEST {String(requestIndex + 1).padStart(2, "0")}</span><strong>{requestVisible && activeRequest ? `“${activeRequest.label} 기구 주세요.”` : "수술팀 요청을 기다리는 중…"}</strong></p>
-                <div className={styles.urgencyMeter}><i style={{ width: `${urgency}%` }} /></div>
-                <small>요청 대기 시간이 길어지면 긴급도가 올라갑니다.</small>
-              </div>
-              <div className={styles.handoffTray}>
-                {sterileItems.map((item) => (
-                  <button key={item.id} type="button" disabled={!requestVisible} onClick={() => handleRequestedTool(item.id)}>
-                    <SurgicalToolVisual itemId={item.id} />
-                    <strong>{item.label}</strong>
-                    <small>{TOOL_PURPOSE[item.id]}</small>
-                  </button>
-                ))}
-              </div>
-            </section>
+            <>
+              <CinematicScene
+                sceneId={requestIndex === 0 ? "handoff" : "surgeryProgress"}
+                dialogue={dialogue}
+                urgency={urgency}
+                transferringToolId={transferToolId}
+              />
+              <section className={styles.handoffTray} aria-label="집도의 요청 기구 선택">
+                <header>
+                  <p><span>INSTRUMENT TRAY</span><strong>{requestVisible ? "집도의의 요청을 듣고 기구를 집으세요." : handoffAdvancePending ? "안전하게 전달하는 중입니다." : "다음 요청을 기다리는 중입니다."}</strong></p>
+                  <small>{requestIndex + 1} / {activeRoles.length} 요청</small>
+                </header>
+                <div className={styles.instrumentRail}>
+                  {sterileItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={styles.instrumentCard}
+                      disabled={!requestVisible || handoffAdvancePending}
+                      onClick={() => handleRequestedTool(item.id)}
+                    >
+                      <SurgicalToolVisual itemId={item.id} />
+                      <span><strong>{item.label}</strong><small>{TOOL_PURPOSE[item.id]}</small></span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </>
           ) : null}
 
           {phase === "incident" ? (
-            <section className={styles.incidentStage} aria-label="멸균 영역 이탈 돌발상황">
-              <div>
-                <span>STERILE FIELD BROKEN</span>
-                <strong>전달 중 지혈겸자가 멸균 영역 밖으로 떨어졌습니다.</strong>
-                <p>수술은 계속 진행 중입니다. 환자 감염을 막기 위해 즉시 행동하세요.</p>
-              </div>
-              <button type="button" onClick={() => handleSterileIncident("reuse")}><strong>닦아서 다시 사용</strong><small>시간을 아끼기 위해 즉시 전달</small></button>
-              <button type="button" onClick={() => handleSterileIncident("replace")}><strong>오염 기구 격리·교체</strong><small>새 멸균 기구를 열어 전달</small></button>
-            </section>
+            <>
+              <CinematicScene sceneId="incident" dialogue={dialogue} />
+              <section className={styles.incidentActions} aria-label="멸균 오염 사고 대응">
+                <header><span>YOUR DECISION</span><strong>떨어진 기구를 어떻게 처리할까요?</strong></header>
+                <button type="button" disabled={incidentResolved} onClick={() => handleSterileIncident("reuse")}>
+                  <span>행동 A</span><strong>그대로 다시 사용한다</strong><small>수술 지연을 막고 바로 전달한다</small>
+                </button>
+                <button type="button" disabled={incidentResolved} onClick={() => handleSterileIncident("replace")}>
+                  <span>행동 B</span><strong>새 멸균 기구로 교체한다</strong><small>오염 가능 기구는 즉시 격리한다</small>
+                </button>
+              </section>
+            </>
           ) : null}
 
-          {phase === "count" || phase === "complete" ? (
-            <section className={styles.countStage} data-complete={missingGauzeFound} aria-label="수술 종료 거즈 카운트">
-              <header>
-                <span>FINAL SAFETY COUNT</span>
-                <strong>사용 5개 · 회수 {missingGauzeFound ? 5 : 4}개</strong>
-                <p>{missingGauzeFound ? "카운트가 일치합니다. 수술 종료를 보고할 수 있습니다." : "거즈 1개가 보이지 않습니다. 수술실 환경을 직접 확인하세요."}</p>
-              </header>
-              <div className={styles.countScene}>
-                <Image src="/assets/nurse/surgery-room-v1.webp" alt="거즈 카운트를 확인하는 수술실" fill priority sizes="(max-width:760px) 100vw, 1180px" />
-                <button type="button" disabled={missingGauzeFound} onClick={() => inspectCountLocation("floor")}><span>바닥</span><strong>확인</strong></button>
-                <button type="button" disabled={missingGauzeFound} onClick={() => inspectCountLocation("bin")}><span>폐기통</span><strong>확인</strong></button>
-                <button type="button" disabled={missingGauzeFound} onClick={() => inspectCountLocation("drape")}><span>수술포 아래</span><strong>확인</strong></button>
+          {phase === "count" ? (
+            <CinematicScene sceneId="count" dialogue={dialogue}>
+              <div className={styles.countHotspots} data-resolved={missingGauzeFound}>
+                <button type="button" disabled={countResolved} onClick={() => inspectCountLocation("floor")}><span>바닥</span><strong>조사</strong></button>
+                <button type="button" disabled={countResolved} onClick={() => inspectCountLocation("bin")}><span>폐기통</span><strong>조사</strong></button>
+                <button type="button" disabled={countResolved} onClick={() => inspectCountLocation("drape")}><span>수술포 주변</span><strong>조사</strong></button>
               </div>
-              {phase === "complete" ? (
-                <div className={styles.surgeryDebrief}>
-                  <p><span>당신의 간호 판단</span><strong>준비 · 협업 · 멸균 · 카운트를 모두 연결했습니다.</strong><small>수술실 간호사는 기구를 전달하는 사람을 넘어, 오염과 누락을 막아 환자 안전을 지킵니다.</small></p>
-                  <PrimaryButton onClick={handleFinish}>수술 안전 결과 확인</PrimaryButton>
+            </CinematicScene>
+          ) : null}
+
+          {phase === "complete" ? (
+            <>
+              <CinematicScene sceneId="complete" dialogue={SURGERY_DIALOGUES.complete} />
+              <section className={styles.debrief}>
+                <div>
+                  <span>당신이 수행한 수술실 간호 업무</span>
+                  <h2>수술 전·중·후의 안전을 연결했습니다.</h2>
+                  <ul>
+                    <li>멸균 상태 판단</li>
+                    <li>수술 기구 준비</li>
+                    <li>집도의 요청 대응</li>
+                    <li>오염 사고 대응</li>
+                    <li>수술 종료 전 거즈 카운트</li>
+                  </ul>
+                  <p>수술실 간호사는 기구를 전달하는 사람이 아니라, 수술 전·중·후의 안전을 지키는 팀 구성원입니다.</p>
                 </div>
-              ) : null}
-            </section>
+                <PrimaryButton onClick={handleFinish}>수술 안전 결과 확인</PrimaryButton>
+              </section>
+            </>
           ) : null}
 
           {draggingId && dragPoint ? (
