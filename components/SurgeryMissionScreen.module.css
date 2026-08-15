@@ -195,6 +195,61 @@
 .dragGhost { position: fixed; z-index: 100; display:flex; align-items:center; gap:var(--space-2); transform: translate(-50%,-50%); padding: 6px var(--space-3) 6px 6px; background: #fff; color: var(--color-text); box-shadow: var(--shadow-raised); font-size:.76rem; font-weight: 800; pointer-events: none; }
 .dragGhost .toolVisual { width: 70px; height: 52px; }
 
+.activity:not([data-phase="setup"])>.statusBar,
+.activity:not([data-phase="setup"])>.scene,
+.activity:not([data-phase="setup"])>.supplyPanel,
+.activity:not([data-phase="setup"])>.assemblyPanel,
+.activity:not([data-phase="setup"])>.completePanel { display:none; }
+
+.handoffStage { position:relative; min-height:620px; margin-top:var(--space-4); overflow:hidden; background:#071f22; }
+.handoffImage { object-fit:cover; }
+.handoffShade { position:absolute; inset:0; background:linear-gradient(90deg,rgba(4,22,25,.92),rgba(4,22,25,.36)); }
+.requestConsole { position:absolute; z-index:2; left:var(--space-5); top:var(--space-5); width:min(43%,450px); padding:var(--space-4); border-left:4px solid var(--color-warning); background:rgba(7,35,38,.92); color:#fff; }
+.requestConsole[data-live="true"] { animation:requestPulse 1.2s ease-in-out infinite alternate; }
+.requestConsole p { display:flex; flex-direction:column; margin:0; }
+.requestConsole span { color:#75d8cf; font-size:.62rem; font-weight:800; letter-spacing:.12em; }
+.requestConsole strong { margin-top:var(--space-2); font-family:"S-Core Dream",sans-serif; font-size:var(--font-size-heading); line-height:1.35; word-break:keep-all; }
+.requestConsole small { color:#b7cacb; font-size:.68rem; }
+.urgencyMeter { height:5px; margin:var(--space-4) 0 var(--space-2); background:rgba(255,255,255,.16); }
+.urgencyMeter i { display:block; height:100%; background:var(--color-warning); transition:width .35s linear; }
+.handoffTray { position:absolute; z-index:2; left:var(--space-5); right:var(--space-5); bottom:var(--space-5); display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-3); }
+.handoffTray button { display:grid; grid-template-columns:90px minmax(0,1fr); align-items:center; min-height:var(--touch-target-large); padding:var(--space-3); border:1px solid rgba(127,201,195,.34); border-radius:var(--radius-small); background:rgba(6,35,38,.94); color:#fff; text-align:left; backdrop-filter:blur(8px); }
+.handoffTray button:not(:disabled):hover { border-color:#75d8cf; background:rgba(8,55,57,.96); }
+.handoffTray button:disabled { opacity:.48; }
+.handoffTray strong { font-size:.86rem; }
+.handoffTray small { color:#9eb5b6; font-size:.64rem; line-height:1.4; }
+.handoffTray .toolVisual { width:82px; height:60px; }
+@keyframes requestPulse { from { border-color:var(--color-warning); } to { border-color:var(--color-danger); box-shadow:0 0 28px rgba(216,58,78,.18); } }
+
+.incidentStage { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(180px,.65fr) minmax(180px,.65fr); align-items:stretch; gap:var(--space-3); margin-top:var(--space-4); padding:var(--space-5); border-left:6px solid var(--color-danger); background:#102f33; color:#fff; }
+.incidentStage>div { display:flex; flex-direction:column; justify-content:center; }
+.incidentStage>div span { color:#ff8c9a; font-size:.64rem; font-weight:800; letter-spacing:.14em; }
+.incidentStage>div strong { margin-top:var(--space-2); font-family:"S-Core Dream",sans-serif; font-size:var(--font-size-heading); line-height:1.35; word-break:keep-all; }
+.incidentStage>div p { margin:var(--space-2) 0 0; color:#c4d2d3; }
+.incidentStage>button { display:flex; min-height:var(--touch-target-large); flex-direction:column; align-items:flex-start; justify-content:center; padding:var(--space-4); border:1px solid rgba(255,255,255,.18); border-radius:var(--radius-small); background:rgba(255,255,255,.07); color:#fff; text-align:left; }
+.incidentStage>button:hover { border-color:#fff; background:rgba(255,255,255,.12); }
+.incidentStage>button small { margin-top:4px; color:#b8c9ca; line-height:1.4; }
+
+.countStage { margin-top:var(--space-4); background:#fff; }
+.countStage>header { padding:var(--space-4); border-left:5px solid var(--color-danger); }
+.countStage[data-complete="true"]>header { border-color:var(--color-success); }
+.countStage>header span { color:var(--color-danger); font-size:.64rem; font-weight:800; letter-spacing:.12em; }
+.countStage>header strong { display:block; margin-top:var(--space-2); font-family:"S-Core Dream",sans-serif; font-size:var(--font-size-heading); font-variant-numeric:tabular-nums; }
+.countStage>header p { margin:var(--space-2) 0 0; color:var(--color-text-muted); }
+.countScene { position:relative; min-height:420px; overflow:hidden; }
+.countScene img { object-fit:cover; filter:brightness(.65); }
+.countScene button { position:absolute; z-index:2; display:flex; min-width:150px; min-height:var(--touch-target-large); flex-direction:column; align-items:flex-start; justify-content:center; padding:var(--space-3); border:1px solid rgba(255,255,255,.45); border-radius:var(--radius-small); background:rgba(7,34,37,.82); color:#fff; text-align:left; backdrop-filter:blur(7px); }
+.countScene button:nth-of-type(1) { left:7%; bottom:8%; }
+.countScene button:nth-of-type(2) { right:7%; bottom:11%; }
+.countScene button:nth-of-type(3) { left:45%; top:24%; }
+.countScene button span { color:#91d8d2; font-size:.62rem; font-weight:800; }
+.countScene button:disabled { opacity:.42; }
+.surgeryDebrief { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); padding:var(--space-4); border-left:5px solid var(--color-success); background:var(--color-success-soft); }
+.surgeryDebrief p { display:flex; flex-direction:column; margin:0; }
+.surgeryDebrief p span { color:var(--color-primary); font-size:.62rem; font-weight:800; letter-spacing:.1em; }
+.surgeryDebrief p strong { margin-top:4px; }
+.surgeryDebrief p small { margin-top:4px; color:var(--color-text-muted); line-height:1.5; }
+
 @media (max-width: 720px) {
   .hero { min-height: 430px; }
   .heroImage { object-position: 45% center; }
@@ -217,4 +272,21 @@
   .roleSlots { grid-template-columns:1fr; }
   .roleSlots button { min-height:96px; }
   .completePanel { align-items: stretch; flex-direction: column; }
+  .handoffStage { min-height:760px; }
+  .requestConsole { left:var(--space-3); right:var(--space-3); top:var(--space-3); width:auto; }
+  .handoffTray { left:var(--space-3); right:var(--space-3); bottom:var(--space-3); grid-template-columns:1fr; }
+  .handoffTray button { grid-template-columns:76px minmax(0,1fr); }
+  .handoffTray .toolVisual { width:70px; height:52px; }
+  .incidentStage { grid-template-columns:1fr; padding:var(--space-4); }
+  .countScene { min-height:520px; }
+  .countScene button { min-width:124px; }
+  .countScene button:nth-of-type(1) { left:4%; bottom:4%; }
+  .countScene button:nth-of-type(2) { right:4%; bottom:22%; }
+  .countScene button:nth-of-type(3) { left:34%; top:24%; }
+  .surgeryDebrief { align-items:stretch; flex-direction:column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .requestConsole[data-live="true"] { animation:none; }
+  .urgencyMeter i { transition:none; }
 }

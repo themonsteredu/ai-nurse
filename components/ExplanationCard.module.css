@@ -89,8 +89,89 @@
 
 .judgment p { margin: var(--space-2) 0 0; color: var(--color-text); font-size: var(--font-size-body-large); line-height: 1.55; }
 
+.firstAction {
+  margin-bottom: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--border-thin) solid var(--color-border);
+}
+
+.actionEyebrow {
+  margin: 0;
+  color: var(--color-mission-er);
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-black);
+  letter-spacing: 0.13em;
+}
+
+.firstAction h2 {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--color-text);
+  font-family: "S-Core Dream", "Pretendard", sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.actionButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--touch-target-large);
+  padding: var(--space-3);
+  border: var(--border-thin) solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.actionButton:hover,
+.actionButton:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.actionButton:disabled { opacity: 0.48; cursor: default; }
+.actionButton strong { font-size: 0.96rem; font-weight: var(--font-weight-black); }
+.actionButton span { color: var(--color-text-muted); font-size: 0.76rem; line-height: 1.35; }
+
+.actionStatus {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.45;
+}
+
+.actionStatus[data-complete="true"] {
+  border-left-color: var(--color-success);
+  background: var(--color-success-soft);
+  animation: treatment-confirmed 520ms ease both;
+}
+
+@keyframes treatment-confirmed {
+  from { opacity: 0.45; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 520px) {
   .card { padding: var(--space-5) var(--space-4); }
   .zoneCompare { gap: var(--space-2); }
   .judgment p { font-size: var(--font-size-body); }
+  .actionGrid { grid-template-columns: 1fr; }
+  .actionButton { min-height: var(--touch-target-min); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actionStatus[data-complete="true"] { animation: none; }
 }

@@ -205,6 +205,24 @@
   white-space: nowrap;
 }
 
+.card[data-live="true"] .vitalsLabel span::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: patient-live-pulse 1.25s ease-in-out infinite;
+}
+
+.card[data-live="true"] .vitalItem dd { transition: color 180ms ease; }
+
+@keyframes patient-live-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.76); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
 .vitalItem[data-tone="warning"] .vitalGlyph,
 .vitalItem[data-tone="warning"] dd { color: var(--color-warning); stroke: var(--color-warning); }
 .vitalItem[data-tone="critical"] .vitalGlyph,
@@ -218,6 +236,10 @@
   .vitalsPanel { padding: var(--space-2) var(--space-4); }
   .vitalItem { padding: var(--space-1) var(--space-2); }
   .vitalGlyph { width: 21px; height: 21px; }
+}
+
+@media (min-width: 761px) and (max-width: 860px) {
+  .card { height: 254px; }
 }
 
 @media (max-width: 760px) {
@@ -247,4 +269,8 @@
   .vitalGlyph { width: 20px; height: 20px; }
   .vitalItem dt span { font-size: 0.7rem; }
   .vitalItem dd { font-size: 1.02rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card[data-live="true"] .vitalsLabel span::after { animation: none; }
 }

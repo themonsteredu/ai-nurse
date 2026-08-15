@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import { getIcuRounds, type IcuPatient } from "@/data/specialty-missions";
 import { buildMissionResult } from "@/lib/scoring";
@@ -21,6 +21,15 @@ function baselineFor(value: number, normal: number, low: number, high: number) {
 }
 
 type VitalKey = "heartRate" | "spo2" | "resp" | "bloodPressure";
+type ResponseActionId = "airway" | "recheck" | "conscious" | "temperature";
+type ResponseState = "idle" | "declining" | "recovering";
+
+const RESPONSE_ACTIONS: Array<{ id: ResponseActionId; label: string; caption: string }> = [
+  { id: "airway", label: "기도·산소 장비 확인", caption: "호흡음과 산소 연결 상태를 직접 확인" },
+  { id: "recheck", label: "혈압 다시 측정", caption: "커프 위치를 확인하고 수동으로 재측정" },
+  { id: "conscious", label: "의식·맥박 확인", caption: "환자를 부르고 맥박을 직접 촉지" },
+  { id: "temperature", label: "체온 먼저 확인", caption: "체온 변화 여부를 우선 확인" },
+];
 
 const VITAL_LABELS: Record<VitalKey, string> = {
   heartRate: "맥박",
@@ -44,6 +53,14 @@ function vitalValue(patient: IcuPatient, vital: VitalKey) {
   if (vital === "spo2") return `${patient.spo2}%`;
   if (vital === "resp") return `${patient.resp}회`;
   return patient.bloodPressure;
+}
+
+function recommendedAction(patient: IcuPatient): ResponseActionId {
+  const [systolic] = patient.bloodPressure.split("/").map(Number);
+  if (patient.heartRate < 55) return "conscious";
+  if (patient.spo2 < 92 || patient.resp < 10 || patient.resp > 28) return "airway";
+  if (systolic < 90) return "recheck";
+  return "conscious";
 }
 
 function TrendScrubber({ progress, completed, onProgress, onComplete }: {
@@ -109,71 +126,6 @@ function TrendScrubber({ progress, completed, onProgress, onComplete }: {
   );
 }
 
-function SwipeResponder({ inactive, completed, onComplete }: {
-  inactive: boolean;
-  completed: boolean;
-  onComplete: () => void;
-}) {
-  const [progress, setProgress] = useState(0);
-  const draggingRef = useRef(false);
-  const progressRef = useRef(0);
-
-  function updateProgress(event: ReactPointerEvent<HTMLButtonElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const next = Math.max(0, Math.min(1, (event.clientX - rect.left - 34) / (rect.width - 68)));
-    progressRef.current = next;
-    setProgress(next);
-  }
-
-  function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (inactive || completed) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    draggingRef.current = true;
-    updateProgress(event);
-  }
-
-  function handlePointerUp() {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    if (progressRef.current >= 0.72) {
-      progressRef.current = 1;
-      setProgress(1);
-      onComplete();
-    } else {
-      progressRef.current = 0;
-      setProgress(0);
-    }
-  }
-
-  return (
-    <button
-      type="button"
-      className={styles.swipe}
-      disabled={inactive || completed}
-      aria-label="오른쪽으로 밀어 즉시 대응"
-      onPointerDown={handlePointerDown}
-      onPointerMove={(event) => { if (draggingRef.current) updateProgress(event); }}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={() => { draggingRef.current = false; progressRef.current = 0; setProgress(0); }}
-      onKeyDown={(event) => {
-        if ((event.key === "Enter" || event.key === " ") && !inactive && !completed) {
-          event.preventDefault();
-          progressRef.current = 1;
-          setProgress(1);
-          onComplete();
-        }
-      }}
-    >
-      <span className={styles.swipeFill} style={{ width: `${progress * 100}%` }} />
-      <i
-        className={styles.swipeHandle}
-        style={{ left: `calc(${progress * 100}% - ${progress * 68}px + 8px)` }}
-      >→</i>
-      <strong>{completed ? "대응 완료" : inactive ? "먼저 모니터를 선택하세요" : "오른쪽으로 밀어 즉시 대응"}</strong>
-    </button>
-  );
-}
-
 export function IcuMissionScreen() {
   const router = useRouter();
   const session = useRequireSession();
@@ -186,23 +138,68 @@ export function IcuMissionScreen() {
   const [trendProgress, setTrendProgress] = useState(0);
   const [trendReviewed, setTrendReviewed] = useState(false);
   const [selectedSignals, setSelectedSignals] = useState<VitalKey[]>([]);
+  const [observedPatientId, setObservedPatientId] = useState<string | null>(null);
+  const [responseState, setResponseState] = useState<ResponseState>("idle");
+  const [responseProgress, setResponseProgress] = useState(0);
+  const [attemptRecorded, setAttemptRecorded] = useState(false);
 
-  if (session === null) return null;
-
-  const difficulty = session.difficulty;
+  const difficulty = session?.difficulty ?? "elementary";
   const rounds = getIcuRounds(difficulty);
   const round = rounds[roundIndex];
   const selectedPatient = round.patients.find((patient) => patient.id === selectedPatientId);
   const requiredSignals = difficulty === "middle" ? 2 : 1;
   const abnormalSignals = selectedPatient ? getAbnormalVitals(selectedPatient) : [];
   const evidenceReady = selectedSignals.length === requiredSignals;
+  const patientObserved = selectedPatient !== undefined && observedPatientId === selectedPatient.id;
+  const correctActionId = selectedPatient ? recommendedAction(selectedPatient) : null;
   const isCorrect = selectedPatientId === round.urgentPatientId
     && evidenceReady
     && selectedSignals.every((signal) => abnormalSignals.includes(signal));
 
-  function handleRespond() {
-    if (selectedPatientId === null || resolved) return;
-    setAnswers((current) => [...current, isCorrect]);
+  useEffect(() => {
+    if (!started || trendReviewed || resolved) return;
+    let interval = 0;
+    const delay = window.setTimeout(() => {
+      interval = window.setInterval(() => {
+        setTrendProgress((current) => Math.min(1, current + 0.035));
+      }, 420);
+    }, 900);
+    return () => {
+      window.clearTimeout(delay);
+      if (interval) window.clearInterval(interval);
+    };
+  }, [started, trendReviewed, resolved, round.id]);
+
+  useEffect(() => {
+    if (trendProgress >= 1 && !trendReviewed) setTrendReviewed(true);
+  }, [trendProgress, trendReviewed]);
+
+  useEffect(() => {
+    if (responseState === "idle") return;
+    setResponseProgress(0);
+    let progress = 0;
+    const interval = window.setInterval(() => {
+      progress = Math.min(1, progress + 0.12);
+      setResponseProgress(progress);
+      if (progress >= 1) window.clearInterval(interval);
+    }, 160);
+    return () => window.clearInterval(interval);
+  }, [responseState]);
+
+  if (session === null) return null;
+
+  function handleRespond(actionId: ResponseActionId) {
+    if (!selectedPatient || !patientObserved || !evidenceReady || resolved) return;
+    const correct = isCorrect && actionId === correctActionId;
+    if (!attemptRecorded) {
+      setAnswers((current) => [...current, correct]);
+      setAttemptRecorded(true);
+    }
+    if (!correct) {
+      setResponseState("declining");
+      return;
+    }
+    setResponseState("recovering");
     setResolved(true);
   }
 
@@ -222,6 +219,10 @@ export function IcuMissionScreen() {
     setTrendProgress(0);
     setTrendReviewed(false);
     setSelectedSignals([]);
+    setObservedPatientId(null);
+    setResponseState("idle");
+    setResponseProgress(0);
+    setAttemptRecorded(false);
   }
 
   function toggleSignal(signal: VitalKey) {
@@ -250,12 +251,12 @@ export function IcuMissionScreen() {
             <div className={styles.heroCopy}>
               <span>MISSION 05 · INTENSIVE CARE</span>
               <strong>변화는 숫자보다 먼저 신호를 보냅니다</strong>
-              <p>세 모니터를 비교하고 환자 선택과 위험 근거를 함께 제출하세요.</p>
+              <p>움직이는 모니터를 비교하고 환자를 직접 확인한 뒤 첫 대응까지 실행하세요.</p>
             </div>
           </div>
           <div className={styles.briefingBar}>
             <p><span>라운드</span><strong>{rounds.length}번의 상태 변화</strong></p>
-            <p><span>판단</span><strong>환자 + 위험 근거 {requiredSignals}개</strong></p>
+            <p><span>판단</span><strong>환자 확인 + 근거 {requiredSignals}개 + 대응</strong></p>
             <PrimaryButton onClick={() => setStarted(true)}>모니터링 시작</PrimaryButton>
           </div>
         </section>
@@ -305,31 +306,39 @@ export function IcuMissionScreen() {
                 const selected = selectedPatientId === patient.id;
                 const urgent = resolved && patient.id === round.urgentPatientId;
                 const [systolic, diastolic] = patient.bloodPressure.split("/").map(Number);
-                const displayHeartRate = interpolate(
+                let displayHeartRate = interpolate(
                   baselineFor(patient.heartRate, 82, 55, 110),
                   patient.heartRate,
                   trendProgress,
                 );
-                const displaySpo2 = interpolate(
+                let displaySpo2 = interpolate(
                   baselineFor(patient.spo2, 97, 94, 101),
                   patient.spo2,
                   trendProgress,
                 );
-                const displayResp = interpolate(
+                let displayResp = interpolate(
                   baselineFor(patient.resp, 16, 10, 26),
                   patient.resp,
                   trendProgress,
                 );
-                const displaySystolic = interpolate(
+                let displaySystolic = interpolate(
                   baselineFor(systolic, 118, 90, 141),
                   systolic,
                   trendProgress,
                 );
-                const displayDiastolic = interpolate(
+                let displayDiastolic = interpolate(
                   baselineFor(diastolic, 72, 55, 91),
                   diastolic,
                   trendProgress,
                 );
+                if (patient.id === selectedPatientId && responseState !== "idle") {
+                  const recovering = responseState === "recovering";
+                  displayHeartRate = interpolate(displayHeartRate, recovering ? 88 : displayHeartRate + 12, responseProgress);
+                  displaySpo2 = interpolate(displaySpo2, recovering ? Math.max(95, displaySpo2) : Math.max(76, displaySpo2 - 4), responseProgress);
+                  displayResp = interpolate(displayResp, recovering ? 18 : displayResp + 4, responseProgress);
+                  displaySystolic = interpolate(displaySystolic, recovering ? Math.max(108, displaySystolic) : Math.max(72, displaySystolic - 8), responseProgress);
+                  displayDiastolic = interpolate(displayDiastolic, recovering ? Math.max(66, displayDiastolic) : Math.max(42, displayDiastolic - 5), responseProgress);
+                }
                 return (
                   <button
                     key={patient.id}
@@ -338,10 +347,12 @@ export function IcuMissionScreen() {
                     data-selected={selected}
                     data-urgent={urgent}
                     data-changing={trendProgress > 0 && !trendReviewed}
-                    disabled={resolved || !trendReviewed}
+                    disabled={resolved}
                     onClick={() => {
                       setSelectedPatientId(patient.id);
                       setSelectedSignals([]);
+                      setObservedPatientId(null);
+                      setResponseState("idle");
                     }}
                   >
                     <span className={styles.bed}>{patient.bed}</span>
@@ -369,12 +380,40 @@ export function IcuMissionScreen() {
                       <div data-alert={displayResp < 10 || displayResp > 28}><dt>RESP</dt><dd>{displayResp}</dd></div>
                       <div data-alert={displaySystolic < 90}><dt>BP</dt><dd>{displaySystolic}/{displayDiastolic}</dd></div>
                     </dl>
-                    <span className={styles.monitorStatus}>{trendReviewed ? patient.status : trendProgress > 0 ? "추세 재생 중" : "10초 전 기준"}</span>
+                    <span className={styles.monitorStatus}>{responseState !== "idle" && patient.id === selectedPatientId
+                      ? responseState === "recovering" ? "처치 반응 · 회복 중" : "경고 · 수치 악화"
+                      : trendReviewed ? patient.status : trendProgress > 0 ? "실시간 추세 수집 중" : "기준 수치"}</span>
                   </button>
                 );
               })}
             </div>
           </div>
+
+          <section className={styles.patientCheck} data-ready={selectedPatient !== undefined} data-observed={patientObserved}>
+            <div className={styles.patientCheckCopy}>
+              <span>STEP 02 · BEDSIDE CHECK</span>
+              <strong>{selectedPatient
+                ? `${selectedPatient.bed} ${selectedPatient.label} 환자를 직접 확인하세요.`
+                : "변화가 가장 큰 모니터를 먼저 선택하세요."}</strong>
+              <small>{patientObserved && selectedPatient
+                ? selectedPatient.resp < 10
+                  ? "가슴 움직임이 느리고 호흡이 얕습니다."
+                  : selectedPatient.resp > 28
+                    ? "가슴 움직임이 빠르고 숨이 가쁩니다."
+                    : selectedPatient.status
+                : "모니터 수치와 환자의 실제 상태를 함께 봐야 합니다."}</small>
+            </div>
+            <button
+              type="button"
+              className={styles.bedsideButton}
+              disabled={!selectedPatient || resolved}
+              data-complete={patientObserved}
+              onClick={() => { if (selectedPatient) setObservedPatientId(selectedPatient.id); }}
+            >
+              <i aria-hidden="true" />
+              <span>{patientObserved ? "호흡·의식 확인 완료" : "환자 호흡·의식 확인"}</span>
+            </button>
+          </section>
 
           <section className={styles.evidencePanel} data-ready={selectedPatient !== undefined} aria-label="우선 대응 근거 선택">
             <div className={styles.evidenceCopy}>
@@ -389,7 +428,7 @@ export function IcuMissionScreen() {
                 <button
                   key={vital}
                   type="button"
-                  disabled={!selectedPatient || resolved}
+                  disabled={!selectedPatient || !patientObserved || resolved}
                   data-selected={selectedSignals.includes(vital)}
                   onClick={() => toggleSignal(vital)}
                 >
@@ -404,34 +443,42 @@ export function IcuMissionScreen() {
             <div className={styles.selectionCopy}>
               <span>PRIORITY RESPONSE</span>
               <strong>{!trendReviewed
-                ? "먼저 10초 추세를 끝까지 재생하세요"
+                ? "모니터가 변하고 있습니다. 환자와 수치를 함께 관찰하세요."
+                : selectedPatient && !patientObserved
+                  ? "침상에서 환자의 호흡과 의식을 직접 확인하세요"
                 : selectedPatient && !evidenceReady
                   ? `위험 근거를 ${requiredSignals - selectedSignals.length}개 더 선택하세요`
                   : selectedPatient
-                    ? `${selectedPatient.bed} ${selectedPatient.label} · 근거 확인 완료`
-                  : "가장 먼저 확인할 모니터를 선택하세요"}</strong>
+                    ? `${selectedPatient.bed} ${selectedPatient.label} · 첫 대응을 실행하세요`
+                    : "가장 먼저 확인할 모니터를 선택하세요"}</strong>
             </div>
-            <SwipeResponder
-              key={round.id}
-              inactive={!trendReviewed || selectedPatientId === null || !evidenceReady}
-              completed={resolved}
-              onComplete={handleRespond}
-            />
+            <div className={styles.responseActions}>
+              {RESPONSE_ACTIONS.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  disabled={!trendReviewed || !patientObserved || !evidenceReady || resolved}
+                  data-recommended={resolved && action.id === correctActionId}
+                  onClick={() => handleRespond(action.id)}
+                >
+                  <strong>{action.label}</strong>
+                  <small>{action.caption}</small>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {resolved ? (
-            <div className={styles.feedback} data-correct={isCorrect} role="status">
+          {responseState !== "idle" ? (
+            <div className={styles.feedback} data-correct={resolved} role="status">
               <div>
-                <span>{isCorrect ? "PRIORITY CONFIRMED" : "RECHECK THE TREND"}</span>
-                <strong>{isCorrect
-                  ? "환자와 위험 근거를 모두 정확히 찾았습니다."
-                  : selectedPatientId === round.urgentPatientId
-                    ? "환자는 맞지만 선택한 활력징후 근거를 다시 확인하세요."
-                    : "가장 급한 변화가 다른 모니터에 있습니다."}</strong>
-                <p>{round.explanation}</p>
-                <small>간호사의 판단 · {round.response}</small>
+                <span>{resolved ? "PATIENT RESPONDING" : "CONDITION DECLINING"}</span>
+                <strong>{resolved
+                  ? "선택한 행동 뒤 수치와 호흡이 회복되고 있습니다."
+                  : "선택하는 동안 환자 상태가 더 나빠졌습니다. 모니터와 침상 관찰을 다시 연결하세요."}</strong>
+                <p>{resolved ? round.explanation : "한 가지 수치만 보지 말고 환자·추세·위험 근거를 함께 확인한 뒤 다른 행동을 실행하세요."}</p>
+                <small>간호사의 판단 · {resolved ? round.response : "잘못된 행동도 즉시 멈추고 다시 확인하는 것이 환자 안전입니다."}</small>
               </div>
-              <PrimaryButton onClick={handleNext}>{roundIndex === rounds.length - 1 ? "결과 확인" : "다음 모니터"}</PrimaryButton>
+              {resolved ? <PrimaryButton onClick={handleNext}>{roundIndex === rounds.length - 1 ? "판단 결과 확인" : "계속 관찰"}</PrimaryButton> : null}
             </div>
           ) : null}
         </section>

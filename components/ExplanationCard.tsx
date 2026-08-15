@@ -6,6 +6,14 @@ import type { TriageLevel } from "@/data/types";
 import { PrimaryButton } from "./PrimaryButton";
 import styles from "./ExplanationCard.module.css";
 
+type ActionId = "airway" | "bleeding" | "monitor" | "guidance";
+
+type ActionOption = {
+  id: ActionId;
+  label: string;
+  caption: string;
+};
+
 type ExplanationCardProps = {
   correct: boolean;
   chosenZone: TriageLevel;
@@ -13,6 +21,10 @@ type ExplanationCardProps = {
   patientName: string;
   explanation: string;
   isLast: boolean;
+  actions: ActionOption[];
+  actionCompleted: boolean;
+  actionMessage: string | null;
+  onAction: (actionId: ActionId) => void;
   onNext: () => void;
 };
 
@@ -23,6 +35,10 @@ export function ExplanationCard({
   patientName,
   explanation,
   isLast,
+  actions,
+  actionCompleted,
+  actionMessage,
+  onAction,
   onNext,
 }: ExplanationCardProps) {
   return (
@@ -53,8 +69,34 @@ export function ExplanationCard({
           <p>{explanation}</p>
         </section>
 
-        <PrimaryButton fullWidth onClick={onNext} autoFocus>
-          {isLast ? "결과 확인" : "다음 환자 확인"}
+        <section className={styles.firstAction} aria-labelledby="first-action-title">
+          <p className={styles.actionEyebrow}>STEP 03 · FIRST ACTION</p>
+          <h2 id="first-action-title">분류 직후 가장 먼저 할 행동은?</h2>
+          <div className={styles.actionGrid}>
+            {actions.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className={styles.actionButton}
+                disabled={actionCompleted}
+                onClick={() => onAction(action.id)}
+              >
+                <strong>{action.label}</strong>
+                <span>{action.caption}</span>
+              </button>
+            ))}
+          </div>
+          {actionMessage ? (
+            <p className={styles.actionStatus} data-complete={actionCompleted} aria-live="polite">
+              {actionMessage}
+            </p>
+          ) : null}
+        </section>
+
+        <PrimaryButton fullWidth onClick={onNext} disabled={!actionCompleted}>
+          {actionCompleted
+            ? isLast ? "결과 확인" : "다음 환자 확인"
+            : "처치를 완료하세요"}
         </PrimaryButton>
       </div>
     </div>

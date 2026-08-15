@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import {
   getMedicationCases,
@@ -15,7 +15,20 @@ import { PrimaryButton } from "./PrimaryButton";
 import { useRequireSession, useSession } from "./SessionProvider";
 import styles from "./MedicationMissionScreen.module.css";
 
-type MismatchField = "patient" | "medicine" | "dose" | "route";
+type MismatchField = "patient" | "medicine" | "dose" | "route" | "time";
+
+function numericDose(value: string) {
+  const parsed = Number.parseFloat(value.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function similarPatientName(name: string) {
+  if (name.length < 2) return `${name}A`;
+  const replacements = ["서", "석", "우", "민"];
+  const current = name.at(-1);
+  const next = replacements.find((candidate) => candidate !== current) ?? "진";
+  return `${name.slice(0, -1)}${next}`;
+}
 
 function WristbandScanner({ patientName, birthDate, onComplete }: {
   patientName: string;
@@ -101,11 +114,13 @@ export function MedicationMissionScreen() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [reviewOptionId, setReviewOptionId] = useState<string | null>(null);
   const [reviewedFields, setReviewedFields] = useState<MismatchField[]>([]);
+  const [selectedPatientKey, setSelectedPatientKey] = useState<"correct" | "similar" | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [quantity, setQuantity] = useState(0);
+  const [workSeconds, setWorkSeconds] = useState(0);
   const dragOriginRef = useRef<{ x: number; y: number } | null>(null);
 
-  if (session === null) return null;
-
-  const difficulty = session.difficulty;
+  const difficulty = session?.difficulty ?? "elementary";
   const cases = getMedicationCases(difficulty);
   const medicationCase = cases[caseIndex];
   const selectedOption = medicationCase.options.find((option) => option.id === selectedOptionId);
@@ -113,7 +128,22 @@ export function MedicationMissionScreen() {
   const orderParts = medicationCase.order.split(" ");
   const expectedDose = orderParts.at(-1) ?? "";
   const expectedMedicine = orderParts.slice(0, -1).join(" ");
-  const reviewComplete = reviewedFields.length === 4;
+  const orderedDose = numericDose(expectedDose);
+  const optionDose = reviewOption ? numericDose(reviewOption.dose) : 0;
+  const expectedQuantity = optionDose > 0 && orderedDose > 0
+    ? Math.max(1, Math.round(orderedDose / optionDose))
+    : 1;
+  const quantityConfirmed = quantity === expectedQuantity;
+  const reviewComplete = reviewedFields.length === 5 && quantityConfirmed;
+  const similarBirthDate = medicationCase.birthDate.replace(/\d$/, (digit) => digit === "9" ? "8" : String(Number(digit) + 1));
+
+  useEffect(() => {
+    if (!started || resolved) return;
+    const interval = window.setInterval(() => setWorkSeconds((current) => current + 1), 1000);
+    return () => window.clearInterval(interval);
+  }, [started, resolved, medicationCase.id]);
+
+  if (session === null) return null;
 
   function verifyOption(option: MedicationOption) {
     if (!scanned || resolved) return;
@@ -125,6 +155,7 @@ export function MedicationMissionScreen() {
     setSelectedOptionId(null);
     setReviewOptionId(option.id);
     setReviewedFields([]);
+    setQuantity(0);
     setFeedback(null);
   }
 
@@ -132,6 +163,7 @@ export function MedicationMissionScreen() {
     if (!reviewOption) return false;
     if (field === "medicine") return reviewOption.medicine === expectedMedicine;
     if (field === "dose") return reviewOption.dose === expectedDose;
+    if (field === "time") return true;
     return true;
   }
 
@@ -146,7 +178,7 @@ export function MedicationMissionScreen() {
 
     if (!decisionCorrect) {
       setFeedback(optionCorrect
-        ? "네 항목이 모두 일치합니다. 이 경우에는 투약 준비를 진행할 수 있습니다."
+        ? "다섯 항목과 준비 수량이 모두 일치합니다. 이 경우에는 투약 준비를 진행할 수 있습니다."
         : "불일치 항목이 있습니다. 투약하지 말고 보류 후 다시 확인해야 합니다.");
       return;
     }
@@ -164,6 +196,7 @@ export function MedicationMissionScreen() {
     setReviewOptionId(null);
     setSelectedOptionId(null);
     setReviewedFields([]);
+    setQuantity(0);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>, option: MedicationOption) {
@@ -204,6 +237,10 @@ export function MedicationMissionScreen() {
     setFeedback(null);
     setReviewOptionId(null);
     setReviewedFields([]);
+    setSelectedPatientKey(null);
+    setDrawerOpen(false);
+    setQuantity(0);
+    setWorkSeconds(0);
   }
 
   return (
@@ -223,12 +260,12 @@ export function MedicationMissionScreen() {
             <div className={styles.heroCopy}>
               <span>MISSION 06 · MEDICATION SAFETY</span>
               <strong>스캔하고,<br />대조하고, 확인하세요</strong>
-              <p>약을 고른 뒤 네 가지 권리를 직접 대조하고 투약 여부까지 결정하세요.</p>
+              <p>팔찌와 처방, 약품을 대조하고 준비 수량과 5 Rights를 직접 확인하세요.</p>
             </div>
           </div>
           <div className={styles.briefingBar}>
             <p><span>대상</span><strong>{cases.length}명의 환자</strong></p>
-            <p><span>판단</span><strong>4항목 대조 + 투약 결정</strong></p>
+            <p><span>판단</span><strong>용량 계산 + 5 Rights</strong></p>
             <PrimaryButton onClick={() => setStarted(true)}>투약 확인 시작</PrimaryButton>
           </div>
         </section>
@@ -236,7 +273,7 @@ export function MedicationMissionScreen() {
         <section className={styles.activity} aria-label="투약 전 환자와 약품 대조 활동">
           <div className={styles.caseHeader}>
             <p><span>VERIFICATION</span><strong>{String(caseIndex + 1).padStart(2, "0")} / {String(cases.length).padStart(2, "0")}</strong></p>
-            <p>팔찌 확인 → 약품 배치 → 4항목 감사 → 투약 결정</p>
+            <p className={styles.liveOrder}><span>ORDER ACTIVE</span><strong>14:00 투약 · {String(Math.floor(workSeconds / 60)).padStart(2, "0")}:{String(workSeconds % 60).padStart(2, "0")} 경과</strong></p>
           </div>
 
           <div className={styles.scanScene}>
@@ -250,13 +287,32 @@ export function MedicationMissionScreen() {
             />
             <div className={styles.sceneShade} />
             <div className={styles.scannerWrap}>
-              <p><span>STEP 01</span><strong>두 가지 환자 정보 확인</strong></p>
-              <WristbandScanner
-                key={medicationCase.id}
-                patientName={medicationCase.patientName}
-                birthDate={medicationCase.birthDate}
-                onComplete={() => setScanned(true)}
-              />
+              <p><span>STEP 01 · PATIENT MATCH</span><strong>이름과 생년월일이 모두 같은 팔찌를 찾으세요.</strong></p>
+              <div className={styles.patientCandidates}>
+                <button
+                  type="button"
+                  data-selected={selectedPatientKey === "correct"}
+                  onClick={() => { setSelectedPatientKey("correct"); setScanned(false); setFeedback(null); }}
+                >
+                  <span>PATIENT A</span><strong>{medicationCase.patientName}</strong><small>{medicationCase.birthDate}</small>
+                </button>
+                <button
+                  type="button"
+                  data-selected={selectedPatientKey === "similar"}
+                  data-mismatch={selectedPatientKey === "similar"}
+                  onClick={() => { setSelectedPatientKey("similar"); setScanned(false); setFeedback("이름이 비슷하지만 생년월일이 다릅니다. 두 정보를 다시 대조하세요."); }}
+                >
+                  <span>PATIENT B</span><strong>{similarPatientName(medicationCase.patientName)}</strong><small>{similarBirthDate}</small>
+                </button>
+              </div>
+              {selectedPatientKey === "correct" ? (
+                <WristbandScanner
+                  key={medicationCase.id}
+                  patientName={medicationCase.patientName}
+                  birthDate={medicationCase.birthDate}
+                  onComplete={() => { setScanned(true); setFeedback(null); }}
+                />
+              ) : <p className={styles.scanGate}>{selectedPatientKey === "similar" ? "환자 정보가 다릅니다. 다른 팔찌를 확인하세요." : "팔찌를 먼저 선택하세요."}</p>}
             </div>
           </div>
 
@@ -283,8 +339,12 @@ export function MedicationMissionScreen() {
             </section>
 
             <section className={styles.medicationRack} aria-label="준비된 약품">
-              <p><span>STEP 03 · MEDICATION RACK</span><strong>약품을 확인 트레이로 옮기세요</strong></p>
-              <div className={styles.options}>
+              <p><span>STEP 03 · MEDICATION DRAWER</span><strong>{drawerOpen ? "라벨을 읽고 약품을 트레이로 옮기세요" : "처방 확인 후 약품 서랍을 여세요"}</strong></p>
+              {!drawerOpen ? (
+                <button type="button" className={styles.drawerButton} disabled={!scanned} onClick={() => setDrawerOpen(true)}>
+                  <span>{scanned ? "DRAWER READY" : "LOCKED DRAWER"}</span><strong>약품 서랍 열기</strong><small>{scanned ? "환자 확인 완료 · 라벨을 대조하세요." : "환자 확인이 완료되면 열 수 있습니다."}</small>
+                </button>
+              ) : <div className={styles.options}>
                 {medicationCase.options.map((option, index) => (
                   <button
                     key={option.id}
@@ -299,12 +359,13 @@ export function MedicationMissionScreen() {
                       if (draggingOptionId) setDragPoint({ x: event.clientX, y: event.clientY });
                     }}
                   >
+                    <span className={styles.packageVisual} data-package={option.id} aria-hidden="true"><i>{option.form}</i></span>
                     <span>RX {String(index + 1).padStart(2, "0")}</span>
                     <strong>{option.medicine}</strong>
                     <small>{option.dose} · {option.form}</small>
                   </button>
                 ))}
-              </div>
+              </div>}
             </section>
 
             <button
@@ -327,11 +388,18 @@ export function MedicationMissionScreen() {
           </div>
 
           {reviewOption ? (
-            <section className={styles.mismatchLab} aria-label="투약 전 네 가지 권리 대조">
+            <section className={styles.mismatchLab} aria-label="투약 전 다섯 가지 권리 대조">
               <div className={styles.mismatchHeader}>
-                <span>STEP 04 · FOUR RIGHTS AUDIT</span>
-                <strong>네 항목을 하나씩 열어 처방과 대조하세요.</strong>
-                <p>모두 확인한 다음에만 투약 또는 보류를 결정할 수 있습니다.</p>
+                <span>STEP 04 · DOSE + 5 RIGHTS</span>
+                <strong>준비 수량을 계산하고 실제 정보 다섯 곳을 대조하세요.</strong>
+                <p>체크리스트가 아니라 팔찌·처방·약품·경로·시간을 직접 확인합니다.</p>
+                <div className={styles.quantityControl} data-confirmed={quantityConfirmed}>
+                  <span>준비 수량</span>
+                  <button type="button" aria-label="수량 줄이기" onClick={() => setQuantity((current) => Math.max(0, current - 1))}>−</button>
+                  <strong>{quantity}<small>정</small></strong>
+                  <button type="button" aria-label="수량 늘리기" onClick={() => setQuantity((current) => Math.min(4, current + 1))}>+</button>
+                  <p>처방 {expectedDose} ÷ 보유 {reviewOption.dose}</p>
+                </div>
               </div>
               <div className={styles.mismatchGrid}>
                 <button type="button" data-reviewed={reviewedFields.includes("patient")} data-match={fieldMatches("patient")} onClick={() => reviewField("patient")}>
@@ -346,9 +414,16 @@ export function MedicationMissionScreen() {
                 <button type="button" data-reviewed={reviewedFields.includes("route")} data-match={fieldMatches("route")} onClick={() => reviewField("route")}>
                   <span>경로</span><strong>{medicationCase.route}</strong><small>{reviewedFields.includes("route") ? `${reviewOption.form} · 경로 일치` : "눌러서 대조"}</small>
                 </button>
+                <button type="button" data-reviewed={reviewedFields.includes("time")} data-match={fieldMatches("time")} onClick={() => reviewField("time")}>
+                  <span>시간</span><strong>14:00</strong><small>{reviewedFields.includes("time") ? "처방 시간과 일치" : "현재 투약 시간 확인"}</small>
+                </button>
               </div>
               <div className={styles.decisionPanel} data-ready={reviewComplete}>
-                <p><span>FINAL DECISION</span><strong>{reviewComplete ? "이 약을 어떻게 할까요?" : `${4 - reviewedFields.length}개 항목을 더 확인하세요.`}</strong></p>
+                <p><span>FINAL DECISION</span><strong>{reviewComplete
+                  ? "투약을 진행할지 안전하게 결정하세요."
+                  : !quantityConfirmed
+                    ? `보유 용량에 맞는 수량을 계산하세요. 현재 ${quantity}정`
+                    : `${5 - reviewedFields.length}개 정보를 더 확인하세요.`}</strong></p>
                 <button type="button" disabled={!reviewComplete} onClick={() => handleDecision("hold")}>보류하고 다시 확인</button>
                 <button type="button" disabled={!reviewComplete} onClick={() => handleDecision("administer")}>투약 준비 진행</button>
               </div>
