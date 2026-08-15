@@ -56,6 +56,8 @@ type AppScreenProps = {
   tone?: ScreenTone;
   /** 긴 제목을 쓰는 화면에서 헤더 글자만 한 단계 줄입니다. */
   compactTitle?: boolean;
+  /** 1024×768 실습 화면에서 헤더와 본문 여백만 압축합니다. 터치 크기는 유지합니다. */
+  compactLandscape?: boolean;
   /** 화면 아래쪽에 고정으로 붙일 내용 (예: 다음 버튼) */
   footer?: ReactNode;
   children: ReactNode;
@@ -66,6 +68,7 @@ export function AppScreen({
   subtitle,
   tone = "calm",
   compactTitle = false,
+  compactLandscape = false,
   footer,
   children,
 }: AppScreenProps) {
@@ -90,7 +93,7 @@ export function AppScreen({
   }
 
   return (
-    <div className={styles.screen} data-tone={tone}>
+    <div className={styles.screen} data-tone={tone} data-compact-landscape={compactLandscape}>
       <header className={styles.header} data-compact-title={compactTitle}>
         <div className={styles.brandMark} aria-hidden="true">GT</div>
 
@@ -120,7 +123,7 @@ export function AppScreen({
         </button>
       </header>
 
-      <main className={styles.body}>{children}</main>
+      <main className={styles.body} data-compact-landscape={compactLandscape}>{children}</main>
 
       {footer ? <footer className={styles.footer}>{footer}</footer> : null}
     </div>

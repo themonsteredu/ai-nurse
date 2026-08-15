@@ -44,6 +44,13 @@
   --color-warning: #e98232;
   --color-warning-soft: #fff4eb;
 
+  /* ---------- 실시간 시뮬레이션 ---------- */
+  --color-monitor: #082c2f;
+  --color-monitor-deep: #061f22;
+  --color-monitor-line: #55cec5;
+  --color-monitor-muted: #9ab7b8;
+  --color-clinical-blue: #426c8f;
+
   /* ---------- 미션별 대표색 ---------- */
   --color-mission-er: #d83a4e;
   --color-mission-er-soft: #fbedef;
@@ -108,6 +115,8 @@
   /* ---------- 움직임 ---------- */
   --transition-fast: 160ms cubic-bezier(0.2, 0.75, 0.25, 1);
   --transition-normal: 360ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  --motion-pulse: 1.2s;
+  --motion-monitor-sweep: 2.8s;
 }
 
 @media (prefers-reduced-motion: reduce) {

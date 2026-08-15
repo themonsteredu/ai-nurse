@@ -15,6 +15,7 @@ import styles from "./TriagePatientCard.module.css";
 type TriagePatientCardProps = {
   patient: TriagePatient;
   showVitals: boolean;
+  liveTick: number;
   draggable: boolean;
   dragging?: boolean;
   dragStyle?: { left: number; top: number; width: number };
@@ -82,9 +83,32 @@ function vitalTone(kind: VitalKind, rawValue: string): VitalTone {
   return "normal";
 }
 
+function liveVital(kind: VitalKind, rawValue: string, tick: number): string {
+  const value = Number.parseFloat(rawValue.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(value)) return rawValue;
+
+  const unit = rawValue.replace(/[0-9.\s]/g, "");
+  const wave = [0, 1, 0, -1][tick % 4];
+  const elapsed = Math.min(3, Math.floor(tick / 4));
+  let nextValue = value;
+
+  if (kind === "oxygen" && value < 95) nextValue = value - elapsed + wave * 0.25;
+  if (kind === "pulse" && value > 100) nextValue = value + elapsed + wave;
+  if (kind === "pulse" && value < 60) nextValue = value - elapsed + wave;
+  if (kind === "respiration" && value > 24) nextValue = value + elapsed + wave;
+  if (kind === "respiration" && value < 12) nextValue = value - elapsed + wave;
+  if (kind === "temperature") nextValue = value + wave * 0.1;
+
+  const formatted = kind === "temperature" || kind === "oxygen"
+    ? nextValue.toFixed(kind === "temperature" ? 1 : 0)
+    : Math.round(nextValue).toString();
+  return `${formatted}${unit}`;
+}
+
 export function TriagePatientCard({
   patient,
   showVitals,
+  liveTick,
   draggable,
   dragging = false,
   dragStyle,
@@ -94,6 +118,12 @@ export function TriagePatientCard({
 }: TriagePatientCardProps) {
   const patientNumber = String(patient.order).padStart(2, "0");
   const sceneSrc = PATIENT_SCENES[patient.id] ?? "/assets/nurse/triage-briefing-v2.webp";
+  const liveVitals = {
+    pulse: liveVital("pulse", patient.vitals.pulse, liveTick),
+    oxygen: liveVital("oxygen", patient.vitals.oxygen, liveTick),
+    respiration: liveVital("respiration", patient.vitals.respiration, liveTick),
+    temperature: liveVital("temperature", patient.vitals.temperature, liveTick),
+  };
 
   return (
     <div
@@ -101,6 +131,7 @@ export function TriagePatientCard({
       data-dragging={dragging}
       data-draggable={draggable}
       data-vitals={showVitals}
+      data-live={liveTick > 0}
       style={
         dragging && dragStyle
           ? {
@@ -145,21 +176,21 @@ export function TriagePatientCard({
           <div className={styles.vitalsPanel} aria-label="활력징후">
             <p className={styles.vitalsLabel}>VITALS <span>LIVE</span></p>
             <dl className={styles.vitals}>
-              <div className={styles.vitalItem} data-tone={vitalTone("pulse", patient.vitals.pulse)}>
+              <div className={styles.vitalItem} data-tone={vitalTone("pulse", liveVitals.pulse)}>
                 <dt><VitalGlyph kind="pulse" /><span>HEART RATE<small>맥박</small></span></dt>
-                <dd>{patient.vitals.pulse}</dd>
+                <dd>{liveVitals.pulse}</dd>
               </div>
-              <div className={styles.vitalItem} data-tone={vitalTone("oxygen", patient.vitals.oxygen)}>
+              <div className={styles.vitalItem} data-tone={vitalTone("oxygen", liveVitals.oxygen)}>
                 <dt><VitalGlyph kind="oxygen" /><span>SpO₂<small>산소포화도</small></span></dt>
-                <dd>{patient.vitals.oxygen}</dd>
+                <dd>{liveVitals.oxygen}</dd>
               </div>
-              <div className={styles.vitalItem} data-tone={vitalTone("respiration", patient.vitals.respiration)}>
+              <div className={styles.vitalItem} data-tone={vitalTone("respiration", liveVitals.respiration)}>
                 <dt><VitalGlyph kind="respiration" /><span>RESP<small>호흡</small></span></dt>
-                <dd>{patient.vitals.respiration}</dd>
+                <dd>{liveVitals.respiration}</dd>
               </div>
-              <div className={styles.vitalItem} data-tone={vitalTone("temperature", patient.vitals.temperature)}>
+              <div className={styles.vitalItem} data-tone={vitalTone("temperature", liveVitals.temperature)}>
                 <dt><VitalGlyph kind="temperature" /><span>TEMP<small>체온</small></span></dt>
-                <dd>{patient.vitals.temperature}</dd>
+                <dd>{liveVitals.temperature}</dd>
               </div>
             </dl>
           </div>

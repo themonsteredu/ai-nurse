@@ -76,6 +76,30 @@ type Feedback = {
   correct: boolean;
 };
 
+type ObservationKey = "response" | "breathing" | "vitals" | "pain";
+type TriageActionId = "airway" | "bleeding" | "monitor" | "guidance";
+
+const OBSERVATIONS: Array<{ id: ObservationKey; label: string; caption: string }> = [
+  { id: "response", label: "반응 확인", caption: "이름을 부르고 대답 여부 확인" },
+  { id: "breathing", label: "호흡 관찰", caption: "가슴 움직임과 숨소리 확인" },
+  { id: "vitals", label: "활력징후 연결", caption: "맥박·호흡·SpO₂ 추세 확인" },
+  { id: "pain", label: "통증·손상 확인", caption: "아픈 위치와 출혈 여부 확인" },
+];
+
+const TRIAGE_ACTIONS: Array<{ id: TriageActionId; label: string; caption: string }> = [
+  { id: "airway", label: "기도·산소부터 확인", caption: "호흡을 확보하고 산소 장비 준비" },
+  { id: "bleeding", label: "손상 부위 안정", caption: "출혈 압박과 손상 부위 보호" },
+  { id: "monitor", label: "지속 모니터링·호출", caption: "변화를 추적하고 의료진에게 보고" },
+  { id: "guidance", label: "대기·자가관리 안내", caption: "안전하게 기다리며 악화 신호 안내" },
+];
+
+function firstActionFor(level: TriageLevel): TriageActionId {
+  if (level === "red") return "airway";
+  if (level === "orange") return "monitor";
+  if (level === "yellow" || level === "green") return "bleeding";
+  return "guidance";
+}
+
 /** 끌고 있는 카드의 위치 정보 */
 type DragState = {
   pointerId: number;
@@ -121,6 +145,10 @@ export function TriageMissionScreen() {
   const [drag, setDrag] = useState<DragState | null>(null);
   const [hoveredZone, setHoveredZone] = useState<TriageLevel | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [patientTick, setPatientTick] = useState(0);
+  const [observationChecks, setObservationChecks] = useState<ObservationKey[]>([]);
+  const [actionCompleted, setActionCompleted] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
@@ -163,9 +191,16 @@ export function TriageMissionScreen() {
     return () => window.clearInterval(interval);
   }, [timerRunning]);
 
+  useEffect(() => {
+    if (phase !== "playing" || feedback !== null) return;
+    const interval = window.setInterval(() => setPatientTick((current) => current + 1), 1000);
+    return () => window.clearInterval(interval);
+  }, [phase, feedback, currentPatient?.id]);
+
   const remainingMs =
     timeLimitMs === null ? null : Math.max(0, timeLimitMs - elapsedMs);
   const timeUp = remainingMs !== null && remainingMs <= 0;
+  const observationReady = observationChecks.length >= 2;
 
   // 시간이 다 되면 그때까지 놓은 것만으로 채점합니다.
   useEffect(() => {
@@ -179,7 +214,7 @@ export function TriageMissionScreen() {
 
   const placeCurrentPatient = useCallback(
     (zone: TriageLevel) => {
-      if (phase !== "playing" || feedback !== null || !currentPatient) return;
+      if (phase !== "playing" || feedback !== null || !currentPatient || !observationReady) return;
 
       setPlacements((current) => ({ ...current, [currentPatient.id]: zone }));
       setFeedback({
@@ -189,14 +224,39 @@ export function TriageMissionScreen() {
         correct: zone === currentPatient.correctZone,
       });
     },
-    [phase, feedback, currentPatient],
+    [phase, feedback, currentPatient, observationReady],
   );
 
   /** 해설 카드를 닫고 다음 환자로 넘어갑니다. */
   function handleNextPatient() {
+    if (!actionCompleted) return;
     setFeedback(null);
+    setObservationChecks([]);
+    setActionCompleted(false);
+    setActionMessage(null);
+    setPatientTick(0);
     if (isLastPatient) setPhase("finished");
     else setCurrentIndex((index) => index + 1);
+  }
+
+  function toggleObservation(check: ObservationKey) {
+    if (feedback !== null) return;
+    setObservationChecks((current) => current.includes(check)
+      ? current.filter((item) => item !== check)
+      : [...current, check]);
+  }
+
+  function handlePatientAction(actionId: TriageActionId) {
+    if (!currentPatient || actionCompleted) return;
+    const correct = actionId === firstActionFor(currentPatient.correctZone);
+    if (!correct) {
+      setActionMessage("환자 상태가 좋아지지 않습니다. 분류 근거와 첫 행동을 다시 연결하세요.");
+      return;
+    }
+    setActionCompleted(true);
+    setActionMessage(currentPatient.correctZone === "red" || currentPatient.correctZone === "orange"
+      ? "즉시 대응이 시작되며 위험 수치가 안정 방향으로 바뀝니다."
+      : "손상 부위를 안전하게 보호하고 다음 진료 순서를 준비했습니다.");
   }
 
   /* ---------------- 카드 끌기 ---------------- */
@@ -290,6 +350,10 @@ export function TriageMissionScreen() {
     setCurrentIndex(0);
     setElapsedMs(0);
     setFeedback(null);
+    setPatientTick(0);
+    setObservationChecks([]);
+    setActionCompleted(false);
+    setActionMessage(null);
     setPhase("playing");
   }
 
@@ -433,6 +497,7 @@ export function TriageMissionScreen() {
       title={mission.title}
       subtitle="골든타임 안에 환자의 상태를 판단하세요."
       tone="urgent"
+      compactLandscape
     >
       <div className={styles.play}>
         {/* 진행 상황과 시계 */}
@@ -465,7 +530,8 @@ export function TriageMissionScreen() {
             <TriagePatientCard
               patient={currentPatient}
               showVitals={showVitals}
-              draggable={feedback === null}
+              liveTick={patientTick}
+              draggable={feedback === null && observationReady}
               dragging={drag !== null}
               dragStyle={
                 drag === null
@@ -478,6 +544,21 @@ export function TriageMissionScreen() {
             />
           </div>
         ) : null}
+
+        <section className={styles.observationPanel} data-ready={observationReady} aria-label="환자 초기 관찰">
+          <div className={styles.observationHeader}>
+            <p><span>STEP 01 · RAPID ASSESSMENT</span><strong>{observationReady ? "초기 관찰 완료 · 우선순위를 배정하세요" : "환자에게서 먼저 확인할 항목 2개를 실행하세요"}</strong></p>
+            <small>{observationChecks.length} / 2 관찰</small>
+          </div>
+          <div className={styles.observationGrid}>
+            {OBSERVATIONS.map((item) => (
+              <button key={item.id} type="button" data-checked={observationChecks.includes(item.id)} disabled={feedback !== null} onClick={() => toggleObservation(item.id)}>
+                <strong>{item.label}</strong><small>{item.caption}</small>
+              </button>
+            ))}
+          </div>
+          <p className={styles.liveNotice}><i aria-hidden="true" /> 환자 상태는 기다리는 동안에도 계속 변합니다.</p>
+        </section>
 
         <section className={styles.actionSection} aria-labelledby="priority-action-title">
           <div className={styles.actionHeader}>
@@ -498,7 +579,7 @@ export function TriageMissionScreen() {
                     .length
                 }
                 isDropTarget={hoveredZone === zone.level}
-                disabled={feedback !== null}
+                disabled={feedback !== null || !observationReady}
                 onSelect={placeCurrentPatient}
                 registerElement={registerZoneElement}
               />
@@ -516,6 +597,10 @@ export function TriageMissionScreen() {
           patientName={`${currentPatient.order}번 ${currentPatient.name}`}
           explanation={currentPatient.explanation}
           isLast={isLastPatient}
+          actions={TRIAGE_ACTIONS}
+          actionCompleted={actionCompleted}
+          actionMessage={actionMessage}
+          onAction={handlePatientAction}
           onNext={handleNextPatient}
         />
       ) : null}
